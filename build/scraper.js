@@ -72,6 +72,9 @@ var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void
             case 0: return [4 /*yield*/, puppeteer_cluster_1.Cluster.launch({
                     concurrency: puppeteer_cluster_1.Cluster.CONCURRENCY_CONTEXT,
                     maxConcurrency: 5,
+                    puppeteerOptions: {
+                        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+                    },
                 })];
             case 1:
                 cluster = _a.sent();

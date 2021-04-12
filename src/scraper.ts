@@ -1,4 +1,4 @@
-import { launch, Page } from "puppeteer";
+import { launch, LaunchOptions, Page } from "puppeteer";
 import { Cluster } from "puppeteer-cluster";
 import { writeFile } from "fs";
 import { ScrapedResult, Site } from "./typing";
@@ -31,6 +31,9 @@ export const createPuppeteerCluster = async () => {
   const cluster = await Cluster.launch({
     concurrency: Cluster.CONCURRENCY_CONTEXT,
     maxConcurrency: 5,
+    puppeteerOptions: {
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    } as LaunchOptions,
   });
 
   await cluster.task(scrape);
