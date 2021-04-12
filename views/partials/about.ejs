@@ -1,0 +1,11 @@
+<div class="container">
+  <div class="head">
+    <div class="title">
+      <a href="<%= post.link %>" target="_blank"><%=post.title%></a>
+    </div>
+    <div class="date"><%= (new Date(post.date)).toUTCString() %></div>
+  </div>
+  <% if (post.summary) { %>
+  <div class="summary"><%= post.summary %></div>
+  <% } %>
+</div>

@@ -1,0 +1,5 @@
+<h2><%= siteTitle %></h2>
+
+<% posts.forEach(post => { %>
+  <%- include('./about', {post: post}) %>
+<% }) %>
