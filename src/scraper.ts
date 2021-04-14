@@ -55,6 +55,7 @@ export const scrape = async ({
   page: Page;
   data: { site: SiteName };
 }): Promise<ScrapedResult> => {
+  console.log(`start ${data.site}`);
   const scrapedResult = await switchSite(data.site)(page).catch((err) => {
     console.error(`got error while scraping: ${data.site}`);
     return { siteTitle: data.site } as ScrapedResult;
@@ -64,6 +65,7 @@ export const scrape = async ({
       post.hDate = formatDate(post.date);
     }
   });
+  console.log(`end ${data.site}`);
   return scrapedResult;
 };
 

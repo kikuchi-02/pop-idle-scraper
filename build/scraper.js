@@ -73,10 +73,12 @@ var scrape = function (_a) {
         var scrapedResult;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, switchSite(data.site)(page).catch(function (err) {
-                        console.error("got error while scraping: " + data.site);
-                        return { siteTitle: data.site };
-                    })];
+                case 0:
+                    console.log("start " + data.site);
+                    return [4 /*yield*/, switchSite(data.site)(page).catch(function (err) {
+                            console.error("got error while scraping: " + data.site);
+                            return { siteTitle: data.site };
+                        })];
                 case 1:
                     scrapedResult = _b.sent();
                     (scrapedResult.posts || []).forEach(function (post) {
@@ -84,6 +86,7 @@ var scrape = function (_a) {
                             post.hDate = formatDate(post.date);
                         }
                     });
+                    console.log("end " + data.site);
                     return [2 /*return*/, scrapedResult];
             }
         });

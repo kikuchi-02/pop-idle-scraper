@@ -89,7 +89,7 @@ var typing_1 = require("./typing");
                             case 0:
                                 if (cache && cache.date) {
                                     now = Date.now();
-                                    diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 24));
+                                    diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 3));
                                     if (diff < 1) {
                                         res.render("index", {
                                             cache: cache,

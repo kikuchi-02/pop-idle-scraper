@@ -35,7 +35,7 @@ import { SiteName, ScrapedCache, ScrapedResult, idleKinds } from "./typing";
   app.get("/", async (req: Request, res: Response) => {
     if (cache && cache.date) {
       const now = Date.now();
-      const diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 24));
+      const diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 3));
       if (diff < 1) {
         res.render("index", {
           cache,
