@@ -3,18 +3,35 @@ export interface Post {
   title?: string;
   link?: string;
   summary?: string;
+  // generated
+  hDate?: string;
 }
 
 export interface ScrapedResult {
-  siteTitle: string;
-  posts: Post[];
+  siteTitle?: string;
+  posts?: Post[];
   // generated
-  site?: Site;
+  site?: string;
 }
 
-export type Site = "nogizaka" | "sakurazaka" | "hinatazaka";
+export const idleKinds = ["nogizaka", "sakurazaka", "hinatazaka"] as const;
+export type IdleKind = typeof idleKinds[number];
+
+export const siteNames = [
+  "nogizaka-koshiki",
+  // "nogizaka-anntena",
+  "nogizaka-blog",
+  "sakurazaka-koshiki",
+  // "sakurazaka-anntena",
+  "sakurazaka-blog",
+  "hinatazaka-koshiki",
+  "hinatazaka-blog",
+] as const;
+export type SiteName = typeof siteNames[number];
 
 export interface ScrapedCache {
   date?: number;
-  sites: ScrapedResult[];
+  nogizaka?: ScrapedResult[];
+  sakurazaka?: ScrapedResult[];
+  hinatazaka?: ScrapedResult[];
 }

@@ -35,6 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -42,8 +47,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var path_1 = require("path");
 var scraper_1 = require("./scraper");
+var typing_1 = require("./typing");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var app, cluster, sites, cache, port;
+    var app, cluster, cache, port;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -58,35 +64,47 @@ var scraper_1 = require("./scraper");
                     console.log("request", req.path);
                     next();
                 });
-                sites = ["nogizaka", "hinatazaka", "sakurazaka"];
-                return [4 /*yield*/, scraper_1.scrapeAll(cluster, sites).then(function (results) {
-                        return { date: Date.now(), sites: Object.values(results) };
-                    })];
+                return [4 /*yield*/, scraper_1.scrapeAll(cluster, __spreadArray([], typing_1.idleKinds))];
             case 2:
                 cache = _a.sent();
+                app.get("__refresh", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, scraper_1.scrapeAll(cluster, __spreadArray([], typing_1.idleKinds))];
+                            case 1:
+                                cache = _a.sent();
+                                res.render("index", { cache: cache, kinds: typing_1.idleKinds });
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                // app.get("/nogizaka", async (req: Request, res: Response) => {
+                //   const ca = await scrapeAll(cluster, ["nogizaka"]);
+                //   res.render("index", { cache: ca, kinds: ["nogizaka"] });
+                // });
                 app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
                     var now, diff;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                if (cache.date) {
+                                if (cache && cache.date) {
                                     now = Date.now();
                                     diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 24));
                                     if (diff < 1) {
                                         res.render("index", {
-                                            sites: cache.sites,
+                                            cache: cache,
+                                            kinds: typing_1.idleKinds,
                                         });
                                         res.end();
                                         return [2 /*return*/];
                                     }
                                 }
-                                return [4 /*yield*/, scraper_1.scrapeAll(cluster, sites).then(function (results) {
-                                        return { date: Date.now(), sites: Object.values(results) };
-                                    })];
+                                return [4 /*yield*/, scraper_1.scrapeAll(cluster, __spreadArray([], typing_1.idleKinds))];
                             case 1:
                                 cache = _a.sent();
                                 res.render("index", {
-                                    sites: cache.sites,
+                                    cache: cache,
+                                    kinds: typing_1.idleKinds,
                                 });
                                 res.end();
                                 return [2 /*return*/];

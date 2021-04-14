@@ -1,11 +1,11 @@
-<div class="container">
-  <div class="head">
-    <div class="title">
+<div class="about-container">
+  <div class="about-date"><%= post.hDate %></div>
+  <div class="about-body">
+    <div class="about-body-title">
       <a href="<%= post.link %>" target="_blank"><%=post.title%></a>
     </div>
-    <div class="date"><%= (new Date(post.date)).toUTCString() %></div>
+    <% if (post.summary) { %>
+    <div class="about-body-summary"><%= post.summary %></div>
+    <% } %>
   </div>
-  <% if (post.summary) { %>
-  <div class="summary"><%= post.summary %></div>
-  <% } %>
 </div>

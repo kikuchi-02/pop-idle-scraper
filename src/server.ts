@@ -1,10 +1,10 @@
 import express from "express";
 import { Request, Response } from "express";
 import { join } from "path";
-import { readFileSync, constants, accessSync } from "fs";
+import { readFileSync, constants, accessSync, writeFileSync } from "fs";
 
 import { scrape, createPuppeteerCluster, scrapeAll } from "./scraper";
-import { Site, ScrapedCache } from "./typing";
+import { SiteName, ScrapedCache, ScrapedResult, idleKinds } from "./typing";
 
 (async () => {
   const app = express();
@@ -20,42 +20,36 @@ import { Site, ScrapedCache } from "./typing";
     next();
   });
 
-  // const readJson = async (idle: Site): Promise<string> => {
-  //   const uri = join(process.cwd(), "scraped", idle + ".json");
-  //   accessSync(uri, constants.R_OK);
-  //   const data = readFileSync(uri, { encoding: "utf-8" });
-  //   return JSON.parse(data);
-  // };
+  let cache: ScrapedCache = await scrapeAll(cluster, [...idleKinds]);
 
-  // const cache: ScrapedCache = await Promise.all(cluster.execute({siteTitle: 'sakurazaka'}))
+  app.get("__refresh", async (req: Request, res: Response) => {
+    cache = await scrapeAll(cluster, [...idleKinds]);
+    res.render("index", { cache, kinds: idleKinds });
+  });
 
-  const sites: Site[] = ["nogizaka", "hinatazaka", "sakurazaka"];
-  let cache: ScrapedCache = await scrapeAll(cluster, sites).then(
-    (results) => {
-      return { date: Date.now(), sites: Object.values(results) };
-    }
-  );
+  // app.get("/nogizaka", async (req: Request, res: Response) => {
+  //   const ca = await scrapeAll(cluster, ["nogizaka"]);
+  //   res.render("index", { cache: ca, kinds: ["nogizaka"] });
+  // });
 
   app.get("/", async (req: Request, res: Response) => {
-    if (cache.date) {
+    if (cache && cache.date) {
       const now = Date.now();
       const diff = Math.floor((now - cache.date) / (1000 * 60 * 60 * 24));
       if (diff < 1) {
         res.render("index", {
-          sites: cache.sites,
+          cache,
+          kinds: idleKinds,
         });
         res.end();
         return;
       }
     }
 
-    cache = await scrapeAll(cluster, sites).then(
-      (results) => {
-        return { date: Date.now(), sites: Object.values(results) };
-      }
-    );
+    cache = await scrapeAll(cluster, [...idleKinds]);
     res.render("index", {
-      sites: cache.sites,
+      cache,
+      kinds: idleKinds,
     });
     res.end();
     return;

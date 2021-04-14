@@ -1,20 +1,39 @@
 body {
+  margin: 40px 30px;
+}
+
+h1 {
+  text-align: center;
+}
+
+main {
   max-width: 1000px;
-  margin: 10px auto;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.container {
-  margin: 15px 0;
+
+.about-container {
+  margin-top: 15px;
+  display:inline-flex;
+  border-bottom: 0.1rem solid;
+  width: 100%;
+}
+.about-date{
+  width: 80px;
+  margin-right: 10px;
 }
 
-.head {
-  display: flex;
+.about-body {
+  width: 100%;
 }
 
-.title {
+.about-body-title {
   font-weight: bold;
+  font-size: 14px;
 }
 
-.date {
-  margin-left: auto;
+
+.about-body-summary {
+  font-size: 11px;
 }

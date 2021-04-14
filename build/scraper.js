@@ -38,28 +38,53 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scrapeAll = exports.createPuppeteerCluster = exports.scrape = void 0;
 var puppeteer_cluster_1 = require("puppeteer-cluster");
+var typing_1 = require("./typing");
 var sites_1 = require("./scraper-utils/sites");
+var formatDate = function (_date) {
+    var date = new Date(_date);
+    var str = ("0" + (date.getMonth() + 1)).slice(-2) +
+        "/" +
+        ("0" + date.getDate()).slice(-2) +
+        " " +
+        ("(" + ["日", "月", "火", "水", "木", "金", "土"][date.getDay()] + ")");
+    return str;
+};
+var switchSite = function (site) {
+    switch (site) {
+        case "nogizaka-koshiki":
+            return sites_1.nogizakaKoshiki;
+        case "nogizaka-blog":
+            return sites_1.nogizakaBlog;
+        case "sakurazaka-koshiki":
+            return sites_1.sakurazakaKoshiki;
+        case "sakurazaka-blog":
+            return sites_1.sakurazakaBlog;
+        case "hinatazaka-koshiki":
+            return sites_1.hinatazakaKoshiki;
+        case "hinatazaka-blog":
+            return sites_1.hinatazakaBlog;
+        default:
+            throw Error("not implemented type " + site);
+    }
+};
 var scrape = function (_a) {
     var page = _a.page, data = _a.data;
     return __awaiter(void 0, void 0, void 0, function () {
-        var _b;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    _b = data.site;
-                    switch (_b) {
-                        case "nogizaka": return [3 /*break*/, 1];
-                        case "hinatazaka": return [3 /*break*/, 3];
-                        case "sakurazaka": return [3 /*break*/, 5];
-                    }
-                    return [3 /*break*/, 7];
-                case 1: return [4 /*yield*/, sites_1.nogizakaFeed(page)];
-                case 2: return [2 /*return*/, _c.sent()];
-                case 3: return [4 /*yield*/, sites_1.hinatazakaFeed(page)];
-                case 4: return [2 /*return*/, _c.sent()];
-                case 5: return [4 /*yield*/, sites_1.sakurazakaFeed(page)];
-                case 6: return [2 /*return*/, _c.sent()];
-                case 7: throw Error("not implemented type " + data.site);
+        var scrapedResult;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, switchSite(data.site)(page).catch(function (err) {
+                        console.error("got error while scraping: " + data.site);
+                        return { siteTitle: data.site };
+                    })];
+                case 1:
+                    scrapedResult = _b.sent();
+                    (scrapedResult.posts || []).forEach(function (post) {
+                        if (post.date) {
+                            post.hDate = formatDate(post.date);
+                        }
+                    });
+                    return [2 /*return*/, scrapedResult];
             }
         });
     });
@@ -73,7 +98,7 @@ var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void
                     concurrency: puppeteer_cluster_1.Cluster.CONCURRENCY_CONTEXT,
                     maxConcurrency: 5,
                     puppeteerOptions: {
-                        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+                        args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=ja-JA,ja"],
                     },
                 })];
             case 1:
@@ -86,16 +111,32 @@ var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void
     });
 }); };
 exports.createPuppeteerCluster = createPuppeteerCluster;
-var scrapeAll = function (cluster, sites) { return __awaiter(void 0, void 0, void 0, function () {
+var scrapeAll = function (cluster, kinds) { return __awaiter(void 0, void 0, void 0, function () {
+    var sites, scarpedResult;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, Promise.all(sites.map(function (site) {
-                    return cluster.execute({ site: site }).then(function (result) {
-                        result.posts = result.posts.slice(0, 10);
-                        return result;
-                    });
-                }))];
-            case 1: return [2 /*return*/, _a.sent()];
+            case 0:
+                console.log("scraping now");
+                sites = typing_1.siteNames.filter(function (site) {
+                    return kinds.some(function (kind) { return site.startsWith(kind); });
+                });
+                return [4 /*yield*/, Promise.all(sites.map(function (site) { return cluster.execute({ site: site }); })).then(function (results) {
+                        var cache = { date: Date.now() };
+                        kinds.forEach(function (kind) {
+                            cache[kind] = [];
+                            sites.forEach(function (site, index) {
+                                var _a;
+                                if (site.startsWith(kind)) {
+                                    (_a = cache[kind]) === null || _a === void 0 ? void 0 : _a.push(results[index]);
+                                }
+                            });
+                        });
+                        return cache;
+                    })];
+            case 1:
+                scarpedResult = _a.sent();
+                console.log("scraping finish");
+                return [2 /*return*/, scarpedResult];
         }
     });
 }); };

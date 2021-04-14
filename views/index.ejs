@@ -6,8 +6,20 @@
   </head>
   <body>
     <h1>アイドル情報まとめ</h1>
-    <% sites.forEach(site => { %>
-      <%- include('./partials/site', {siteTitle: site.siteTitle, posts: site.posts}) %>
-    <% }) %>
+    <div class="idle-switcher">
+      <label><input type="checkbox" id="checkbox-nogizaka" checked>乃木坂46</label>
+      <label><input type="checkbox" id="checkbox-sakurazaka"checked>櫻坂46</label>
+      <label><input type="checkbox" id="checkbox-hinatazaka" checked>日向坂46</label>
+    </div>
+    <main>
+      <% kinds.forEach(kind =>{ %>
+        <div id="kind-container-<%= kind %>">
+          <% (cache[kind] || []).forEach(site => { %>
+            <%- include('./partials/site', {siteTitle: site.siteTitle, posts: site.posts}) %>
+          <% }) %>
+        </div>
+      <% }) %>
+    </main>
   </body>
+  <script src="index.js"></script>
 </html>
