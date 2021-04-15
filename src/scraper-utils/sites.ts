@@ -64,14 +64,19 @@ export const nogizakaBlog = async (
   const posts: Post[] = [];
   for (let index = 0; index < heads.length; index++) {
     const { date, author, title, link } = await page.evaluate((elm) => {
-      const yearmonth = elm.querySelector(".yearmonth")?.textContent;
+      const yearmonth = elm
+        .querySelector(".yearmonth")
+        ?.textContent?.split("/");
       const _date = elm.querySelector(".dd1")?.textContent;
 
-      const date = new Date(
-        yearmonth.split("/")[0],
-        yearmonth.split("/")[1],
-        _date
-      ).getTime();
+      let date;
+      if (yearmonth && _date) {
+        date = new Date(
+          parseInt(yearmonth[0], 10),
+          parseInt(yearmonth[1], 10) - 1,
+          parseInt(_date)
+        ).getTime();
+      }
 
       const author = elm.querySelector(".author")?.textContent;
       const title = elm.querySelector(".entrytitle")?.textContent;
@@ -158,9 +163,7 @@ export const sakurazakaBlog = async (
         const post: Post = {};
         const title = elm.querySelector(".title")?.textContent;
         const author = elm.querySelector(".name")?.textContent;
-        if (title && author) {
-          post.title = `${title}(${author})`;
-        }
+        post.title = `${title}(${author})`;
         const link = elm.querySelector("a")?.getAttribute("href");
         if (link) {
           post.link = `https://sakurazaka46.com${link}`;
@@ -257,9 +260,7 @@ export const hinatazakaBlog = async (
           const author = elm
             .querySelector(".c-blog-top__name")
             ?.textContent?.trim();
-          if (title && author) {
-            post.title = `${title}(${author})`;
-          }
+          post.title = `${title}(${author})`;
           const link = elm.querySelector("a")?.getAttribute("href");
           if (link) {
             post.link = `https://www.hinatazaka46.com${link}`;

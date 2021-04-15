@@ -36,7 +36,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setLanguage = void 0;
+exports.urlify = exports.setLanguage = exports.formatDate = void 0;
+var formatDate = function (_date) {
+    var date = new Date(_date);
+    var str = ("0" + (date.getMonth() + 1)).slice(-2) +
+        "/" +
+        ("0" + date.getDate()).slice(-2) +
+        " " +
+        ("(" + ["日", "月", "火", "水", "木", "金", "土"][date.getDay()] + ")");
+    return str;
+};
+exports.formatDate = formatDate;
 var setLanguage = function (page) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -59,3 +69,8 @@ var setLanguage = function (page) { return __awaiter(void 0, void 0, void 0, fun
     });
 }); };
 exports.setLanguage = setLanguage;
+var urlify = function (text) {
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+};
+exports.urlify = urlify;

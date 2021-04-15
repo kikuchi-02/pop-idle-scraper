@@ -6,18 +6,38 @@
   </head>
   <body>
     <h1>アイドル情報まとめ</h1>
-    <div class="idle-switcher">
-      <label><input type="checkbox" id="checkbox-nogizaka" checked>乃木坂46</label>
-      <label><input type="checkbox" id="checkbox-sakurazaka"checked>櫻坂46</label>
-      <label><input type="checkbox" id="checkbox-hinatazaka" checked>日向坂46</label>
-    </div>
     <main>
+      <div class="idle-switcher">
+        <label
+          ><input
+            type="checkbox"
+            id="checkbox-nogizaka"
+            checked
+          />乃木坂46</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            id="checkbox-sakurazaka"
+            checked
+          />櫻坂46</label
+        >
+        <label
+          ><input
+            type="checkbox"
+            id="checkbox-hinatazaka"
+            checked
+          />日向坂46</label
+        >
+      </div>
       <% kinds.forEach(kind =>{ %>
-        <div id="kind-container-<%= kind %>">
-          <% (cache[kind] || []).forEach(site => { %>
-            <%- include('./partials/site', {siteTitle: site.siteTitle, posts: site.posts}) %>
-          <% }) %>
-        </div>
+      <div id="kind-container-<%= kind %>">
+        <% (scrapedCache[kind] || []).forEach(site => { %> <%-
+        include('./partials/site', {siteTitle: site.siteTitle, posts:
+        site.posts}) %> <% }) %> <% (tweetCache[kind] || []).forEach(site => {
+        %> <%- include('./partials/site', {siteTitle: site.siteTitle, posts:
+        site.posts}) %> <% }) %>
+      </div>
       <% }) %>
     </main>
   </body>

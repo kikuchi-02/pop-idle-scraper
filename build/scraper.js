@@ -35,20 +35,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scrapeAll = exports.createPuppeteerCluster = exports.scrape = void 0;
+exports.checkCache = exports.searchTweetsAll = exports.searchTweets = exports.scrapeAll = exports.createPuppeteerCluster = exports.scrape = void 0;
 var puppeteer_cluster_1 = require("puppeteer-cluster");
 var typing_1 = require("./typing");
 var sites_1 = require("./scraper-utils/sites");
-var formatDate = function (_date) {
-    var date = new Date(_date);
-    var str = ("0" + (date.getMonth() + 1)).slice(-2) +
-        "/" +
-        ("0" + date.getDate()).slice(-2) +
-        " " +
-        ("(" + ["日", "月", "火", "水", "木", "金", "土"][date.getDay()] + ")");
-    return str;
-};
+var twitter_v2_1 = __importDefault(require("twitter-v2"));
+var utils_1 = require("./scraper-utils/utils");
 var switchSite = function (site) {
     switch (site) {
         case "nogizaka-koshiki":
@@ -67,6 +68,18 @@ var switchSite = function (site) {
             throw Error("not implemented type " + site);
     }
 };
+var switchTwitterAccount = function (idle) {
+    switch (idle) {
+        case "nogizaka":
+            return "nogizaka46";
+        case "sakurazaka":
+            return "sakurazaka46";
+        case "hinatazaka":
+            return "hinatazaka46";
+        default:
+            throw Error("not implemented type " + idle);
+    }
+};
 var scrape = function (_a) {
     var page = _a.page, data = _a.data;
     return __awaiter(void 0, void 0, void 0, function () {
@@ -83,7 +96,7 @@ var scrape = function (_a) {
                     scrapedResult = _b.sent();
                     (scrapedResult.posts || []).forEach(function (post) {
                         if (post.date) {
-                            post.hDate = formatDate(post.date);
+                            post.hDate = utils_1.formatDate(post.date);
                         }
                     });
                     console.log("end " + data.site);
@@ -144,3 +157,98 @@ var scrapeAll = function (cluster, kinds) { return __awaiter(void 0, void 0, voi
     });
 }); };
 exports.scrapeAll = scrapeAll;
+var searchTweets = function (settings, account) { return __awaiter(void 0, void 0, void 0, function () {
+    var twitterClient, response, tweets;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                twitterClient = new twitter_v2_1.default({
+                    bearer_token: settings.TWITTER_BEARER_TOKEN,
+                });
+                return [4 /*yield*/, twitterClient
+                        .get("tweets/search/recent", {
+                        query: "from: \"" + account + "\"",
+                        max_results: "10",
+                        tweet: {
+                            fields: ["created_at"],
+                        },
+                    })
+                        .catch(function (err) {
+                        console.error("got error while searching tweets: " + account);
+                    })];
+            case 1:
+                response = _a.sent();
+                if (!response) {
+                    return [2 /*return*/, { siteTitle: account }];
+                }
+                tweets = response.data.map(function (tweet) {
+                    var date = new Date(tweet.created_at).getTime();
+                    var text = tweet.text
+                        .split("\n")
+                        .map(function (s) { return s.trim(); })
+                        .join();
+                    var title = utils_1.urlify(text);
+                    var hDate = utils_1.formatDate(date);
+                    return { date: date, title: title, hDate: hDate };
+                });
+                return [2 /*return*/, { siteTitle: account, posts: tweets }];
+        }
+    });
+}); };
+exports.searchTweets = searchTweets;
+var searchTweetsAll = function (settings, idles) { return __awaiter(void 0, void 0, void 0, function () {
+    var searchedResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.log("searching tweets now");
+                return [4 /*yield*/, Promise.all(idles.map(function (idle) { return exports.searchTweets(settings, switchTwitterAccount(idle)); })).then(function (results) {
+                        var cache = { date: Date.now() };
+                        idles.forEach(function (kind, index) {
+                            cache[kind] = [results[index]];
+                        });
+                        return cache;
+                    })];
+            case 1:
+                searchedResult = _a.sent();
+                return [2 /*return*/, searchedResult];
+        }
+    });
+}); };
+exports.searchTweetsAll = searchTweetsAll;
+var checkCache = function (cluster, settings, scrapedCache, tweetCache) { return __awaiter(void 0, void 0, void 0, function () {
+    var now, caches;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                now = Date.now();
+                return [4 /*yield*/, Promise.all([
+                        (function () {
+                            if (scrapedCache && scrapedCache.date) {
+                                var diff = Math.floor((now - scrapedCache.date) / (1000 * 60 * 60));
+                                // 3 hours
+                                if (diff < 3) {
+                                    return Promise.resolve(scrapedCache);
+                                }
+                            }
+                            return exports.scrapeAll(cluster, __spreadArray([], typing_1.idleKinds));
+                        })(),
+                        (function () {
+                            if (tweetCache && tweetCache.date) {
+                                var diff = Math.floor((now - tweetCache.date) / (1000 * 60 * 60));
+                                // 1 hour
+                                if (diff < 1) {
+                                    return Promise.resolve(tweetCache);
+                                }
+                            }
+                            // return searchTweets(settings, [...idleKinds]);
+                            return exports.searchTweetsAll(settings, __spreadArray([], typing_1.idleKinds));
+                        })(),
+                    ])];
+            case 1:
+                caches = _a.sent();
+                return [2 /*return*/, { _scrapedCache: caches[0], _tweetCache: caches[1] }];
+        }
+    });
+}); };
+exports.checkCache = checkCache;

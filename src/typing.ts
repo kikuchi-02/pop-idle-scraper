@@ -29,9 +29,22 @@ export const siteNames = [
 ] as const;
 export type SiteName = typeof siteNames[number];
 
-export interface ScrapedCache {
+export interface Cache {
   date?: number;
   nogizaka?: ScrapedResult[];
   sakurazaka?: ScrapedResult[];
   hinatazaka?: ScrapedResult[];
+}
+
+export interface Settings {
+  TWITTER_API_KEY: string;
+  TWITTER_API_SECRET_KEY: string;
+  TWITTER_BEARER_TOKEN: string;
+  TWITTER_ACCESS_TOKEN: string;
+  TWITTER_ACCESS_TOKEN_SECRET: string;
+}
+
+export interface Tweet {
+  created_at: string;
+  text: string;
 }

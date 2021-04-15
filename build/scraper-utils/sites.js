@@ -120,13 +120,17 @@ var nogizakaBlog = function (page, limit) {
                 case 4:
                     if (!(index < heads.length)) return [3 /*break*/, 8];
                     return [4 /*yield*/, page.evaluate(function (elm) {
-                            var _a, _b, _c, _d, _e;
-                            var yearmonth = (_a = elm.querySelector(".yearmonth")) === null || _a === void 0 ? void 0 : _a.textContent;
-                            var _date = (_b = elm.querySelector(".dd1")) === null || _b === void 0 ? void 0 : _b.textContent;
-                            var date = new Date(yearmonth.split("/")[0], yearmonth.split("/")[1], _date).getTime();
-                            var author = (_c = elm.querySelector(".author")) === null || _c === void 0 ? void 0 : _c.textContent;
-                            var title = (_d = elm.querySelector(".entrytitle")) === null || _d === void 0 ? void 0 : _d.textContent;
-                            var link = (_e = elm.querySelector(".entrytitle > a")) === null || _e === void 0 ? void 0 : _e.getAttribute("href");
+                            var _a, _b, _c, _d, _e, _f;
+                            var yearmonth = (_b = (_a = elm
+                                .querySelector(".yearmonth")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.split("/");
+                            var _date = (_c = elm.querySelector(".dd1")) === null || _c === void 0 ? void 0 : _c.textContent;
+                            var date;
+                            if (yearmonth && _date) {
+                                date = new Date(parseInt(yearmonth[0], 10), parseInt(yearmonth[1], 10) - 1, parseInt(_date)).getTime();
+                            }
+                            var author = (_d = elm.querySelector(".author")) === null || _d === void 0 ? void 0 : _d.textContent;
+                            var title = (_e = elm.querySelector(".entrytitle")) === null || _e === void 0 ? void 0 : _e.textContent;
+                            var link = (_f = elm.querySelector(".entrytitle > a")) === null || _f === void 0 ? void 0 : _f.getAttribute("href");
                             return { date: date, author: author, title: title, link: link };
                         }, heads[index])];
                 case 5:
@@ -233,9 +237,7 @@ var sakurazakaBlog = function (page, limit) {
                                 var post = {};
                                 var title = (_a = elm.querySelector(".title")) === null || _a === void 0 ? void 0 : _a.textContent;
                                 var author = (_b = elm.querySelector(".name")) === null || _b === void 0 ? void 0 : _b.textContent;
-                                if (title && author) {
-                                    post.title = title + "(" + author + ")";
-                                }
+                                post.title = title + "(" + author + ")";
                                 var link = (_c = elm.querySelector("a")) === null || _c === void 0 ? void 0 : _c.getAttribute("href");
                                 if (link) {
                                     post.link = "https://sakurazaka46.com" + link;
@@ -347,9 +349,7 @@ var hinatazakaBlog = function (page, limit) {
                                     .querySelector(".c-blog-top__title")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim();
                                 var author = (_d = (_c = elm
                                     .querySelector(".c-blog-top__name")) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.trim();
-                                if (title && author) {
-                                    post.title = title + "(" + author + ")";
-                                }
+                                post.title = title + "(" + author + ")";
                                 var link = (_e = elm.querySelector("a")) === null || _e === void 0 ? void 0 : _e.getAttribute("href");
                                 if (link) {
                                     post.link = "https://www.hinatazaka46.com" + link;
