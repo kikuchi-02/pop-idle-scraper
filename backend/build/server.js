@@ -64,8 +64,10 @@ var fs_1 = require("fs");
 var scraper_1 = require("./scraper");
 var typing_1 = require("./typing");
 var yaml = __importStar(require("js-yaml"));
+var cache_1 = require("./cache");
+var magazine_1 = require("./magazine");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var settings, app, cluster, scrapedCache, tweetCache, port;
+    var settings, app, cluster, port;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -74,30 +76,87 @@ var yaml = __importStar(require("js-yaml"));
                 return [4 /*yield*/, scraper_1.createPuppeteerCluster()];
             case 1:
                 cluster = _a.sent();
-                app.set('views', path_1.join(process.cwd(), 'views'));
-                app.set('view engine', 'ejs');
-                app.use(express_1.default.static('assets'));
                 app.get('*', function (req, res, next) {
                     console.log('request', req.path);
+                    // TODO
+                    // const cacher = new Cacher<ScrapedResult>(req.originalUrl);
+                    // const cache = cacher.getCache();
+                    // if (cache) {
+                    //   res.send();
+                    // }
                     next();
                 });
-                scrapedCache = {};
-                tweetCache = {};
-                app.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var _a, _scrapedCache, _tweetCache;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
-                            case 0: return [4 /*yield*/, scraper_1.checkCache(cluster, settings, scrapedCache, tweetCache)];
+                app.get('/api/twitter', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var kind, account, cacher, cache, value, tommorow;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                kind = req.query.kind;
+                                if (!typing_1.idleKinds.includes(kind)) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                account = scraper_1.switchTwitterAccount(kind);
+                                cacher = new cache_1.Cacher(account);
+                                cache = cacher.getCache();
+                                if (cache) {
+                                    res.send(JSON.stringify(cache));
+                                    return [2 /*return*/];
+                                }
+                                return [4 /*yield*/, scraper_1.searchTweets(settings, account)];
                             case 1:
-                                _a = _b.sent(), _scrapedCache = _a._scrapedCache, _tweetCache = _a._tweetCache;
-                                scrapedCache = _scrapedCache;
-                                tweetCache = _tweetCache;
-                                res.render('index', {
-                                    scrapedCache: scrapedCache,
-                                    tweetCache: tweetCache,
-                                    kinds: typing_1.idleKinds,
-                                });
-                                res.end();
+                                value = _a.sent();
+                                if (!value) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                tommorow = new Date();
+                                tommorow.setHours(tommorow.getHours() + 1);
+                                cacher.saveCache(value, tommorow);
+                                res.send(JSON.stringify(value));
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                app.get('/api/site', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var query, cacher, cache, value, tommorow;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                query = req.query.kind;
+                                if (!typing_1.siteNames.includes(query)) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                cacher = new cache_1.Cacher(query);
+                                cache = cacher.getCache();
+                                if (cache) {
+                                    res.send(JSON.stringify(cache));
+                                    return [2 /*return*/];
+                                }
+                                return [4 /*yield*/, cluster.execute({ site: query })];
+                            case 1:
+                                value = _a.sent();
+                                if (!value) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                tommorow = new Date();
+                                tommorow.setDate(tommorow.getDate() + 1);
+                                cacher.saveCache(value, tommorow);
+                                res.send(JSON.stringify(value));
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                app.get('/api/magazine', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var magazines;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                            case 1:
+                                magazines = _a.sent();
+                                res.send(JSON.stringify(magazines));
                                 return [2 /*return*/];
                         }
                     });

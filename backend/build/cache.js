@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Cache = void 0;
+exports.Cacher = void 0;
 var fs_1 = require("fs");
 var path_1 = require("path");
-var Cache = /** @class */ (function () {
-    function Cache(key) {
+var Cacher = /** @class */ (function () {
+    function Cacher(key) {
         this.cacheFilePath = path_1.join(process.cwd(), 'cache', key + ".buff");
         this.getCacheFromFile();
     }
-    Cache.prototype.getCacheFromFile = function () {
+    Cacher.prototype.getCacheFromFile = function () {
         try {
             fs_1.accessSync(this.cacheFilePath, fs_1.constants.R_OK);
         }
@@ -18,7 +18,7 @@ var Cache = /** @class */ (function () {
         var data = fs_1.readFileSync(this.cacheFilePath, 'utf-8');
         this.cacheValue = JSON.parse(data);
     };
-    Cache.prototype.getCache = function () {
+    Cacher.prototype.getCache = function () {
         if (this.cacheValue) {
             if (!this.cacheValue.expireDate) {
                 return this.cacheValue.value;
@@ -29,7 +29,7 @@ var Cache = /** @class */ (function () {
         }
         return undefined;
     };
-    Cache.prototype.saveCache = function (data, expireDate) {
+    Cacher.prototype.saveCache = function (data, expireDate) {
         if (expireDate === void 0) { expireDate = null; }
         this.cacheValue = {
             value: data,
@@ -40,6 +40,6 @@ var Cache = /** @class */ (function () {
             console.error(err);
         });
     };
-    return Cache;
+    return Cacher;
 }());
-exports.Cache = Cache;
+exports.Cacher = Cacher;

@@ -1,0 +1,21 @@
+.twitter {
+  &-container {
+    margin-top: 15px;
+    display: inline-flex;
+    border-bottom: 0.1rem solid;
+    width: 100%;
+  }
+  &-date {
+    width: 80px;
+    margin-right: 10px;
+  }
+
+  &-body {
+    width: 100%;
+    
+    &-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+  }
+}

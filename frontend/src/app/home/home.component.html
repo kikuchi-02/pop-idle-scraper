@@ -1,0 +1,23 @@
+<h1>アイドル情報まとめ</h1>
+<main>
+  <div class="idle-switcher">
+    <label><input type="checkbox" [(ngModel)]="nogizakaCheck" />乃木坂46</label>
+    <label><input type="checkbox" [(ngModel)]="sakurazakaCheck" />櫻坂46</label>
+    <label><input type="checkbox" [(ngModel)]="hinatazakaCheck" />日向坂46</label>
+  </div>
+  <ng-container *ngIf="nogizakaCheck">
+    <app-site [siteName]="'nogizaka-koshiki'"></app-site>
+    <app-site [siteName]="'nogizaka-blog'"></app-site>
+    <app-twitter [idle]="'nogizaka'"></app-twitter>
+  </ng-container>
+  <ng-container *ngIf="sakurazakaCheck">
+    <app-site [siteName]="'sakurazaka-koshiki'"></app-site>
+    <app-site [siteName]="'sakurazaka-blog'"></app-site>
+    <app-twitter [idle]="'sakurazaka'"></app-twitter>
+  </ng-container>
+  <ng-container *ngIf="hinatazakaCheck">
+    <app-site [siteName]="'hinatazaka-koshiki'"></app-site>
+    <app-site [siteName]="'hinatazaka-blog'"></app-site>
+    <app-twitter [idle]="'hinatazaka'"></app-twitter>
+  </ng-container>
+</main>

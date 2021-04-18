@@ -136,8 +136,13 @@ var nogizakaBlog = function (page, limit) {
                 case 5:
                     _a = _b.sent(), date = _a.date, author = _a.author, title = _a.title, link = _a.link;
                     return [4 /*yield*/, page.evaluate(function (elm) {
-                            var _a, _b;
-                            return (_b = (_a = elm === null || elm === void 0 ? void 0 : elm.textContent) === null || _a === void 0 ? void 0 : _a.trim()) === null || _b === void 0 ? void 0 : _b.slice(0, 100);
+                            return elm === null || elm === void 0 ? void 0 : elm.textContent.split('\n').reduce(function (acc, curr) {
+                                curr = curr.trim();
+                                if (curr) {
+                                    acc += curr;
+                                }
+                                return acc;
+                            }, '').slice(0, 200);
                         }, bodies[index])];
                 case 6:
                     body = _b.sent();
@@ -248,7 +253,16 @@ var sakurazakaBlog = function (page, limit) {
                                 }
                                 var summary = (_e = elm.querySelector('.lead')) === null || _e === void 0 ? void 0 : _e.textContent;
                                 if (summary) {
-                                    post.summary = summary.trim().slice(0, 100);
+                                    post.summary = summary
+                                        .split('\n')
+                                        .reduce(function (acc, curr) {
+                                        curr = curr.trim();
+                                        if (curr) {
+                                            acc += curr;
+                                        }
+                                        return acc;
+                                    }, '')
+                                        .slice(0, 200);
                                 }
                                 return post;
                             });

@@ -1,15 +1,6 @@
 import { LaunchOptions, Page } from 'puppeteer';
 import { Cluster } from 'puppeteer-cluster';
-import {
-  IdleKind,
-  Cache,
-  ScrapedResult,
-  SiteName,
-  siteNames,
-  idleKinds,
-  Settings,
-  Tweet,
-} from './typing';
+import { IdleKind, ScrapedResult, SiteName, Settings, Tweet } from './typing';
 import {
   nogizakaKoshiki,
   sakurazakaKoshiki,
@@ -42,7 +33,7 @@ const switchSite = (
   }
 };
 
-const switchTwitterAccount = (idle: IdleKind) => {
+export const switchTwitterAccount = (idle: IdleKind) => {
   switch (idle) {
     case 'nogizaka':
       return 'nogizaka46';
@@ -89,40 +80,19 @@ export const createPuppeteerCluster = async () => {
   return cluster;
 };
 
-export const scrapeAll = async (
-  cluster: Cluster,
-  kinds: IdleKind[]
-): Promise<Cache> => {
-  console.log('scraping now');
-  const sites = siteNames.filter((site) =>
-    kinds.some((kind) => site.startsWith(kind))
-  );
-  const scarpedResult = await Promise.all(
-    sites.map((site) => cluster.execute({ site }))
-  ).then((results) => {
-    const cache: Cache = { date: Date.now() };
-    kinds.forEach((kind) => {
-      cache[kind] = [];
-      sites.forEach((site, index) => {
-        if (site.startsWith(kind)) {
-          cache[kind]?.push(results[index]);
-        }
-      });
-    });
-
-    return cache;
-  });
-  console.log('scraping finish');
-  return scarpedResult;
-};
-
 export const searchTweets = async (
   settings: Settings,
   account: string
-): Promise<ScrapedResult> => {
-  const twitterClient = new Twitter({
-    bearer_token: settings.TWITTER_BEARER_TOKEN,
-  });
+): Promise<ScrapedResult | undefined> => {
+  let twitterClient;
+  try {
+    twitterClient = new Twitter({
+      bearer_token: settings.TWITTER_BEARER_TOKEN,
+    });
+  } catch (e) {
+    console.error('error arround twitter keys', e);
+    return undefined;
+  }
   const response = await twitterClient
     .get('tweets/search/recent', {
       query: `from: "${account}"`,
@@ -133,6 +103,7 @@ export const searchTweets = async (
     })
     .catch((err) => {
       console.error(`got error while searching tweets: ${account}`);
+      return undefined;
     });
   if (!response) {
     return { siteTitle: account };
@@ -149,55 +120,4 @@ export const searchTweets = async (
     return { date, title, hDate };
   });
   return { siteTitle: account, posts: tweets };
-};
-
-export const searchTweetsAll = async (
-  settings: Settings,
-  idles: IdleKind[]
-): Promise<Cache> => {
-  console.log('searching tweets now');
-  const searchedResult = await Promise.all(
-    idles.map((idle) => searchTweets(settings, switchTwitterAccount(idle)))
-  ).then((results) => {
-    const cache: Cache = { date: Date.now() };
-    idles.forEach((kind, index) => {
-      cache[kind] = [results[index]];
-    });
-    return cache;
-  });
-  return searchedResult;
-};
-
-export const checkCache = async (
-  cluster: Cluster,
-  settings: Settings,
-  scrapedCache: Cache,
-  tweetCache: Cache
-) => {
-  const now = Date.now();
-
-  const caches = await Promise.all([
-    ((): Promise<Cache> => {
-      if (scrapedCache && scrapedCache.date) {
-        const diff = Math.floor((now - scrapedCache.date) / (1000 * 60 * 60));
-        // 3 hours
-        if (diff < 3) {
-          return Promise.resolve(scrapedCache);
-        }
-      }
-      return scrapeAll(cluster, [...idleKinds]);
-    })(),
-    ((): Promise<Cache> => {
-      if (tweetCache && tweetCache.date) {
-        const diff = Math.floor((now - tweetCache.date) / (1000 * 60 * 60));
-        // 1 hour
-        if (diff < 1) {
-          return Promise.resolve(tweetCache);
-        }
-      }
-      // return searchTweets(settings, [...idleKinds]);
-      return searchTweetsAll(settings, [...idleKinds]);
-    })(),
-  ]);
-  return { _scrapedCache: caches[0], _tweetCache: caches[1] };
 };

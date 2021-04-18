@@ -85,7 +85,16 @@ export const nogizakaBlog = async (
     }, heads[index]);
 
     const body = await page.evaluate((elm) => {
-      return elm?.textContent?.trim()?.slice(0, 100);
+      return elm?.textContent
+        .split('\n')
+        .reduce((acc: string, curr: string) => {
+          curr = curr.trim();
+          if (curr) {
+            acc += curr;
+          }
+          return acc;
+        }, '')
+        .slice(0, 200);
     }, bodies[index]);
 
     posts.push({
@@ -174,7 +183,16 @@ export const sakurazakaBlog = async (
         }
         const summary = elm.querySelector('.lead')?.textContent;
         if (summary) {
-          post.summary = summary.trim().slice(0, 100);
+          post.summary = summary
+            .split('\n')
+            .reduce((acc: string, curr: string) => {
+              curr = curr.trim();
+              if (curr) {
+                acc += curr;
+              }
+              return acc;
+            }, '')
+            .slice(0, 200);
         }
         return post;
       });

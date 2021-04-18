@@ -1,12 +1,12 @@
 import { readFileSync, writeFile, accessSync, constants } from 'fs';
 import { join } from 'path';
-import { CacheKey, CacheValue } from './typing';
+import { CacheValue } from './typing';
 
-export class Cache<T> {
+export class Cacher<T> {
   private cacheFilePath: string;
   private cacheValue: CacheValue<T> | undefined;
 
-  constructor(key: CacheKey) {
+  constructor(key: string) {
     this.cacheFilePath = join(process.cwd(), 'cache', `${key}.buff`);
     this.getCacheFromFile();
   }

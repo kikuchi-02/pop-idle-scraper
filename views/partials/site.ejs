@@ -1,9 +1,0 @@
-<h2><%= siteTitle %></h2>
-
-<% if (posts) { %>
-  <% posts.forEach(post => { %>
-    <%- include('./about', {post: post}) %>
-  <% }) %>
-<% } else {%>
-  something went wrong
-<% } %>

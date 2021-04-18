@@ -1,0 +1,11 @@
+<div *ngIf="!!post" class="post-container">
+  <div class="post-date">{{ post.hDate }}</div>
+  <div class="post-body">
+    <div class="post-body-title">
+      <a [href]="post.link" target="_blank">{{ post.title }}</a>
+    </div>
+    <div *ngIf="!!post.summary" class="post-body-summary">
+      {{ post.summary }}
+    </div>
+  </div>
+</div>
