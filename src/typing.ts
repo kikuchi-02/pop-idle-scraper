@@ -48,3 +48,11 @@ export interface Tweet {
   created_at: string;
   text: string;
 }
+
+
+export type CacheKey = 'holydaies'
+
+export interface CacheValue<T> {
+  value: T;
+  expireDate: number | null;
+}
