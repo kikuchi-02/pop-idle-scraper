@@ -52,17 +52,17 @@ var twitter_v2_1 = __importDefault(require("twitter-v2"));
 var utils_1 = require("./scraper-utils/utils");
 var switchSite = function (site) {
     switch (site) {
-        case "nogizaka-koshiki":
+        case 'nogizaka-koshiki':
             return sites_1.nogizakaKoshiki;
-        case "nogizaka-blog":
+        case 'nogizaka-blog':
             return sites_1.nogizakaBlog;
-        case "sakurazaka-koshiki":
+        case 'sakurazaka-koshiki':
             return sites_1.sakurazakaKoshiki;
-        case "sakurazaka-blog":
+        case 'sakurazaka-blog':
             return sites_1.sakurazakaBlog;
-        case "hinatazaka-koshiki":
+        case 'hinatazaka-koshiki':
             return sites_1.hinatazakaKoshiki;
-        case "hinatazaka-blog":
+        case 'hinatazaka-blog':
             return sites_1.hinatazakaBlog;
         default:
             throw Error("not implemented type " + site);
@@ -70,12 +70,12 @@ var switchSite = function (site) {
 };
 var switchTwitterAccount = function (idle) {
     switch (idle) {
-        case "nogizaka":
-            return "nogizaka46";
-        case "sakurazaka":
-            return "sakurazaka46";
-        case "hinatazaka":
-            return "hinatazaka46";
+        case 'nogizaka':
+            return 'nogizaka46';
+        case 'sakurazaka':
+            return 'sakurazaka46';
+        case 'hinatazaka':
+            return 'hinatazaka46';
         default:
             throw Error("not implemented type " + idle);
     }
@@ -114,7 +114,7 @@ var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void
                     concurrency: puppeteer_cluster_1.Cluster.CONCURRENCY_CONTEXT,
                     maxConcurrency: 5,
                     puppeteerOptions: {
-                        args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=ja-JA,ja"],
+                        args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ja-JA,ja'],
                     },
                 })];
             case 1:
@@ -132,7 +132,7 @@ var scrapeAll = function (cluster, kinds) { return __awaiter(void 0, void 0, voi
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log("scraping now");
+                console.log('scraping now');
                 sites = typing_1.siteNames.filter(function (site) {
                     return kinds.some(function (kind) { return site.startsWith(kind); });
                 });
@@ -151,7 +151,7 @@ var scrapeAll = function (cluster, kinds) { return __awaiter(void 0, void 0, voi
                     })];
             case 1:
                 scarpedResult = _a.sent();
-                console.log("scraping finish");
+                console.log('scraping finish');
                 return [2 /*return*/, scarpedResult];
         }
     });
@@ -166,11 +166,11 @@ var searchTweets = function (settings, account) { return __awaiter(void 0, void 
                     bearer_token: settings.TWITTER_BEARER_TOKEN,
                 });
                 return [4 /*yield*/, twitterClient
-                        .get("tweets/search/recent", {
+                        .get('tweets/search/recent', {
                         query: "from: \"" + account + "\"",
-                        max_results: "10",
+                        max_results: '10',
                         tweet: {
-                            fields: ["created_at"],
+                            fields: ['created_at'],
                         },
                     })
                         .catch(function (err) {
@@ -182,9 +182,9 @@ var searchTweets = function (settings, account) { return __awaiter(void 0, void 
                     return [2 /*return*/, { siteTitle: account }];
                 }
                 tweets = response.data.map(function (tweet) {
-                    var date = new Date(tweet.created_at).getTime();
+                    var date = new Date(tweet.createdAt).getTime();
                     var text = tweet.text
-                        .split("\n")
+                        .split('\n')
                         .map(function (s) { return s.trim(); })
                         .join();
                     var title = utils_1.urlify(text);
@@ -201,7 +201,7 @@ var searchTweetsAll = function (settings, idles) { return __awaiter(void 0, void
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log("searching tweets now");
+                console.log('searching tweets now');
                 return [4 /*yield*/, Promise.all(idles.map(function (idle) { return exports.searchTweets(settings, switchTwitterAccount(idle)); })).then(function (results) {
                         var cache = { date: Date.now() };
                         idles.forEach(function (kind, index) {

@@ -46,39 +46,39 @@ var nogizakaKoshiki = function (page, limit) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "http://www.nogizaka46.com/news/";
+                    url = 'http://www.nogizaka46.com/news/';
                     return [4 /*yield*/, utils_1.setLanguage(page)];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 2:
                     _a.sent();
                     return [4 /*yield*/, page
-                            .$$eval("#N0 > div.padding > ul > li", function (elements) {
+                            .$$eval('#N0 > div.padding > ul > li', function (elements) {
                             return elements.map(function (elm) {
                                 var _a, _b, _c, _d;
                                 var obj = {};
-                                var title = (_a = elm.querySelector(".title")) === null || _a === void 0 ? void 0 : _a.textContent;
+                                var title = (_a = elm.querySelector('.title')) === null || _a === void 0 ? void 0 : _a.textContent;
                                 if (title) {
                                     obj.title = title;
                                 }
-                                var summary = (((_b = elm.querySelector(".summary")) === null || _b === void 0 ? void 0 : _b.textContent) || "")
-                                    .split("\n")
+                                var summary = (((_b = elm.querySelector('.summary')) === null || _b === void 0 ? void 0 : _b.textContent) || '')
+                                    .split('\n')
                                     .reduce(function (p, c) {
                                     c = c.trim();
                                     if (c) {
                                         p += c;
                                     }
                                     return p;
-                                }, "");
+                                }, '');
                                 if (summary) {
                                     obj.summary = summary;
                                 }
-                                var date = (_c = elm.querySelector(".date")) === null || _c === void 0 ? void 0 : _c.textContent;
+                                var date = (_c = elm.querySelector('.date')) === null || _c === void 0 ? void 0 : _c.textContent;
                                 if (date) {
                                     obj.date = new Date(date).getTime();
                                 }
-                                var link = (_d = elm.querySelector("a")) === null || _d === void 0 ? void 0 : _d.getAttribute("href");
+                                var link = (_d = elm.querySelector('a')) === null || _d === void 0 ? void 0 : _d.getAttribute('href');
                                 if (link) {
                                     obj.link = link;
                                 }
@@ -104,14 +104,14 @@ var nogizakaBlog = function (page, limit) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    url = "http://blog.nogizaka46.com/";
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    url = 'http://blog.nogizaka46.com/';
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 1:
                     _b.sent();
-                    return [4 /*yield*/, page.$$("#sheet > h1")];
+                    return [4 /*yield*/, page.$$('#sheet > h1')];
                 case 2:
                     heads = _b.sent();
-                    return [4 /*yield*/, page.$$("#sheet > div[class=entrybody]")];
+                    return [4 /*yield*/, page.$$('#sheet > div[class=entrybody]')];
                 case 3:
                     bodies = _b.sent();
                     posts = [];
@@ -122,15 +122,15 @@ var nogizakaBlog = function (page, limit) {
                     return [4 /*yield*/, page.evaluate(function (elm) {
                             var _a, _b, _c, _d, _e, _f;
                             var yearmonth = (_b = (_a = elm
-                                .querySelector(".yearmonth")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.split("/");
-                            var _date = (_c = elm.querySelector(".dd1")) === null || _c === void 0 ? void 0 : _c.textContent;
+                                .querySelector('.yearmonth')) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.split('/');
+                            var _date = (_c = elm.querySelector('.dd1')) === null || _c === void 0 ? void 0 : _c.textContent;
                             var date;
                             if (yearmonth && _date) {
                                 date = new Date(parseInt(yearmonth[0], 10), parseInt(yearmonth[1], 10) - 1, parseInt(_date)).getTime();
                             }
-                            var author = (_d = elm.querySelector(".author")) === null || _d === void 0 ? void 0 : _d.textContent;
-                            var title = (_e = elm.querySelector(".entrytitle")) === null || _e === void 0 ? void 0 : _e.textContent;
-                            var link = (_f = elm.querySelector(".entrytitle > a")) === null || _f === void 0 ? void 0 : _f.getAttribute("href");
+                            var author = (_d = elm.querySelector('.author')) === null || _d === void 0 ? void 0 : _d.textContent;
+                            var title = (_e = elm.querySelector('.entrytitle')) === null || _e === void 0 ? void 0 : _e.textContent;
+                            var link = (_f = elm.querySelector('.entrytitle > a')) === null || _f === void 0 ? void 0 : _f.getAttribute('href');
                             return { date: date, author: author, title: title, link: link };
                         }, heads[index])];
                 case 5:
@@ -170,37 +170,37 @@ var sakurazakaKoshiki = function (page, limit) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "https://sakurazaka46.com";
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    url = 'https://sakurazaka46.com';
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, page.$eval("#page-top > header > div.inner.fxpc > nav > div > ul:nth-child(1) > li:nth-child(3) > a", function (elm) {
-                            return elm.getAttribute("href");
+                    return [4 /*yield*/, page.$eval('#page-top > header > div.inner.fxpc > nav > div > ul:nth-child(1) > li:nth-child(3) > a', function (elm) {
+                            return elm.getAttribute('href');
                         })];
                 case 2:
                     newsPath = _a.sent();
                     if (!newsPath) {
-                        return [2 /*return*/, Promise.reject()];
+                        return [2 /*return*/, Promise.reject(Error('path not found'))];
                     }
-                    return [4 /*yield*/, page.goto(url + newsPath, { waitUntil: "networkidle2" })];
+                    return [4 /*yield*/, page.goto(url + newsPath, { waitUntil: 'networkidle2' })];
                 case 3:
                     _a.sent();
                     return [4 /*yield*/, page
-                            .$$eval("#cate-news > main > div.col2-wrap.wid1200 > div.col-r > ul > li", function (elements) {
+                            .$$eval('#cate-news > main > div.col2-wrap.wid1200 > div.col-r > ul > li', function (elements) {
                             return elements.map(function (elm) {
                                 var _a, _b, _c;
                                 var obj = {};
-                                var link = (_a = elm.querySelector("a")) === null || _a === void 0 ? void 0 : _a.getAttribute("href");
+                                var link = (_a = elm.querySelector('a')) === null || _a === void 0 ? void 0 : _a.getAttribute('href');
                                 if (link) {
-                                    obj.link = link.startsWith("/")
-                                        ? "https://sakurazaka46.com" + link
+                                    obj.link = link.startsWith('/')
+                                        ? 'https://sakurazaka46.com' + link
                                         : link;
                                 }
-                                var date = (_b = elm.querySelector(".date")) === null || _b === void 0 ? void 0 : _b.textContent;
+                                var date = (_b = elm.querySelector('.date')) === null || _b === void 0 ? void 0 : _b.textContent;
                                 if (date) {
                                     obj.date = new Date(date).getTime();
                                 }
-                                var title = (_c = elm.querySelector(".lead")) === null || _c === void 0 ? void 0 : _c.textContent;
+                                var title = (_c = elm.querySelector('.lead')) === null || _c === void 0 ? void 0 : _c.textContent;
                                 if (title) {
                                     obj.title = title;
                                 }
@@ -226,27 +226,27 @@ var sakurazakaBlog = function (page, limit) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "https://sakurazaka46.com/s/s46/diary/blog/list";
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    url = 'https://sakurazaka46.com/s/s46/diary/blog/list';
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 1:
                     _a.sent();
                     return [4 /*yield*/, page
-                            .$$eval("#cate-blog > main > div:nth-child(3) > ul > li", function (elements) {
+                            .$$eval('#cate-blog > main > div:nth-child(3) > ul > li', function (elements) {
                             return elements.map(function (elm) {
                                 var _a, _b, _c, _d, _e;
                                 var post = {};
-                                var title = (_a = elm.querySelector(".title")) === null || _a === void 0 ? void 0 : _a.textContent;
-                                var author = (_b = elm.querySelector(".name")) === null || _b === void 0 ? void 0 : _b.textContent;
+                                var title = (_a = elm.querySelector('.title')) === null || _a === void 0 ? void 0 : _a.textContent;
+                                var author = (_b = elm.querySelector('.name')) === null || _b === void 0 ? void 0 : _b.textContent;
                                 post.title = title + "(" + author + ")";
-                                var link = (_c = elm.querySelector("a")) === null || _c === void 0 ? void 0 : _c.getAttribute("href");
+                                var link = (_c = elm.querySelector('a')) === null || _c === void 0 ? void 0 : _c.getAttribute('href');
                                 if (link) {
                                     post.link = "https://sakurazaka46.com" + link;
                                 }
-                                var date = (_d = elm.querySelector(".date")) === null || _d === void 0 ? void 0 : _d.textContent;
+                                var date = (_d = elm.querySelector('.date')) === null || _d === void 0 ? void 0 : _d.textContent;
                                 if (date) {
                                     post.date = new Date(date).getTime();
                                 }
-                                var summary = (_e = elm.querySelector(".lead")) === null || _e === void 0 ? void 0 : _e.textContent;
+                                var summary = (_e = elm.querySelector('.lead')) === null || _e === void 0 ? void 0 : _e.textContent;
                                 if (summary) {
                                     post.summary = summary.trim().slice(0, 100);
                                 }
@@ -272,45 +272,45 @@ var hinatazakaKoshiki = function (page, limit) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "https://www.hinatazaka46.com";
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    url = 'https://www.hinatazaka46.com';
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, page.$eval("body > div > div.l-header > div > header > nav > ul > li:nth-child(1) > a", function (elm) {
-                            return elm.getAttribute("href");
+                    return [4 /*yield*/, page.$eval('body > div > div.l-header > div > header > nav > ul > li:nth-child(1) > a', function (elm) {
+                            return elm.getAttribute('href');
                         })];
                 case 2:
                     newsPath = _a.sent();
                     if (!newsPath) {
-                        return [2 /*return*/, Promise.reject()];
+                        return [2 /*return*/, Promise.reject(Error('not found'))];
                     }
-                    return [4 /*yield*/, page.goto(url + newsPath, { waitUntil: "networkidle2" })];
+                    return [4 /*yield*/, page.goto(url + newsPath, { waitUntil: 'networkidle2' })];
                 case 3:
                     _a.sent();
                     return [4 /*yield*/, page
-                            .$$eval("body > div > main > section > div > div.l-contents > div.l-maincontents--news > ul > li", function (elements) {
+                            .$$eval('body > div > main > section > div > div.l-contents > div.l-maincontents--news > ul > li', function (elements) {
                             return elements.map(function (elm) {
                                 var _a, _b, _c;
                                 var obj = {};
-                                var link = (_a = elm.querySelector("a")) === null || _a === void 0 ? void 0 : _a.getAttribute("href");
+                                var link = (_a = elm.querySelector('a')) === null || _a === void 0 ? void 0 : _a.getAttribute('href');
                                 if (link) {
-                                    obj.link = link.startsWith("/")
-                                        ? "https://www.hinatazaka46.com" + link
+                                    obj.link = link.startsWith('/')
+                                        ? 'https://www.hinatazaka46.com' + link
                                         : link;
                                 }
-                                var date = (_b = elm.querySelector(".c-news__date")) === null || _b === void 0 ? void 0 : _b.textContent;
+                                var date = (_b = elm.querySelector('.c-news__date')) === null || _b === void 0 ? void 0 : _b.textContent;
                                 if (date) {
                                     obj.date = new Date(date).getTime();
                                 }
-                                var title = (((_c = elm.querySelector(".c-news__text")) === null || _c === void 0 ? void 0 : _c.textContent) || "")
-                                    .split("\n")
+                                var title = (((_c = elm.querySelector('.c-news__text')) === null || _c === void 0 ? void 0 : _c.textContent) || '')
+                                    .split('\n')
                                     .reduce(function (p, c) {
                                     c = c.trim();
                                     if (c) {
                                         p += c;
                                     }
                                     return p;
-                                }, "");
+                                }, '');
                                 if (title) {
                                     obj.title = title;
                                 }
@@ -336,25 +336,25 @@ var hinatazakaBlog = function (page, limit) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = "https://www.hinatazaka46.com/s/official/diary/member";
-                    return [4 /*yield*/, page.goto(url, { waitUntil: "networkidle2" })];
+                    url = 'https://www.hinatazaka46.com/s/official/diary/member';
+                    return [4 /*yield*/, page.goto(url, { waitUntil: 'networkidle2' })];
                 case 1:
                     _a.sent();
                     return [4 /*yield*/, page
-                            .$$eval("body > div > main > section > div > div.l-contents > div.l-maincontents.l-maincontents--100 > div.p-blog-top__contents > ul > li", function (elements) {
+                            .$$eval('body > div > main > section > div > div.l-contents > div.l-maincontents.l-maincontents--100 > div.p-blog-top__contents > ul > li', function (elements) {
                             return elements.map(function (elm) {
                                 var _a, _b, _c, _d, _e, _f;
                                 var post = {};
                                 var title = (_b = (_a = elm
-                                    .querySelector(".c-blog-top__title")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim();
+                                    .querySelector('.c-blog-top__title')) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim();
                                 var author = (_d = (_c = elm
-                                    .querySelector(".c-blog-top__name")) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.trim();
+                                    .querySelector('.c-blog-top__name')) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.trim();
                                 post.title = title + "(" + author + ")";
-                                var link = (_e = elm.querySelector("a")) === null || _e === void 0 ? void 0 : _e.getAttribute("href");
+                                var link = (_e = elm.querySelector('a')) === null || _e === void 0 ? void 0 : _e.getAttribute('href');
                                 if (link) {
                                     post.link = "https://www.hinatazaka46.com" + link;
                                 }
-                                var date = (_f = elm.querySelector(".c-blog-top__date")) === null || _f === void 0 ? void 0 : _f.textContent;
+                                var date = (_f = elm.querySelector('.c-blog-top__date')) === null || _f === void 0 ? void 0 : _f.textContent;
                                 if (date) {
                                     post.date = new Date(date).getTime();
                                 }

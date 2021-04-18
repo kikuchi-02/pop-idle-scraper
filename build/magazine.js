@@ -5,10 +5,10 @@ exports.todaysMagazines = void 0;
 楽天マガジン要チェック雑誌
  芸能系
 頻度多
-・週刊プレイボーイ　月
-・月刊エンタメ　毎月30日
-・EX大衆　毎月15日
-・Platinum FLASH　不定期
+・週刊プレイボーイ 月
+・月刊エンタメ 毎月30日
+・EX大衆 毎月15日
+・Platinum FLASH 不定期
 */
 var magazines1 = function (date) {
     var magazines = [];
@@ -25,10 +25,10 @@ var magazines1 = function (date) {
 };
 /*
 頻度中（時々グラビア掲載）
-・FRIDAY　金
-・サイゾー　毎月１８日
-・ FLASH　火
-・日経エンタメ　毎月４日
+・FRIDAY 金
+・サイゾー 毎月１８日
+・ FLASH 火
+・日経エンタメ 毎月４日
 */
 var magazines2 = function (date) {
     var magazines = [];
@@ -48,13 +48,13 @@ var magazines2 = function (date) {
 };
 /*
 頻度小（スキャンダルで掲載）
-・SPA！　火
-・週刊大衆　月
-・女性自身　火
-・週刊文春　木
-・週刊新潮　木
-・女性セブン　紙版は木、電子版は金
-・週刊ポスト　紙版は月、電子版は火
+・SPA！ 火
+・週刊大衆 月
+・女性自身 火
+・週刊文春 木
+・週刊新潮 木
+・女性セブン 紙版は木、電子版は金
+・週刊ポスト 紙版は月、電子版は火
 */
 var magazines3 = function (date) {
     var magazines = [];
@@ -78,14 +78,14 @@ var magazines3 = function (date) {
 };
 /*
  女性ファッション
-・ar　毎月１２
-・LARME　3,6,9,12月の17日
-・non-no　毎月２０日
-・ViVi　毎月２３日
-・Ray　毎月23日
-・CamCam　毎月23日
-・Seventeen　毎月1日
-・bis　偶数月1日
+・ar 毎月１２
+・LARME 3,6,9,12月の17日
+・non-no 毎月２０日
+・ViVi 毎月２３日
+・Ray 毎月23日
+・CamCam 毎月23日
+・Seventeen 毎月1日
+・bis 偶数月1日
 */
 var magazines4 = function (date) {
     var magazines = [];
@@ -117,6 +117,11 @@ var magazines4 = function (date) {
 };
 var todaysMagazines = function () {
     var date = new Date();
-    return [magazines1(date), magazines2(date), magazines3(date), magazines4(date)];
+    return [
+        magazines1(date),
+        magazines2(date),
+        magazines3(date),
+        magazines4(date),
+    ];
 };
 exports.todaysMagazines = todaysMagazines;

@@ -69,21 +69,21 @@ var yaml = __importStar(require("js-yaml"));
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                settings = yaml.load(fs_1.readFileSync("envs.yaml", "utf-8"));
+                settings = yaml.load(fs_1.readFileSync('envs.yaml', 'utf-8'));
                 app = express_1.default();
                 return [4 /*yield*/, scraper_1.createPuppeteerCluster()];
             case 1:
                 cluster = _a.sent();
-                app.set("views", path_1.join(process.cwd(), "views"));
-                app.set("view engine", "ejs");
-                app.use(express_1.default.static("assets"));
-                app.get("*", function (req, res, next) {
-                    console.log("request", req.path);
+                app.set('views', path_1.join(process.cwd(), 'views'));
+                app.set('view engine', 'ejs');
+                app.use(express_1.default.static('assets'));
+                app.get('*', function (req, res, next) {
+                    console.log('request', req.path);
                     next();
                 });
                 scrapedCache = {};
                 tweetCache = {};
-                app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                app.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
                     var _a, _scrapedCache, _tweetCache;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
@@ -92,7 +92,7 @@ var yaml = __importStar(require("js-yaml"));
                                 _a = _b.sent(), _scrapedCache = _a._scrapedCache, _tweetCache = _a._tweetCache;
                                 scrapedCache = _scrapedCache;
                                 tweetCache = _tweetCache;
-                                res.render("index", {
+                                res.render('index', {
                                     scrapedCache: scrapedCache,
                                     tweetCache: tweetCache,
                                     kinds: typing_1.idleKinds,

@@ -31,7 +31,10 @@ var Cache = /** @class */ (function () {
     };
     Cache.prototype.saveCache = function (data, expireDate) {
         if (expireDate === void 0) { expireDate = null; }
-        this.cacheValue = { value: data, expireDate: expireDate ? expireDate.getTime() : null };
+        this.cacheValue = {
+            value: data,
+            expireDate: expireDate ? expireDate.getTime() : null,
+        };
         var str = JSON.stringify(this.cacheValue);
         fs_1.writeFile(this.cacheFilePath, str, function (err) {
             console.error(err);

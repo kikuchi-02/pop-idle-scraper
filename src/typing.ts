@@ -14,18 +14,18 @@ export interface ScrapedResult {
   site?: string;
 }
 
-export const idleKinds = ["nogizaka", "sakurazaka", "hinatazaka"] as const;
+export const idleKinds = ['nogizaka', 'sakurazaka', 'hinatazaka'] as const;
 export type IdleKind = typeof idleKinds[number];
 
 export const siteNames = [
-  "nogizaka-koshiki",
+  'nogizaka-koshiki',
   // "nogizaka-anntena",
-  "nogizaka-blog",
-  "sakurazaka-koshiki",
+  'nogizaka-blog',
+  'sakurazaka-koshiki',
   // "sakurazaka-anntena",
-  "sakurazaka-blog",
-  "hinatazaka-koshiki",
-  "hinatazaka-blog",
+  'sakurazaka-blog',
+  'hinatazaka-koshiki',
+  'hinatazaka-blog',
 ] as const;
 export type SiteName = typeof siteNames[number];
 
@@ -45,12 +45,11 @@ export interface Settings {
 }
 
 export interface Tweet {
-  created_at: string;
+  createdAt: string;
   text: string;
 }
 
-
-export type CacheKey = 'holydaies'
+export type CacheKey = 'holydaies';
 
 export interface CacheValue<T> {
   value: T;

@@ -1,5 +1,5 @@
-import { LaunchOptions, Page } from "puppeteer";
-import { Cluster } from "puppeteer-cluster";
+import { LaunchOptions, Page } from 'puppeteer';
+import { Cluster } from 'puppeteer-cluster';
 import {
   IdleKind,
   Cache,
@@ -8,9 +8,8 @@ import {
   siteNames,
   idleKinds,
   Settings,
-  Post,
   Tweet,
-} from "./typing";
+} from './typing';
 import {
   nogizakaKoshiki,
   sakurazakaKoshiki,
@@ -18,25 +17,25 @@ import {
   nogizakaBlog,
   hinatazakaBlog,
   sakurazakaBlog,
-} from "./scraper-utils/sites";
-import Twitter from "twitter-v2";
-import { formatDate, urlify } from "./scraper-utils/utils";
+} from './scraper-utils/sites';
+import Twitter from 'twitter-v2';
+import { formatDate, urlify } from './scraper-utils/utils';
 
 const switchSite = (
   site: SiteName
 ): ((page: Page) => Promise<ScrapedResult>) => {
   switch (site) {
-    case "nogizaka-koshiki":
+    case 'nogizaka-koshiki':
       return nogizakaKoshiki;
-    case "nogizaka-blog":
+    case 'nogizaka-blog':
       return nogizakaBlog;
-    case "sakurazaka-koshiki":
+    case 'sakurazaka-koshiki':
       return sakurazakaKoshiki;
-    case "sakurazaka-blog":
+    case 'sakurazaka-blog':
       return sakurazakaBlog;
-    case "hinatazaka-koshiki":
+    case 'hinatazaka-koshiki':
       return hinatazakaKoshiki;
-    case "hinatazaka-blog":
+    case 'hinatazaka-blog':
       return hinatazakaBlog;
     default:
       throw Error(`not implemented type ${site}`);
@@ -45,12 +44,12 @@ const switchSite = (
 
 const switchTwitterAccount = (idle: IdleKind) => {
   switch (idle) {
-    case "nogizaka":
-      return "nogizaka46";
-    case "sakurazaka":
-      return "sakurazaka46";
-    case "hinatazaka":
-      return "hinatazaka46";
+    case 'nogizaka':
+      return 'nogizaka46';
+    case 'sakurazaka':
+      return 'sakurazaka46';
+    case 'hinatazaka':
+      return 'hinatazaka46';
     default:
       throw Error(`not implemented type ${idle}`);
   }
@@ -82,7 +81,7 @@ export const createPuppeteerCluster = async () => {
     concurrency: Cluster.CONCURRENCY_CONTEXT,
     maxConcurrency: 5,
     puppeteerOptions: {
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=ja-JA,ja"],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ja-JA,ja'],
     } as LaunchOptions,
   });
 
@@ -94,7 +93,7 @@ export const scrapeAll = async (
   cluster: Cluster,
   kinds: IdleKind[]
 ): Promise<Cache> => {
-  console.log("scraping now");
+  console.log('scraping now');
   const sites = siteNames.filter((site) =>
     kinds.some((kind) => site.startsWith(kind))
   );
@@ -113,7 +112,7 @@ export const scrapeAll = async (
 
     return cache;
   });
-  console.log("scraping finish");
+  console.log('scraping finish');
   return scarpedResult;
 };
 
@@ -125,11 +124,11 @@ export const searchTweets = async (
     bearer_token: settings.TWITTER_BEARER_TOKEN,
   });
   const response = await twitterClient
-    .get("tweets/search/recent", {
+    .get('tweets/search/recent', {
       query: `from: "${account}"`,
-      max_results: "10",
+      max_results: '10',
       tweet: {
-        fields: ["created_at"],
+        fields: ['created_at'],
       },
     })
     .catch((err) => {
@@ -140,9 +139,9 @@ export const searchTweets = async (
   }
 
   const tweets = (response as any).data.map((tweet: Tweet) => {
-    const date = new Date(tweet.created_at).getTime();
+    const date = new Date(tweet.createdAt).getTime();
     const text = tweet.text
-      .split("\n")
+      .split('\n')
       .map((s) => s.trim())
       .join();
     const title = urlify(text);
@@ -156,7 +155,7 @@ export const searchTweetsAll = async (
   settings: Settings,
   idles: IdleKind[]
 ): Promise<Cache> => {
-  console.log("searching tweets now");
+  console.log('searching tweets now');
   const searchedResult = await Promise.all(
     idles.map((idle) => searchTweets(settings, switchTwitterAccount(idle)))
   ).then((results) => {

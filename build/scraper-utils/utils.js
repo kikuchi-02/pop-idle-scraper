@@ -39,11 +39,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.urlify = exports.setLanguage = exports.formatDate = void 0;
 var formatDate = function (_date) {
     var date = new Date(_date);
-    var str = ("0" + (date.getMonth() + 1)).slice(-2) +
-        "/" +
-        ("0" + date.getDate()).slice(-2) +
-        " " +
-        ("(" + ["日", "月", "火", "水", "木", "金", "土"][date.getDay()] + ")");
+    var str = ('0' + (date.getMonth() + 1)).slice(-2) +
+        '/' +
+        ('0' + date.getDate()).slice(-2) +
+        ' ' +
+        ("(" + ['日', '月', '火', '水', '木', '金', '土'][date.getDay()] + ")");
     return str;
 };
 exports.formatDate = formatDate;
@@ -51,14 +51,14 @@ var setLanguage = function (page) { return __awaiter(void 0, void 0, void 0, fun
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, page.evaluateOnNewDocument(function () {
-                    Object.defineProperty(navigator, "language", {
+                    Object.defineProperty(navigator, 'language', {
                         get: function () {
-                            return "ja-JA";
+                            return 'ja-JA';
                         },
                     });
-                    Object.defineProperty(navigator, "languages", {
+                    Object.defineProperty(navigator, 'languages', {
                         get: function () {
-                            return ["ja-JA", "ja"];
+                            return ['ja-JA', 'ja'];
                         },
                     });
                 })];
