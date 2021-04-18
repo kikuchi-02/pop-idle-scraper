@@ -69,7 +69,7 @@ var yaml = __importStar(require("js-yaml"));
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                settings = yaml.load(fs_1.readFileSync('envs.yaml', 'utf-8'));
+                settings = yaml.load(fs_1.readFileSync(path_1.join(process.cwd(), '..', 'envs.yaml'), 'utf-8'));
                 app = express_1.default();
                 return [4 /*yield*/, scraper_1.createPuppeteerCluster()];
             case 1:

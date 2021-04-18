@@ -8,7 +8,7 @@ import { Cache, idleKinds, Settings } from './typing';
 import * as yaml from 'js-yaml';
 
 (async () => {
-  const settings = yaml.load(readFileSync('envs.yaml', 'utf-8')) as Settings;
+  const settings = yaml.load(readFileSync(join(process.cwd(),'..', 'envs.yaml'), 'utf-8')) as Settings;
 
   const app = express();
   const cluster = await createPuppeteerCluster();
