@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { parseHtml, Element } from 'libxmljs2';
-import { IdleKind } from '../typing';
+import { IdleKind, Member } from '../typing';
 
 const parseTable = (membersTable: Element): string[][] => {
   const members: string[][] = [];
@@ -80,32 +80,37 @@ export const extractExternalLinks = (htmlString: string) => {
   return links;
 };
 
-export const getMembers = async (idle: IdleKind) => {
-  const baseUrl = 'https://ja.wikipedia.org';
-  let url = baseUrl;
+const switchLink = (idle: IdleKind): string => {
   switch (idle) {
     case 'nogizaka':
-      const nogizakaHome =
-        '/wiki/%E4%B9%83%E6%9C%A8%E5%9D%8246#%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC';
-      url += nogizakaHome;
+      return '/wiki/%E4%B9%83%E6%9C%A8%E5%9D%8246#%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC';
       break;
     case 'sakurazaka':
-      const sakurazakaHome = '/wiki/%E6%AB%BB%E5%9D%8246';
-      url += sakurazakaHome;
+      return '/wiki/%E6%AB%BB%E5%9D%8246';
       break;
     case 'hinatazaka':
-      const hinatazakaHome = '/wiki/%E6%97%A5%E5%90%91%E5%9D%8246';
-      url += hinatazakaHome;
+      return '/wiki/%E6%97%A5%E5%90%91%E5%9D%8246';
       break;
     default:
       throw Error(`not impletemnetd type ${idle}`);
   }
+};
+
+export const getMembers = async (idle: IdleKind): Promise<Member[]> => {
+  const baseUrl = 'https://ja.wikipedia.org';
+  const url = baseUrl + switchLink(idle);
+
   const homeResponse = await axios.get(url);
   if (homeResponse.status !== 200) {
     return Promise.reject(Error(`status ${homeResponse.status}`));
   }
 
-  const members = extractMembers(homeResponse.data);
+  const members = extractMembers(homeResponse.data).map((member) => {
+    return {
+      name: member[0],
+      link: member[1] ? baseUrl + member[1] : undefined,
+    } as Member;
+  });
   return members;
   // const json: any = await Promise.all(members.map(async (member) => {
   //   if (member.length > 1) {
@@ -127,3 +132,28 @@ export const getMembers = async (idle: IdleKind) => {
   // }))
   // return json
 };
+
+export const getMemberTable = async (idle: IdleKind): Promise<string[]> => {
+  const baseUrl = 'https://ja.wikipedia.org';
+  const url = baseUrl + switchLink(idle);
+  const homeResponse = await axios.get(url);
+  if (homeResponse.status !== 200) {
+    return Promise.reject(Error(`status ${homeResponse.status}`));
+  }
+
+  const tables: string[] = [];
+  const html = parseHtml(homeResponse.data);
+  const membersTable = html.get(
+    '//*[@id="mw-content-text"]/div[1]/table[2]/tbody'
+  );
+  if (membersTable?.type() === 'element') {
+    tables.push(membersTable.toString());
+  }
+  const oldMembersTable = html.get(
+    '//*[@id="mw-content-text"]/div[1]/table[3]/tbody'
+  );
+  if (oldMembersTable?.type() === 'element') {
+    tables.push(oldMembersTable.toString())
+  }
+  return tables;
+}

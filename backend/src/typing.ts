@@ -53,3 +53,14 @@ export interface CacheValue<T> {
   value: T;
   expireDate: number | null;
 }
+
+export interface Member {
+  name: string;
+  kana: string;
+  link: string;
+}
+
+export interface Magazine {
+  title: string;
+  link: string;
+}

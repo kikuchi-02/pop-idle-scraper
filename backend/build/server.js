@@ -66,6 +66,7 @@ var typing_1 = require("./typing");
 var yaml = __importStar(require("js-yaml"));
 var cache_1 = require("./cache");
 var magazine_1 = require("./magazine");
+var wiki_1 = require("./scraper-utils/wiki");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var settings, app, cluster, port;
     return __generator(this, function (_a) {
@@ -145,6 +146,68 @@ var magazine_1 = require("./magazine");
                                 tommorow.setDate(tommorow.getDate() + 1);
                                 cacher.saveCache(value, tommorow);
                                 res.send(JSON.stringify(value));
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                app.get('/api/members', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var kind, cacher, cache, members, tommorow;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                kind = req.query.kind;
+                                if (!typing_1.idleKinds.includes(kind)) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                cacher = new cache_1.Cacher(kind + "-members");
+                                cache = cacher.getCache();
+                                if (cache) {
+                                    res.send(JSON.stringify(cache));
+                                    return [2 /*return*/];
+                                }
+                                return [4 /*yield*/, wiki_1.getMembers(kind)];
+                            case 1:
+                                members = _a.sent();
+                                if (!members) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                tommorow = new Date();
+                                tommorow.setDate(tommorow.getDate() + 10);
+                                cacher.saveCache(members, tommorow);
+                                res.send(JSON.stringify(members));
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                app.get('/api/member-table', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var kind, cacher, cache, tables, tommorow;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                kind = req.query.kind;
+                                if (!typing_1.idleKinds.includes(kind)) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                cacher = new cache_1.Cacher(kind + "-member-table");
+                                cache = cacher.getCache();
+                                if (cache) {
+                                    res.send(JSON.stringify(cache));
+                                    return [2 /*return*/];
+                                }
+                                return [4 /*yield*/, wiki_1.getMemberTable(kind)];
+                            case 1:
+                                tables = _a.sent();
+                                if (!tables) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                tommorow = new Date();
+                                tommorow.setDate(tommorow.getDate() + 10);
+                                cacher.saveCache(tables, tommorow);
+                                res.send(JSON.stringify(tables));
                                 return [2 /*return*/];
                         }
                     });

@@ -34,7 +34,7 @@ export const twitterAccounts = [
   'sakurazaka-twitter',
   'hinatazaka-twitter',
 ] as const;
-export  type TwitterAccount = typeof twitterAccounts[number];
+export type TwitterAccount = typeof twitterAccounts[number];
 
 export interface Cache {
   date?: number;
@@ -51,4 +51,14 @@ export interface Tweet {
 export interface CacheValue<T> {
   value: T;
   expireDate: number | null;
+}
+export interface IdleSwitchState {
+  nogizakaCheck: boolean;
+  sakurazakaCheck: boolean;
+  hinatazakaCheck: boolean;
+}
+
+export interface Member {
+  name: string;
+  link: string;
 }

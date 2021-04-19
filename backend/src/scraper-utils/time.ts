@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Cache } from '../cache';
+import { Cacher } from '../cache';
 
 const getHolydaies = async (): Promise<Date[]> => {
-  const cacher = new Cache<string[]>('holydaies');
+  const cacher = new Cacher<string[]>('holydaies');
   let holydaies = cacher.getCache();
   if (holydaies) {
     return holydaies.map((d) => new Date(d));
@@ -13,14 +13,21 @@ const getHolydaies = async (): Promise<Date[]> => {
 
   holydaies = response.data
     .split('\n')
-    .filter((line: string) =>
-      /^\d{4}\/(\d{1}|\d{2})\/(\d{1}|\d{2}),/.test(line)
-    )
-    .map((d: string) => d.split(',')[0]);
-
-  cacher.saveCache(holydaies);
-
-  return holydaies.map((d) => new Date(d));
+    .reduce((acc: string[], curr: string) => {
+      if (/^\d{4}\/(\d{1}|\d{2})\/(\d{1}|\d{2}),/.test(curr)) {
+        const d = curr.split(',')[0];
+        if (d) {
+          acc.push(d);
+        }
+      }
+      return acc;
+    }, []);
+  if (holydaies) {
+    cacher.saveCache(holydaies);
+    return holydaies.map((d) => new Date(d));
+  } else {
+    return [];
+  }
 };
 
 const isDayOff = (date: Date, holidaies: Date[]) => {

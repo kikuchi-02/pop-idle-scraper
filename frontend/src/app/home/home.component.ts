@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { IdleSwitchState } from '../typing';
 
 @Component({
   selector: 'app-home',
@@ -6,12 +7,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  nogizakaCheck = true;
-  sakurazakaCheck = true;
-  hinatazakaCheck = true;
+  idleSwitchState: IdleSwitchState = {
+    nogizakaCheck: true,
+    sakurazakaCheck: true,
+    hinatazakaCheck: true,
+  };
 
   constructor() {}
 
   ngOnInit(): void {}
-
 }

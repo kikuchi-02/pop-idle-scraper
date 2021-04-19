@@ -11,6 +11,7 @@ import {
 } from './scraper-utils/sites';
 import Twitter from 'twitter-v2';
 import { formatDate, urlify } from './scraper-utils/utils';
+import { getMembers } from './scraper-utils/wiki';
 
 const switchSite = (
   site: SiteName

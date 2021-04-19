@@ -1,3 +1,5 @@
+import { publishDates } from './scraper-utils/time';
+import { Magazine } from './typing';
 /*
 楽天マガジン要チェック雑誌
  芸能系
@@ -116,13 +118,23 @@ const magazines4 = (date: Date): string[][] => {
   return magazines;
 };
 
-export const todaysMagazines = () => {
-  const date = new Date();
+export const todaysMagazines = async (): Promise<Magazine[]> => {
+  const dates = await publishDates();
 
-  return [
-    magazines1(date),
-    magazines2(date),
-    magazines3(date),
-    magazines4(date),
-  ];
+  return dates
+    .map((date) => {
+      return [
+        ...magazines1(date),
+        ...magazines2(date),
+        ...magazines3(date),
+        ...magazines4(date),
+      ].map((m) => {
+        return { title: m[0] } as Magazine;
+      });
+    })
+    .reduce((acc: Magazine[], curr: Magazine[]) => {
+      acc.push(...curr);
+      return acc;
+    }, []);
+
 };

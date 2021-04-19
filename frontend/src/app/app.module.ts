@@ -11,9 +11,11 @@ import { SiteService } from './site/site.service';
 import { TwitterComponent } from './twitter/twitter.component';
 import { TwitterService } from './twitter/twitter.service';
 import { FormsModule } from '@angular/forms';
+import { MemberComponent } from './member/member.component';
+import { IdleSwitcherComponent } from './idle-switcher/idle-switcher.component';
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, PostComponent, SiteComponent, TwitterComponent],
+  declarations: [AppComponent, HomeComponent, PostComponent, SiteComponent, TwitterComponent, MemberComponent, IdleSwitcherComponent],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
   providers: [SiteService, TwitterService],
   bootstrap: [AppComponent],

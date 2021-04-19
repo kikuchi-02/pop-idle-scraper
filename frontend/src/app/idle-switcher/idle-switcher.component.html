@@ -1,0 +1,26 @@
+<ng-container *ngIf="!!value">
+  <div class="idle-switcher-checkbox">
+    <label
+      ><input
+        type="checkbox"
+        [(ngModel)]="value.nogizakaCheck"
+      />乃木坂46</label
+    >
+  </div>
+  <div class="idle-switcher-checkbox">
+    <label
+      ><input
+        type="checkbox"
+        [(ngModel)]="value.sakurazakaCheck"
+      />櫻坂46</label
+    >
+  </div>
+  <div class="idle-switcher-checkbox">
+    <label
+      ><input
+        type="checkbox"
+        [(ngModel)]="value.hinatazakaCheck"
+      />日向坂46</label
+    >
+  </div>
+</ng-container>
