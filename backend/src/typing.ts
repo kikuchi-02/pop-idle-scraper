@@ -45,7 +45,7 @@ export interface Settings {
 }
 
 export interface Tweet {
-  createdAt: string;
+  created_at: string;
   text: string;
 }
 

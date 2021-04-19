@@ -110,7 +110,7 @@ export const searchTweets = async (
   }
 
   const tweets = (response as any).data.map((tweet: Tweet) => {
-    const date = new Date(tweet.createdAt).getTime();
+    const date = new Date(tweet.created_at).getTime();
     const text = tweet.text
       .split('\n')
       .map((s) => s.trim())

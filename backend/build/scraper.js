@@ -154,7 +154,7 @@ var searchTweets = function (settings, account) { return __awaiter(void 0, void 
                     return [2 /*return*/, { siteTitle: account }];
                 }
                 tweets = response.data.map(function (tweet) {
-                    var date = new Date(tweet.createdAt).getTime();
+                    var date = new Date(tweet.created_at).getTime();
                     var text = tweet.text
                         .split('\n')
                         .map(function (s) { return s.trim(); })

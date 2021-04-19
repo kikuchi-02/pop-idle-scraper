@@ -1,12 +1,16 @@
-<ng-container *ngIf="!!tweets">
-  <ng-container *ngFor="let tweet of tweets">
-    <div class="twitter-container">
-      <div class="twitter-date">{{ tweet.hDate }}</div>
-      <div class="twitter-body">
-        <div class="twitter-body-title">
-          <a [href]="tweet.link" target="_blank">{{ tweet.title }}</a>
+<ng-container *ngIf="!!siteTitle">
+  <h2>{{ siteTitle }}</h2>
+
+  <ng-container *ngIf="!!tweets">
+    <ng-container *ngFor="let tweet of tweets">
+      <div class="twitter-container">
+        <div class="twitter-date">{{ tweet.hDate }}</div>
+        <div class="twitter-body">
+          <div class="twitter-body-title">
+            <div [innerHtml]="tweet.title"></div>
+          </div>
         </div>
       </div>
-    </div>
+    </ng-container>
   </ng-container>
 </ng-container>
