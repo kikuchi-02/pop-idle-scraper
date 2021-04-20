@@ -35,11 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.todaysMagazines = void 0;
 var time_1 = require("./scraper-utils/time");
@@ -58,10 +53,13 @@ var magazines1 = function (date) {
         magazines.push(['週刊プレイボーイ']);
     }
     if (date.getDate() == 30) {
-        magazines.push(['月刊エンタメ']);
+        magazines.push([
+            '月刊エンタメ',
+            'https://magazine.rakuten.co.jp/title/02053/',
+        ]);
     }
     if (date.getDate() === 15) {
-        magazines.push(['EX大衆']);
+        magazines.push(['EX大衆', 'https://magazine.rakuten.co.jp/title/A11E0/']);
     }
     return magazines;
 };
@@ -75,16 +73,19 @@ var magazines1 = function (date) {
 var magazines2 = function (date) {
     var magazines = [];
     if (date.getDay() === 5) {
-        magazines.push(['FRIDAY']);
+        magazines.push(['FRIDAY', 'https://magazine.rakuten.co.jp/title/22211/']);
     }
     if (date.getDate() === 18) {
-        magazines.push(['サイゾー']);
+        magazines.push(['サイゾー', 'https://magazine.rakuten.co.jp/title/04111/']);
     }
     if (date.getDay() === 2) {
-        magazines.push(['FLASH']);
+        magazines.push(['FLASH', 'https://magazine.rakuten.co.jp/title/A0SP0/']);
     }
     if (date.getDate() === 4) {
-        magazines.push(['日経エンタメ']);
+        magazines.push([
+            '日経エンタメ',
+            'https://magazine.rakuten.co.jp/title/07183/',
+        ]);
     }
     return magazines;
 };
@@ -102,16 +103,22 @@ var magazines3 = function (date) {
     var magazines = [];
     switch (date.getDay()) {
         case 1:
-            magazines.push(['週刊大衆']);
+            magazines.push([
+                '週刊大衆',
+                'https://magazine.rakuten.co.jp/title/A0YR0/',
+            ]);
             break;
         case 2:
-            magazines.push(['SPA！'], ['女性自身'], ['週刊ポスト']);
+            magazines.push(['SPA！', 'https://magazine.rakuten.co.jp/title/23451/'], ['女性自身', 'https://magazine.rakuten.co.jp/title/A0SQ0/'], ['週刊ポスト', 'https://magazine.rakuten.co.jp/title/A0VT0/']);
             break;
         case 4:
-            magazines.push(['週刊文春'], ['週刊新潮']);
+            magazines.push(['週刊文春', 'https://magazine.rakuten.co.jp/title/A10T0/'], ['週刊新潮', 'https://magazine.rakuten.co.jp/title/20311']);
             break;
         case 5:
-            magazines.push(['女性セブン']);
+            magazines.push([
+                '女性セブン',
+                'https://magazine.rakuten.co.jp/title/20924/',
+            ]);
             break;
         default:
             break;
@@ -133,24 +140,27 @@ var magazines4 = function (date) {
     var magazines = [];
     switch (date.getDate()) {
         case 1:
-            magazines.push(['Seventeen']);
+            magazines.push([
+                'Seventeen',
+                'https://magazine.rakuten.co.jp/title/05625/',
+            ]);
             if ((date.getMonth() + 1) % 2 === 0) {
-                magazines.push(['bis']);
+                magazines.push(['bis', 'https://magazine.rakuten.co.jp/title/17687/']);
             }
             break;
         case 12:
-            magazines.push(['ar']);
+            magazines.push(['ar', 'https://magazine.rakuten.co.jp/title/11431/']);
             break;
         case 17:
             if ((date.getMonth() + 1) % 3 === 0) {
-                magazines.push(['LARME']);
+                magazines.push(['LARME', 'https://magazine.rakuten.co.jp/title/A1BP0']);
             }
             break;
         case 20:
-            magazines.push(['non-no']);
+            magazines.push(['non-no', 'https://magazine.rakuten.co.jp/title/07283/']);
             break;
         case 23:
-            magazines.push(['Ray'], ['CamCam']);
+            magazines.push(['Ray', 'https://magazine.rakuten.co.jp/title/09695/'], ['CanCam', 'https://magazine.rakuten.co.jp/title/A0KR0/']);
             break;
         default:
             break;
@@ -164,16 +174,15 @@ var todaysMagazines = function () { return __awaiter(void 0, void 0, void 0, fun
             case 0: return [4 /*yield*/, time_1.publishDates()];
             case 1:
                 dates = _a.sent();
-                return [2 /*return*/, dates
-                        .map(function (date) {
-                        return __spreadArray(__spreadArray(__spreadArray(__spreadArray([], magazines1(date)), magazines2(date)), magazines3(date)), magazines4(date)).map(function (m) {
-                            return { title: m[0] };
-                        });
-                    })
-                        .reduce(function (acc, curr) {
-                        acc.push.apply(acc, curr);
-                        return acc;
-                    }, [])];
+                return [2 /*return*/, [magazines1, magazines2, magazines3, magazines4].map(function (func) {
+                        return dates.reduce(function (acc, curr) {
+                            var ms = func(curr).map(function (m) {
+                                return { title: m[0], link: m[1] };
+                            });
+                            acc.push.apply(acc, ms);
+                            return acc;
+                        }, []);
+                    })];
         }
     });
 }); };

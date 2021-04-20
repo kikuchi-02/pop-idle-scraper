@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 
 import { Post, SiteName } from '../typing';
 import { takeUntil } from 'rxjs/operators';
-import { SiteService } from './site.service';
+import { UtilService } from '../util.service';
 
 @Component({
   selector: 'app-site',
@@ -18,10 +18,10 @@ export class SiteComponent implements OnInit, OnDestroy {
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
-  constructor(private siteService: SiteService) {}
+  constructor(private utilService: UtilService) {}
 
   ngOnInit(): void {
-    this.siteService
+    this.utilService
       .getSite(this.siteName)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((val) => {
@@ -30,7 +30,7 @@ export class SiteComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.unsubscriber$.next();
   }
 }

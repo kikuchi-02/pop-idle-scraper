@@ -212,7 +212,7 @@ var wiki_1 = require("./scraper-utils/wiki");
                         }
                     });
                 }); });
-                app.get('/api/magazine', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                app.get('/api/magazines', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
                     var magazines;
                     return __generator(this, function (_a) {
                         switch (_a.label) {

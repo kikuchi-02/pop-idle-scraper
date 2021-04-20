@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleSwitchState, Member } from '../typing';
-import { MemberService } from './member.service';
+import { UtilService } from '../util.service';
 
 @Component({
   selector: 'app-member',
@@ -26,42 +26,42 @@ export class MemberComponent implements OnInit, OnDestroy {
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
-  constructor(private memberService: MemberService) {
-    this.memberService
+  constructor(private utilService: UtilService) {
+    this.utilService
       .getMembers('nogizaka')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((members) => {
         this.nogizakaMembers = members;
       });
-    this.memberService
+    this.utilService
       .getMembers('sakurazaka')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((members) => {
         this.sakurazakaMembers = members;
       });
 
-    this.memberService
+    this.utilService
       .getMembers('hinatazaka')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((members) => {
         this.hinatazakaMembers = members;
       });
 
-    // this.memberService
+    // this.utilService
     //   .getMemberTable('nogizaka')
     //   .pipe(takeUntil(this.unsubscriber$))
     //   .subscribe((tables) => {
     //     this.nogizakaTables = tables;
     //   });
 
-    // this.memberService
+    // this.utilService
     //   .getMemberTable('sakurazaka')
     //   .pipe(takeUntil(this.unsubscriber$))
     //   .subscribe((tables) => {
     //     this.sakurazakaTables = tables;
     //   });
 
-    // this.memberService
+    // this.utilService
     //   .getMemberTable('hinatazaka')
     //   .pipe(takeUntil(this.unsubscriber$))
     //   .subscribe((tables) => {

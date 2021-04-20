@@ -62,3 +62,8 @@ export interface Member {
   name: string;
   link: string;
 }
+
+export interface Magazine {
+  title: string;
+  link: string;
+}

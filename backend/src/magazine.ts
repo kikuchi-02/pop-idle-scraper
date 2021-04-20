@@ -15,10 +15,13 @@ const magazines1 = (date: Date): string[][] => {
     magazines.push(['週刊プレイボーイ']);
   }
   if (date.getDate() == 30) {
-    magazines.push(['月刊エンタメ']);
+    magazines.push([
+      '月刊エンタメ',
+      'https://magazine.rakuten.co.jp/title/02053/',
+    ]);
   }
   if (date.getDate() === 15) {
-    magazines.push(['EX大衆']);
+    magazines.push(['EX大衆', 'https://magazine.rakuten.co.jp/title/A11E0/']);
   }
   return magazines;
 };
@@ -34,16 +37,19 @@ const magazines1 = (date: Date): string[][] => {
 const magazines2 = (date: Date): string[][] => {
   const magazines: string[][] = [];
   if (date.getDay() === 5) {
-    magazines.push(['FRIDAY']);
+    magazines.push(['FRIDAY', 'https://magazine.rakuten.co.jp/title/22211/']);
   }
   if (date.getDate() === 18) {
-    magazines.push(['サイゾー']);
+    magazines.push(['サイゾー', 'https://magazine.rakuten.co.jp/title/04111/']);
   }
   if (date.getDay() === 2) {
-    magazines.push(['FLASH']);
+    magazines.push(['FLASH', 'https://magazine.rakuten.co.jp/title/A0SP0/']);
   }
   if (date.getDate() === 4) {
-    magazines.push(['日経エンタメ']);
+    magazines.push([
+      '日経エンタメ',
+      'https://magazine.rakuten.co.jp/title/07183/',
+    ]);
   }
   return magazines;
 };
@@ -61,16 +67,29 @@ const magazines3 = (date: Date): string[][] => {
   const magazines: string[][] = [];
   switch (date.getDay()) {
     case 1:
-      magazines.push(['週刊大衆']);
+      magazines.push([
+        '週刊大衆',
+        'https://magazine.rakuten.co.jp/title/A0YR0/',
+      ]);
       break;
     case 2:
-      magazines.push(['SPA！'], ['女性自身'], ['週刊ポスト']);
+      magazines.push(
+        ['SPA！', 'https://magazine.rakuten.co.jp/title/23451/'],
+        ['女性自身', 'https://magazine.rakuten.co.jp/title/A0SQ0/'],
+        ['週刊ポスト', 'https://magazine.rakuten.co.jp/title/A0VT0/']
+      );
       break;
     case 4:
-      magazines.push(['週刊文春'], ['週刊新潮']);
+      magazines.push(
+        ['週刊文春', 'https://magazine.rakuten.co.jp/title/A10T0/'],
+        ['週刊新潮', 'https://magazine.rakuten.co.jp/title/20311']
+      );
       break;
     case 5:
-      magazines.push(['女性セブン']);
+      magazines.push([
+        '女性セブン',
+        'https://magazine.rakuten.co.jp/title/20924/',
+      ]);
       break;
     default:
       break;
@@ -93,24 +112,30 @@ const magazines4 = (date: Date): string[][] => {
   const magazines: string[][] = [];
   switch (date.getDate()) {
     case 1:
-      magazines.push(['Seventeen']);
+      magazines.push([
+        'Seventeen',
+        'https://magazine.rakuten.co.jp/title/05625/',
+      ]);
       if ((date.getMonth() + 1) % 2 === 0) {
-        magazines.push(['bis']);
+        magazines.push(['bis', 'https://magazine.rakuten.co.jp/title/17687/']);
       }
       break;
     case 12:
-      magazines.push(['ar']);
+      magazines.push(['ar', 'https://magazine.rakuten.co.jp/title/11431/']);
       break;
     case 17:
       if ((date.getMonth() + 1) % 3 === 0) {
-        magazines.push(['LARME']);
+        magazines.push(['LARME', 'https://magazine.rakuten.co.jp/title/A1BP0']);
       }
       break;
     case 20:
-      magazines.push(['non-no']);
+      magazines.push(['non-no', 'https://magazine.rakuten.co.jp/title/07283/']);
       break;
     case 23:
-      magazines.push(['Ray'], ['CamCam']);
+      magazines.push(
+        ['Ray', 'https://magazine.rakuten.co.jp/title/09695/'],
+        ['CanCam', 'https://magazine.rakuten.co.jp/title/A0KR0/']
+      );
       break;
     default:
       break;
@@ -118,22 +143,16 @@ const magazines4 = (date: Date): string[][] => {
   return magazines;
 };
 
-export const todaysMagazines = async (): Promise<Magazine[]> => {
+export const todaysMagazines = async (): Promise<Magazine[][]> => {
   const dates = await publishDates();
 
-  return dates
-    .map((date) => {
-      return [
-        ...magazines1(date),
-        ...magazines2(date),
-        ...magazines3(date),
-        ...magazines4(date),
-      ].map((m) => {
-        return { title: m[0] } as Magazine;
+  return [magazines1, magazines2, magazines3, magazines4].map((func) => {
+    return dates.reduce((acc: Magazine[], curr: Date) => {
+      const ms = func(curr).map((m) => {
+        return { title: m[0], link: m[1] } as Magazine;
       });
-    })
-    .reduce((acc: Magazine[], curr: Magazine[]) => {
-      acc.push(...curr);
+      acc.push(...ms);
       return acc;
     }, []);
+  });
 };

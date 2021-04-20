@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleKind, Post } from '../typing';
-import { TwitterService } from './twitter.service';
+import { UtilService } from '../util.service';
 
 @Component({
   selector: 'app-twitter',
@@ -16,10 +16,10 @@ export class TwitterComponent implements OnInit, OnDestroy {
   siteTitle: string;
 
   private unsubscriber$: Subject<void> = new Subject<void>();
-  constructor(private twitterService: TwitterService) {}
+  constructor(private utilService: UtilService) {}
 
   ngOnInit(): void {
-    this.twitterService
+    this.utilService
       .getTweets(this.idle)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((val) => {

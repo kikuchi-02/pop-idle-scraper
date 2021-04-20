@@ -103,7 +103,7 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
       res.send(JSON.stringify(cache));
       return;
     }
-    const members: Member[] = await getMembers(kind as IdleKind)
+    const members: Member[] = await getMembers(kind as IdleKind);
     if (!members) {
       res.sendStatus(400).end();
       return;
@@ -113,7 +113,7 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
     cacher.saveCache(members, tommorow);
     res.send(JSON.stringify(members));
     return;
-  })
+  });
 
   app.get('/api/member-table', async (req, res) => {
     const kind = req.query.kind;
@@ -127,7 +127,7 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
       res.send(JSON.stringify(cache));
       return;
     }
-    const tables: string[] = await getMemberTable(kind as IdleKind)
+    const tables: string[] = await getMemberTable(kind as IdleKind);
     if (!tables) {
       res.sendStatus(400).end();
       return;
@@ -137,9 +137,9 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
     cacher.saveCache(tables, tommorow);
     res.send(JSON.stringify(tables));
     return;
-  })
+  });
 
-  app.get('/api/magazine', async (req, res) => {
+  app.get('/api/magazines', async (req, res) => {
     const magazines = await todaysMagazines();
     res.send(JSON.stringify(magazines));
     return;
