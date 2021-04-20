@@ -45,7 +45,7 @@ exports.todaysMagazines = void 0;
 var time_1 = require("./scraper-utils/time");
 /*
 楽天マガジン要チェック雑誌
- 芸能系
+芸能系
 頻度多
 ・週刊プレイボーイ 月
 ・月刊エンタメ 毎月30日

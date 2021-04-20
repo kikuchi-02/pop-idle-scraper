@@ -94,7 +94,7 @@ var isDayOff = function (date, holidaies) {
     return false;
 };
 var publishDates = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var holydaies, today, accdate, targetDate;
+    var holydaies, today, targetDate, accdate;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, getHolydaies()];
@@ -104,8 +104,8 @@ var publishDates = function () { return __awaiter(void 0, void 0, void 0, functi
                 if (isDayOff(today, holydaies)) {
                     return [2 /*return*/, []];
                 }
-                accdate = [];
                 targetDate = new Date();
+                accdate = [new Date(targetDate.getTime())];
                 targetDate.setDate(targetDate.getDate() - 1);
                 while (isDayOff(targetDate, holydaies) && accdate.length < 5) {
                     // clone

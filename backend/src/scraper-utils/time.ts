@@ -57,8 +57,8 @@ export const publishDates = async (): Promise<Date[]> => {
     return [];
   }
 
-  const accdate = [];
   const targetDate = new Date();
+  const accdate = [new Date(targetDate.getTime())];
   targetDate.setDate(targetDate.getDate() - 1);
   while (isDayOff(targetDate, holydaies) && accdate.length < 5) {
     // clone

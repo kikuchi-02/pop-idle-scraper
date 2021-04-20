@@ -2,7 +2,7 @@ import { publishDates } from './scraper-utils/time';
 import { Magazine } from './typing';
 /*
 楽天マガジン要チェック雑誌
- 芸能系
+芸能系
 頻度多
 ・週刊プレイボーイ 月
 ・月刊エンタメ 毎月30日
@@ -136,5 +136,4 @@ export const todaysMagazines = async (): Promise<Magazine[]> => {
       acc.push(...curr);
       return acc;
     }, []);
-
 };
