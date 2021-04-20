@@ -27,46 +27,46 @@ export class MemberComponent implements OnInit, OnDestroy {
   private unsubscriber$: Subject<void> = new Subject<void>();
 
   constructor(private utilService: UtilService) {
-    this.utilService
-      .getMembers('nogizaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((members) => {
-        this.nogizakaMembers = members;
-      });
-    this.utilService
-      .getMembers('sakurazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((members) => {
-        this.sakurazakaMembers = members;
-      });
-
-    this.utilService
-      .getMembers('hinatazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((members) => {
-        this.hinatazakaMembers = members;
-      });
-
     // this.utilService
-    //   .getMemberTable('nogizaka')
+    //   .getMembers('nogizaka')
     //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((tables) => {
-    //     this.nogizakaTables = tables;
+    //   .subscribe((members) => {
+    //     this.nogizakaMembers = members;
+    //   });
+    // this.utilService
+    //   .getMembers('sakurazaka')
+    //   .pipe(takeUntil(this.unsubscriber$))
+    //   .subscribe((members) => {
+    //     this.sakurazakaMembers = members;
     //   });
 
     // this.utilService
-    //   .getMemberTable('sakurazaka')
+    //   .getMembers('hinatazaka')
     //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((tables) => {
-    //     this.sakurazakaTables = tables;
+    //   .subscribe((members) => {
+    //     this.hinatazakaMembers = members;
     //   });
 
-    // this.utilService
-    //   .getMemberTable('hinatazaka')
-    //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((tables) => {
-    //     this.hinatazakaTables = tables;
-    //   });
+    this.utilService
+      .getMemberTable('nogizaka')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((tables) => {
+        this.nogizakaTables = tables;
+      });
+
+    this.utilService
+      .getMemberTable('sakurazaka')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((tables) => {
+        this.sakurazakaTables = tables;
+      });
+
+    this.utilService
+      .getMemberTable('hinatazaka')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((tables) => {
+        this.hinatazakaTables = tables;
+      });
   }
 
   ngOnInit(): void {}

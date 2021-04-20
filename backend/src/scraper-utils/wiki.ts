@@ -29,6 +29,24 @@ const parseTable = (membersTable: Element): string[][] => {
   return members;
 };
 
+const formatTable = (element: Element): Element => {
+  element.childNodes().forEach((node) => {
+    if (node.type() === 'element') {
+      if ((node as Element).name() === 'a') {
+        (node as Element).attr('target', '_blank');
+      }
+      const style = (node as Element).attr('style');
+      if (style && /display:none/.test(style.value())) {
+        node.remove();
+      }
+      if (node) {
+        node = formatTable(node as Element);
+      }
+    }
+  });
+  return element;
+};
+
 const extractMembers = (htmlString: string) => {
   const members: string[][] = [];
   const html = parseHtml(htmlString);
@@ -141,19 +159,29 @@ export const getMemberTable = async (idle: IdleKind): Promise<string[]> => {
     return Promise.reject(Error(`status ${homeResponse.status}`));
   }
 
+  const urlReplacer = (match: string, p: string) => {
+    return match.replace(p, baseUrl + p);
+  };
+
   const tables: string[] = [];
   const html = parseHtml(homeResponse.data);
-  const membersTable = html.get(
-    '//*[@id="mw-content-text"]/div[1]/table[2]/tbody'
-  );
+  const membersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[2]');
   if (membersTable?.type() === 'element') {
-    tables.push(membersTable.toString());
+    tables.push(
+      formatTable(membersTable as Element)
+        .toString()
+        .replace(/href="(.[^"]*)/g, urlReplacer)
+    );
   }
   const oldMembersTable = html.get(
-    '//*[@id="mw-content-text"]/div[1]/table[3]/tbody'
+    '//*[@id="mw-content-text"]/div[1]/table[3]'
   );
   if (oldMembersTable?.type() === 'element') {
-    tables.push(oldMembersTable.toString())
+    tables.push(
+      formatTable(oldMembersTable as Element)
+        .toString()
+        .replace(/href="(.[^"]*)/g, urlReplacer)
+    );
   }
   return tables;
-}
+};

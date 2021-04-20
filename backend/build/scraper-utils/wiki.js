@@ -68,6 +68,23 @@ var parseTable = function (membersTable) {
     });
     return members;
 };
+var formatTable = function (element) {
+    element.childNodes().forEach(function (node) {
+        if (node.type() === 'element') {
+            if (node.name() === 'a') {
+                node.attr('target', '_blank');
+            }
+            var style = node.attr('style');
+            if (style && /display:none/.test(style.value())) {
+                node.remove();
+            }
+            if (node) {
+                node = formatTable(node);
+            }
+        }
+    });
+    return element;
+};
 var extractMembers = function (htmlString) {
     var members = [];
     var html = libxmljs2_1.parseHtml(htmlString);
@@ -155,7 +172,7 @@ var getMembers = function (idle) { return __awaiter(void 0, void 0, void 0, func
 }); };
 exports.getMembers = getMembers;
 var getMemberTable = function (idle) { return __awaiter(void 0, void 0, void 0, function () {
-    var baseUrl, url, homeResponse, tables, html, membersTable, oldMembersTable;
+    var baseUrl, url, homeResponse, urlReplacer, tables, html, membersTable, oldMembersTable;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -167,15 +184,22 @@ var getMemberTable = function (idle) { return __awaiter(void 0, void 0, void 0, 
                 if (homeResponse.status !== 200) {
                     return [2 /*return*/, Promise.reject(Error("status " + homeResponse.status))];
                 }
+                urlReplacer = function (match, p) {
+                    return match.replace(p, baseUrl + p);
+                };
                 tables = [];
                 html = libxmljs2_1.parseHtml(homeResponse.data);
-                membersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[2]/tbody');
+                membersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[2]');
                 if ((membersTable === null || membersTable === void 0 ? void 0 : membersTable.type()) === 'element') {
-                    tables.push(membersTable.toString());
+                    tables.push(formatTable(membersTable)
+                        .toString()
+                        .replace(/href="(.[^"]*)/g, urlReplacer));
                 }
-                oldMembersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[3]/tbody');
+                oldMembersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[3]');
                 if ((oldMembersTable === null || oldMembersTable === void 0 ? void 0 : oldMembersTable.type()) === 'element') {
-                    tables.push(oldMembersTable.toString());
+                    tables.push(formatTable(oldMembersTable)
+                        .toString()
+                        .replace(/href="(.[^"]*)/g, urlReplacer));
                 }
                 return [2 /*return*/, tables];
         }
