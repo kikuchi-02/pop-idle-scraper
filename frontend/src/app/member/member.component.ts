@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleSwitchState, Member } from '../typing';
@@ -8,6 +8,7 @@ import { UtilService } from '../util.service';
   selector: 'app-member',
   templateUrl: './member.component.html',
   styleUrls: ['./member.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MemberComponent implements OnInit, OnDestroy {
   idleSwitchState: IdleSwitchState = {
@@ -26,7 +27,7 @@ export class MemberComponent implements OnInit, OnDestroy {
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
-  constructor(private utilService: UtilService) {
+  constructor(private utilService: UtilService, private cd: ChangeDetectorRef) {
     // this.utilService
     //   .getMembers('nogizaka')
     //   .pipe(takeUntil(this.unsubscriber$))
@@ -52,6 +53,7 @@ export class MemberComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((tables) => {
         this.nogizakaTables = tables;
+        this.cd.markForCheck();
       });
 
     this.utilService
@@ -59,6 +61,7 @@ export class MemberComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((tables) => {
         this.sakurazakaTables = tables;
+        this.cd.markForCheck();
       });
 
     this.utilService
@@ -66,6 +69,7 @@ export class MemberComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((tables) => {
         this.hinatazakaTables = tables;
+        this.cd.markForCheck();
       });
   }
 

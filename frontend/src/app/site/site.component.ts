@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Subject } from 'rxjs';
 
 import { Post, SiteName } from '../typing';
@@ -9,6 +9,7 @@ import { UtilService } from '../util.service';
   selector: 'app-site',
   templateUrl: './site.component.html',
   styleUrls: ['./site.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SiteComponent implements OnInit, OnDestroy {
   @Input() siteName: SiteName;
@@ -18,7 +19,7 @@ export class SiteComponent implements OnInit, OnDestroy {
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
-  constructor(private utilService: UtilService) {}
+  constructor(private utilService: UtilService, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.utilService
@@ -27,6 +28,7 @@ export class SiteComponent implements OnInit, OnDestroy {
       .subscribe((val) => {
         this.posts = val.posts;
         this.siteTitle = val.siteTitle;
+        this.cd.markForCheck();
       });
   }
 
