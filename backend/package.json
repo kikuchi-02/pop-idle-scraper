@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc -w",
-    "server": "env TZ=Asia/Tokyo nodemon build/server.js"
+    "server": "env TZ=Asia/Tokyo nodemon build/server.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

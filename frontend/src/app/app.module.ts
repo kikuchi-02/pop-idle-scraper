@@ -13,6 +13,7 @@ import { MemberComponent } from './member/member.component';
 import { IdleSwitcherComponent } from './idle-switcher/idle-switcher.component';
 import { MagazineComponent } from './magazine/magazine.component';
 import { UtilService } from './util.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,7 @@ import { UtilService } from './util.service';
     IdleSwitcherComponent,
     MagazineComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, BrowserAnimationsModule],
   providers: [UtilService],
   bootstrap: [AppComponent],
 })
