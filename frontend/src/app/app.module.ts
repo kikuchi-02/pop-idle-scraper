@@ -14,7 +14,8 @@ import { IdleSwitcherComponent } from './idle-switcher/idle-switcher.component';
 import { MagazineComponent } from './magazine/magazine.component';
 import { UtilService } from './util.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { ChatComponent } from './chat/chat.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
 @NgModule({
   declarations: [
     AppComponent,
@@ -25,8 +26,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MemberComponent,
     IdleSwitcherComponent,
     MagazineComponent,
+    ChatComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, BrowserAnimationsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    MatFormFieldModule,
+  ],
   providers: [UtilService],
   bootstrap: [AppComponent],
 })
