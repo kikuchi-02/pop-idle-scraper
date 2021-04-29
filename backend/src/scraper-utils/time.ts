@@ -57,7 +57,7 @@ export const publishDates = async (): Promise<Date[]> => {
     return [];
   }
 
-  const targetDate = new Date();
+  const targetDate = new Date(today.getTime());
   const accdate = [new Date(targetDate.getTime())];
   targetDate.setDate(targetDate.getDate() - 1);
   while (isDayOff(targetDate, holydaies) && accdate.length < 5) {

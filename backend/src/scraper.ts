@@ -11,7 +11,7 @@ import {
 } from './scraper-utils/sites';
 import Twitter from 'twitter-v2';
 import { formatDate, urlify } from './scraper-utils/utils';
-import { getMembers } from './scraper-utils/wiki';
+import { ENV_SETTINGS } from './conf';
 
 const switchSite = (
   site: SiteName
@@ -82,16 +82,15 @@ export const createPuppeteerCluster = async () => {
 };
 
 export const searchTweets = async (
-  settings: Settings,
   account: string
 ): Promise<ScrapedResult | undefined> => {
   let twitterClient;
   try {
     twitterClient = new Twitter({
-      bearer_token: settings.TWITTER_BEARER_TOKEN,
+      bearer_token: ENV_SETTINGS.TWITTER_BEARER_TOKEN,
     });
   } catch (e) {
-    console.error('error arround twitter keys', e);
+    console.error('error around twitter keys', e);
     return undefined;
   }
   const response = await twitterClient

@@ -42,6 +42,7 @@ export interface Settings {
   TWITTER_BEARER_TOKEN: string;
   TWITTER_ACCESS_TOKEN: string;
   TWITTER_ACCESS_TOKEN_SECRET: string;
+  LINE_CHANNEL_ACCESS_TOKEN: string;
 }
 
 export interface Tweet {

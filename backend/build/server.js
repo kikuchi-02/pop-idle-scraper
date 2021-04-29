@@ -1,23 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -59,20 +40,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var path_1 = require("path");
-var fs_1 = require("fs");
 var scraper_1 = require("./scraper");
 var typing_1 = require("./typing");
-var yaml = __importStar(require("js-yaml"));
 var cache_1 = require("./cache");
 var magazine_1 = require("./magazine");
 var wiki_1 = require("./scraper-utils/wiki");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var settings, app, cluster, port;
+    var app, cluster, port;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                settings = yaml.load(fs_1.readFileSync(path_1.join(process.cwd(), '..', 'envs.yaml'), 'utf-8'));
                 app = express_1.default();
                 return [4 /*yield*/, scraper_1.createPuppeteerCluster()];
             case 1:
@@ -88,7 +65,7 @@ var wiki_1 = require("./scraper-utils/wiki");
                     next();
                 });
                 app.get('/api/twitter', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var kind, account, cacher, cache, value, tommorow;
+                    var kind, account, cacher, cache, value, tomorrow;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -104,23 +81,23 @@ var wiki_1 = require("./scraper-utils/wiki");
                                     res.send(JSON.stringify(cache));
                                     return [2 /*return*/];
                                 }
-                                return [4 /*yield*/, scraper_1.searchTweets(settings, account)];
+                                return [4 /*yield*/, scraper_1.searchTweets(account)];
                             case 1:
                                 value = _a.sent();
                                 if (!value) {
                                     res.sendStatus(400).end();
                                     return [2 /*return*/];
                                 }
-                                tommorow = new Date();
-                                tommorow.setHours(tommorow.getHours() + 1);
-                                cacher.saveCache(value, tommorow);
+                                tomorrow = new Date();
+                                tomorrow.setHours(tomorrow.getHours() + 1);
+                                cacher.saveCache(value, tomorrow);
                                 res.send(JSON.stringify(value));
                                 return [2 /*return*/];
                         }
                     });
                 }); });
                 app.get('/api/site', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var query, cacher, cache, value, tommorow;
+                    var query, cacher, cache, value, tomorrow;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -142,9 +119,9 @@ var wiki_1 = require("./scraper-utils/wiki");
                                     res.sendStatus(400).end();
                                     return [2 /*return*/];
                                 }
-                                tommorow = new Date();
-                                tommorow.setDate(tommorow.getDate() + 1);
-                                cacher.saveCache(value, tommorow);
+                                tomorrow = new Date();
+                                tomorrow.setDate(tomorrow.getDate() + 1);
+                                cacher.saveCache(value, tomorrow);
                                 res.send(JSON.stringify(value));
                                 return [2 /*return*/];
                         }

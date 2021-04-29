@@ -104,7 +104,7 @@ var publishDates = function () { return __awaiter(void 0, void 0, void 0, functi
                 if (isDayOff(today, holydaies)) {
                     return [2 /*return*/, []];
                 }
-                targetDate = new Date();
+                targetDate = new Date(today.getTime());
                 accdate = [new Date(targetDate.getTime())];
                 targetDate.setDate(targetDate.getDate() - 1);
                 while (isDayOff(targetDate, holydaies) && accdate.length < 5) {

@@ -44,6 +44,7 @@ var puppeteer_cluster_1 = require("puppeteer-cluster");
 var sites_1 = require("./scraper-utils/sites");
 var twitter_v2_1 = __importDefault(require("twitter-v2"));
 var utils_1 = require("./scraper-utils/utils");
+var conf_1 = require("./conf");
 var switchSite = function (site) {
     switch (site) {
         case 'nogizaka-koshiki':
@@ -122,18 +123,18 @@ var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void
     });
 }); };
 exports.createPuppeteerCluster = createPuppeteerCluster;
-var searchTweets = function (settings, account) { return __awaiter(void 0, void 0, void 0, function () {
+var searchTweets = function (account) { return __awaiter(void 0, void 0, void 0, function () {
     var twitterClient, response, tweets;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 try {
                     twitterClient = new twitter_v2_1.default({
-                        bearer_token: settings.TWITTER_BEARER_TOKEN,
+                        bearer_token: conf_1.ENV_SETTINGS.TWITTER_BEARER_TOKEN,
                     });
                 }
                 catch (e) {
-                    console.error('error arround twitter keys', e);
+                    console.error('error around twitter keys', e);
                     return [2 /*return*/, undefined];
                 }
                 return [4 /*yield*/, twitterClient

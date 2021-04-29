@@ -1,6 +1,4 @@
 import express from 'express';
-import { join } from 'path';
-import { readFileSync } from 'fs';
 
 import {
   createPuppeteerCluster,
@@ -12,20 +10,14 @@ import {
   idleKinds,
   Member,
   ScrapedResult,
-  Settings,
   SiteName,
   siteNames,
 } from './typing';
-import * as yaml from 'js-yaml';
 import { Cacher } from './cache';
 import { todaysMagazines } from './magazine';
 import { getMembers, getMemberTable } from './scraper-utils/wiki';
 
 (async () => {
-  const settings = yaml.load(
-    readFileSync(join(process.cwd(), '..', 'envs.yaml'), 'utf-8')
-  ) as Settings;
-
   const app = express();
   const cluster = await createPuppeteerCluster();
 
@@ -54,14 +46,14 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
       res.send(JSON.stringify(cache));
       return;
     }
-    const value = await searchTweets(settings, account);
+    const value = await searchTweets(account);
     if (!value) {
       res.sendStatus(400).end();
       return;
     }
-    const tommorow = new Date();
-    tommorow.setHours(tommorow.getHours() + 1);
-    cacher.saveCache(value as ScrapedResult, tommorow);
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 1);
+    cacher.saveCache(value as ScrapedResult, tomorrow);
     res.send(JSON.stringify(value));
     return;
   });
@@ -84,9 +76,9 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
       res.sendStatus(400).end();
       return;
     }
-    const tommorow = new Date();
-    tommorow.setDate(tommorow.getDate() + 1);
-    cacher.saveCache(value as ScrapedResult, tommorow);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    cacher.saveCache(value as ScrapedResult, tomorrow);
     res.send(JSON.stringify(value));
     return;
   });
