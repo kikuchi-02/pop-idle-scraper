@@ -4,6 +4,8 @@ import { setLanguage } from './utils';
 
 const defaultLimit = 7;
 
+declare var document;
+
 export const nogizakaKoshiki = async (
   page: Page,
   limit = defaultLimit
@@ -14,7 +16,8 @@ export const nogizakaKoshiki = async (
   await page.goto(url, { waitUntil: 'networkidle2' });
 
   const posts = await page
-    .$$eval('#N0 > div.padding > ul > li', (elements) => {
+    .evaluate(() => {
+      const elements = document.querySelectorAll('#N0 > div.padding > ul > li');
       return elements.map((elm) => {
         const obj: Post = {};
         const title = elm.querySelector('.title')?.textContent;
@@ -131,29 +134,29 @@ export const sakurazakaKoshiki = async (
   await page.goto(url + newsPath, { waitUntil: 'networkidle2' });
 
   const posts = await page
-    .$$eval(
-      '#cate-news > main > div.col2-wrap.wid1200 > div.col-r > ul > li',
-      (elements) => {
-        return elements.map((elm) => {
-          const obj: Post = {};
-          const link = elm.querySelector('a')?.getAttribute('href');
-          if (link) {
-            obj.link = link.startsWith('/')
-              ? 'https://sakurazaka46.com' + link
-              : link;
-          }
-          const date = elm.querySelector('.date')?.textContent;
-          if (date) {
-            obj.date = new Date(date).getTime();
-          }
-          const title = elm.querySelector('.lead')?.textContent;
-          if (title) {
-            obj.title = title;
-          }
-          return obj;
-        });
-      }
-    )
+    .evaluate(() => {
+      const elements = document.querySelectorAll(
+        '#cate-news > main > div.col2-wrap.wid1200 > div.col-r > ul > li'
+      );
+      return elements.map((elm) => {
+        const obj: Post = {};
+        const link = elm.querySelector('a')?.getAttribute('href');
+        if (link) {
+          obj.link = link.startsWith('/')
+            ? 'https://sakurazaka46.com' + link
+            : link;
+        }
+        const date = elm.querySelector('.date')?.textContent;
+        if (date) {
+          obj.date = new Date(date).getTime();
+        }
+        const title = elm.querySelector('.lead')?.textContent;
+        if (title) {
+          obj.title = title;
+        }
+        return obj;
+      });
+    })
     .then((_posts) => _posts.slice(0, limit));
   const siteTitle = await page.title();
   return { siteTitle, posts };
@@ -167,7 +170,10 @@ export const sakurazakaBlog = async (
 
   await page.goto(url, { waitUntil: 'networkidle2' });
   const posts = await page
-    .$$eval('#cate-blog > main > div:nth-child(3) > ul > li', (elements) => {
+    .evaluate(() => {
+      const elements = document.querySelectorAll(
+        '#cate-blog > main > div:nth-child(3) > ul > li'
+      );
       return elements.map((elm) => {
         const post: Post = {};
         const title = elm.querySelector('.title')?.textContent;
@@ -221,38 +227,38 @@ export const hinatazakaKoshiki = async (
   await page.goto(url + newsPath, { waitUntil: 'networkidle2' });
 
   const posts = await page
-    .$$eval(
-      'body > div > main > section > div > div.l-contents > div.l-maincontents--news > ul > li',
-      (elements) => {
-        return elements.map((elm) => {
-          const obj: Post = {};
-          const link = elm.querySelector('a')?.getAttribute('href');
-          if (link) {
-            obj.link = link.startsWith('/')
-              ? 'https://www.hinatazaka46.com' + link
-              : link;
-          }
-          const date = elm.querySelector('.c-news__date')?.textContent;
-          if (date) {
-            obj.date = new Date(date).getTime();
-          }
+    .evaluate(() => {
+      const elements = document.querySelectorAll(
+        'body > div > main > section > div > div.l-contents > div.l-maincontents--news > ul > li'
+      );
+      return elements.map((elm) => {
+        const obj: Post = {};
+        const link = elm.querySelector('a')?.getAttribute('href');
+        if (link) {
+          obj.link = link.startsWith('/')
+            ? 'https://www.hinatazaka46.com' + link
+            : link;
+        }
+        const date = elm.querySelector('.c-news__date')?.textContent;
+        if (date) {
+          obj.date = new Date(date).getTime();
+        }
 
-          const title = (elm.querySelector('.c-news__text')?.textContent || '')
-            .split('\n')
-            .reduce((p, c) => {
-              c = c.trim();
-              if (c) {
-                p += c;
-              }
-              return p;
-            }, '');
-          if (title) {
-            obj.title = title;
-          }
-          return obj;
-        });
-      }
-    )
+        const title = (elm.querySelector('.c-news__text')?.textContent || '')
+          .split('\n')
+          .reduce((p, c) => {
+            c = c.trim();
+            if (c) {
+              p += c;
+            }
+            return p;
+          }, '');
+        if (title) {
+          obj.title = title;
+        }
+        return obj;
+      });
+    })
     .then((_posts) => _posts.slice(0, limit));
   const siteTitle = await page.title();
 
@@ -267,30 +273,31 @@ export const hinatazakaBlog = async (
   await page.goto(url, { waitUntil: 'networkidle2' });
 
   const posts = await page
-    .$$eval(
-      'body > div > main > section > div > div.l-contents > div.l-maincontents.l-maincontents--100 > div.p-blog-top__contents > ul > li',
-      (elements) => {
-        return elements.map((elm) => {
-          const post: Post = {};
-          const title = elm
-            .querySelector('.c-blog-top__title')
-            ?.textContent?.trim();
-          const author = elm
-            .querySelector('.c-blog-top__name')
-            ?.textContent?.trim();
-          post.title = `${title}(${author})`;
-          const link = elm.querySelector('a')?.getAttribute('href');
-          if (link) {
-            post.link = `https://www.hinatazaka46.com${link}`;
-          }
-          const date = elm.querySelector('.c-blog-top__date')?.textContent;
-          if (date) {
-            post.date = new Date(date).getTime();
-          }
-          return post;
-        });
-      }
-    )
+    .evaluate(() => {
+      const elements = document.querySelectorAll(
+        'body > div > main > section > div > div.l-contents > div.l-maincontents.l-maincontents--100 > div.p-blog-top__contents > ul > li'
+      );
+
+      return elements.map((elm) => {
+        const post: Post = {};
+        const title = elm
+          .querySelector('.c-blog-top__title')
+          ?.textContent?.trim();
+        const author = elm
+          .querySelector('.c-blog-top__name')
+          ?.textContent?.trim();
+        post.title = `${title}(${author})`;
+        const link = elm.querySelector('a')?.getAttribute('href');
+        if (link) {
+          post.link = `https://www.hinatazaka46.com${link}`;
+        }
+        const date = elm.querySelector('.c-blog-top__date')?.textContent;
+        if (date) {
+          post.date = new Date(date).getTime();
+        }
+        return post;
+      });
+    })
     .then((_posts) => _posts.slice(0, limit));
   const siteTitle = await page.title();
   return { siteTitle, posts };

@@ -1,4 +1,4 @@
-import express from 'express';
+import express = require('express');
 
 import {
   createPuppeteerCluster,
@@ -17,9 +17,16 @@ import { Cacher } from './cache';
 import { todaysMagazines } from './magazine';
 import { getMembers, getMemberTable } from './scraper-utils/wiki';
 
+import * as jwt from 'express-jwt';
+import { createConnection, getConnection } from 'typeorm';
+import { User } from './entity/User';
+import { dbConfig } from './conf';
+
 (async () => {
   const app = express();
   const cluster = await createPuppeteerCluster();
+
+  const connection = await createConnection(dbConfig);
 
   app.get('*', (req, res, next) => {
     console.log('request', req.path);
@@ -32,6 +39,20 @@ import { getMembers, getMemberTable } from './scraper-utils/wiki';
     // }
     next();
   });
+
+  app.get('/api/login', async (req, res) => {
+    console.log('hello');
+    const result = await connection
+      // .manager.find(User)
+      .createQueryBuilder()
+      .select('count(*)')
+      .from(User, 'user')
+      .getRawOne();
+    console.log('result', result)
+    res.send('hello');
+  });
+
+  // app.get('/protected', jwt({}));
 
   app.get('/api/twitter', async (req, res) => {
     const kind = req.query.kind;

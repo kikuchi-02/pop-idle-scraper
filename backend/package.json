@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "server": "env TZ=Asia/Tokyo nodemon build/server.js",
+    "server": "env TZ=Asia/Tokyo node build/server.js",
     "ws-server": "env TZ=Asia/Tokyo nodemon build/ws-server.js",
     "build": "tsc -w",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
@@ -15,24 +15,27 @@
   "license": "ISC",
   "dependencies": {
     "@line/bot-sdk": "^7.3.0",
+    "@types/puppeteer": "^5.4.3",
     "axios": "^0.21.1",
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
     "js-yaml": "^4.1.0",
     "libxmljs2": "^0.26.7",
     "pg": "^8.6.0",
-    "puppeteer": "^8.0.0",
+    "puppeteer": "^9.0.0",
     "puppeteer-cluster": "^0.22.0",
     "reflect-metadata": "^0.1.10",
     "twitter-v2": "^1.1.0",
     "typeorm": "0.2.32",
-    "ws": "^7.4.5",
-    "mysql": "^2.14.1"
+    "ws": "^7.4.5"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.11",
+    "@types/express-jwt": "^6.0.1",
     "@types/js-yaml": "^4.0.0",
-    "@types/node": "^8.0.29",
-    "@types/puppeteer": "^5.4.3",
+    "@types/node": "^12.20.11",
     "@types/ws": "^7.4.1",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
@@ -41,7 +44,7 @@
     "eslint-config-prettier": "^8.2.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
-    "typescript": "3.3.3333",
-    "ts-node": "3.3.0"
+    "ts-node": "3.3.0",
+    "typescript": "^4.1.5"
   }
 }
