@@ -5,6 +5,7 @@ export interface Post {
   summary?: string;
   // generated
   hDate?: string;
+  isTweet?: boolean;
 }
 
 export interface ScrapedResult {

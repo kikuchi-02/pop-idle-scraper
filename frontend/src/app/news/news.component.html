@@ -1,0 +1,22 @@
+<app-idle-switcher
+  [value]="idleSwitchState"
+  (changed)="switchIdle()"
+></app-idle-switcher>
+<ng-container *ngFor="let post of posts">
+  <div *ngIf="!!post" class="post-container">
+    <div class="post-date">{{ post.hDate }}</div>
+    <div class="post-body">
+      <div class="post-body-title">
+        <ng-container *ngIf="!post.isTweet; else tweetTmp">
+          <a [href]="post.link" target="_blank">{{ post.title }}</a>
+        </ng-container>
+        <ng-template #tweetTmp>
+          <div [innerHtml]="post.title"></div>
+        </ng-template>
+      </div>
+      <div *ngIf="!!post.summary" class="post-body-summary">
+        {{ post.summary }}
+      </div>
+    </div>
+  </div>
+</ng-container>
