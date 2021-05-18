@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { IdleSwitchState } from '../typing';
 
 @Component({
   selector: 'app-home',
@@ -8,11 +7,7 @@ import { IdleSwitchState } from '../typing';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
-  idleSwitchState: IdleSwitchState = {
-    nogizakaCheck: true,
-    sakurazakaCheck: true,
-    hinatazakaCheck: true,
-  };
+
 
   constructor() {}
 
