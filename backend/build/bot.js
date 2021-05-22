@@ -35,8 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var bot_sdk_1 = require("@line/bot-sdk");
+var axios_1 = __importDefault(require("axios"));
 var conf_1 = require("./conf");
 var magazine_1 = require("./magazine");
 var magazineText = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -61,7 +65,7 @@ var magazineText = function () { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
-(function () { return __awaiter(void 0, void 0, void 0, function () {
+var lineBroadCastMagazine = function () { return __awaiter(void 0, void 0, void 0, function () {
     var clientConfig, client, text, _a, message;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -79,8 +83,44 @@ var magazineText = function () { return __awaiter(void 0, void 0, void 0, functi
                     type: 'text',
                     text: text,
                 };
-                client.broadcast(message);
-                return [2 /*return*/];
+                return [2 /*return*/, client.broadcast(message)];
+        }
+    });
+}); };
+var discordMagazine = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var magazines;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, magazineText()];
+            case 1:
+                magazines = _a.sent();
+                return [2 /*return*/, axios_1.default.post(conf_1.ENV_SETTINGS.DISCORD_URL, {
+                        content: magazines,
+                    })];
+        }
+    });
+}); };
+(function () { return __awaiter(void 0, void 0, void 0, function () {
+    var app, _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                app = process.env.APPLICATION_TYPE;
+                _a = app;
+                switch (_a) {
+                    case 'line': return [3 /*break*/, 1];
+                    case 'discord': return [3 /*break*/, 3];
+                }
+                return [3 /*break*/, 3];
+            case 1: return [4 /*yield*/, lineBroadCastMagazine()];
+            case 2:
+                _b.sent();
+                return [3 /*break*/, 5];
+            case 3: return [4 /*yield*/, discordMagazine()];
+            case 4:
+                _b.sent();
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); })();
