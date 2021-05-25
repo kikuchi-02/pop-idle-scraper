@@ -1,10 +1,21 @@
 <h1>member search</h1>
 
 <div class="google_search-input">
-  <input [(ngModel)]="keywords" />
-  <button (click)="submit()" [disabled]="!keywords.trim()">
-    open in new tab
-  </button>
+  <form class="example-form">
+    <input
+      type="text"
+      matInput
+      placeholder="Search for a street"
+      [formControl]="control"
+      [matAutocomplete]="auto"
+    />
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let candidate of candidates" [value]="candidate">
+        {{ candidate }}
+      </mat-option>
+    </mat-autocomplete>
+    <button (click)="submit()">open in new tab</button>
+  </form>
 </div>
 
 <div class="google_search-accordions">

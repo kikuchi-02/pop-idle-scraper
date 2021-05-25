@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GoogleSearchService } from './google-search.service';
 import { MemberLinks } from '../typing';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-google-search',
@@ -17,7 +18,9 @@ import { MemberLinks } from '../typing';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoogleSearchComponent implements OnInit, OnDestroy {
-  keywords = '';
+  control = new FormControl();
+
+  candidates: string[];
 
   nogizakaLinks: MemberLinks[];
   sakurazakaLinks: MemberLinks[];
@@ -27,10 +30,29 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
 
   private unsubscriber$ = new Subject<void>();
 
+  private localStorageKey = 'google-search-candidates';
+  get keywords(): string[] {
+    const keys = localStorage.getItem(this.localStorageKey);
+    return keys ? JSON.parse(keys) : [];
+  }
+  set keywords(words: string[]) {
+    const keys = [...new Set([...words, ...this.keywords])];
+    localStorage.setItem(this.localStorageKey, JSON.stringify(keys));
+  }
+
   constructor(
     private googleSearchService: GoogleSearchService,
     private cd: ChangeDetectorRef
   ) {
+    this.candidates = this.keywords;
+    this.control.valueChanges
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((value) => {
+        this.candidates = this.keywords.filter((key) =>
+          key.includes(value.trim())
+        );
+      });
+
     this.googleSearchService
       .getLinks('nogizaka')
       .pipe(takeUntil(this.unsubscriber$))
@@ -73,7 +95,13 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
-    const words = this.keywords.trim().split(/\s+/).join('+');
+    const input = this.control.value.trim();
+    if (!input) {
+      return;
+    }
+    this.keywords = [input];
+
+    const words = input.split(/\s+/).join('+');
     let query = `https://www.google.com/search?q=${words}`;
 
     if (
