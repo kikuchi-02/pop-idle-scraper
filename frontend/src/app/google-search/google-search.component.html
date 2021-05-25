@@ -1,0 +1,77 @@
+<h1>member search</h1>
+
+<div class="google_search-input">
+  <input [(ngModel)]="keywords" />
+  <button (click)="submit()" [disabled]="!keywords.trim()">
+    open in new tab
+  </button>
+</div>
+
+<div class="google_search-accordions">
+  <div class="google_search-accordions-accordion">
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title> checked </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-container *ngFor="let blog of targetLinks">
+          <div>
+            {{ blog.name }}
+          </div>
+        </ng-container>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+  <div class="google_search-accordions-accordion">
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title> 乃木坂46 </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <ng-container *ngFor="let blog of nogizakaLinks">
+          <div>
+            <input type="checkbox" (change)="changed($event, blog)" />
+            {{ blog.name }}
+          </div>
+        </ng-container>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class="google_search-accordions-accordion">
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title> 櫻坂46 </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <ng-container *ngFor="let blog of sakurazakaLinks">
+            <div>
+              <input type="checkbox" (change)="changed($event, blog)" />
+              {{ blog.name }}
+            </div>
+          </ng-container>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class="google_search-accordions-accordion">
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title> 日向坂46 </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <ng-container *ngFor="let blog of hinatazakaLinks">
+            <div>
+              <input type="checkbox" (change)="changed($event, blog)" />
+              {{ blog.name }}
+            </div>
+          </ng-container>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>
