@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
-import { BlogLink } from '../typing';
+import { BlogLink, IdleKind } from '../../typing';
 
-export const nogizakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
+const nogizakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
   const url = 'https://blog.nogizaka46.com';
   await page.goto(url, { waitUntil: 'networkidle0' });
   const baseUrl = await page.evaluate(() => {
@@ -15,6 +15,9 @@ export const nogizakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
         .evaluate((elm) => {
           const name = elm.querySelector('.kanji').textContent;
           let link = elm.querySelector('a').getAttribute('href');
+          if (link.startsWith('./')) {
+            link = link.slice(1);
+          }
           return { name, link };
         }, member)
         .then((m) => {
@@ -25,7 +28,7 @@ export const nogizakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
   );
 };
 
-export const sakurazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
+const sakurazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
   const url = 'https://sakurazaka46.com/s/s46/diary/blog/list';
   await page.goto(url, { waitUntil: 'networkidle0' });
   const baseUrl = await page.evaluate(() => {
@@ -40,6 +43,9 @@ export const sakurazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
       return page.evaluate((elm) => {
         const name = elm.textContent;
         let link = elm.getAttribute('value');
+        if (link.startsWith('./')) {
+          link = link.slice(1);
+        }
         return { name, link };
       }, member);
     })
@@ -54,7 +60,7 @@ export const sakurazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
   });
 };
 
-export const hinatazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
+const hinatazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
   const url = 'https://www.hinatazaka46.com/s/official/diary/member/list';
   await page.goto(url, { waitUntil: 'networkidle0' });
   const baseUrl = await page.evaluate(() => {
@@ -69,6 +75,9 @@ export const hinatazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
       return page.evaluate((elm) => {
         const name = elm.textContent;
         let link = elm.getAttribute('value');
+        if (link.startsWith('./')) {
+          link = link.slice(1);
+        }
         return { name, link };
       }, member);
     })
@@ -81,4 +90,20 @@ export const hinatazakaBlogLinks = async (page: Page): Promise<BlogLink[]> => {
         return m;
       });
   });
+};
+
+export const getBlogLinks = (
+  page: Page,
+  kind: IdleKind
+): Promise<BlogLink[]> => {
+  switch (kind) {
+    case 'nogizaka':
+      return nogizakaBlogLinks(page);
+    case 'hinatazaka':
+      return hinatazakaBlogLinks(page);
+    case 'sakurazaka':
+      return sakurazakaBlogLinks(page);
+    default:
+      throw Error('not valid kind');
+  }
 };
