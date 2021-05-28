@@ -1,4 +1,4 @@
-.twitter {
+.post {
   &-container {
     margin-top: 15px;
     display: inline-flex;
@@ -15,7 +15,11 @@
 
     &-title {
       font-weight: bold;
-      font-size: 12px;
+      font-size: 14px;
+    }
+
+    &-summary {
+      font-size: 11px;
     }
   }
 }

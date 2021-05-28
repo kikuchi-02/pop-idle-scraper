@@ -1,14 +1,23 @@
 <ng-container *ngIf="!!value">
   <label
-    ><input type="checkbox" [(ngModel)]="value.nogizakaCheck" />乃木坂46</label
-  >
-  <label
-    ><input type="checkbox" [(ngModel)]="value.sakurazakaCheck" />櫻坂46</label
+    ><input
+      type="checkbox"
+      [ngModel]="value.nogizakaCheck"
+      (ngModelChange)="checkboxChange($event, 'nogizaka')"
+    />乃木坂46</label
   >
   <label
     ><input
       type="checkbox"
-      [(ngModel)]="value.hinatazakaCheck"
+      [ngModel]="value.sakurazakaCheck"
+      (ngModelChange)="checkboxChange($event, 'sakurazaka')"
+    />櫻坂46</label
+  >
+  <label
+    ><input
+      type="checkbox"
+      [ngModel]="value.hinatazakaCheck"
+      (ngModelChange)="checkboxChange($event, 'hinatazaka')"
     />日向坂46</label
   >
 </ng-container>

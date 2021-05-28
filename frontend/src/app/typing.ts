@@ -5,6 +5,7 @@ export interface Post {
   summary?: string;
   // generated
   hDate?: string;
+  isTweet?: boolean;
 }
 
 export interface ScrapedResult {
@@ -66,4 +67,14 @@ export interface Member {
 export interface Magazine {
   title: string;
   link: string;
+}
+
+export interface BlogLink {
+  name: string;
+  link: string;
+}
+
+export interface MemberLinks {
+  name: string;
+  links: string[];
 }

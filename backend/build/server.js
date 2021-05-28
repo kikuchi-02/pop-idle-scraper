@@ -39,12 +39,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var scraper_1 = require("./scraper");
 var typing_1 = require("./typing");
 var cache_1 = require("./cache");
-var magazine_1 = require("./magazine");
+var scraper_1 = require("./scraper");
+var express_1 = __importDefault(require("express"));
+var blog_1 = require("./scraper-utils/links/blog");
 var wiki_1 = require("./scraper-utils/wiki");
+var wiki_2 = require("./scraper-utils/links/wiki");
+var puppeteer_1 = require("puppeteer");
+var magazine_1 = require("./magazine");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var app, cluster, port;
     return __generator(this, function (_a) {
@@ -127,37 +130,6 @@ var wiki_1 = require("./scraper-utils/wiki");
                         }
                     });
                 }); });
-                app.get('/api/members', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var kind, cacher, cache, members, tommorow;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                kind = req.query.kind;
-                                if (!typing_1.idleKinds.includes(kind)) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                cacher = new cache_1.Cacher(kind + "-members");
-                                cache = cacher.getCache();
-                                if (cache) {
-                                    res.send(JSON.stringify(cache));
-                                    return [2 /*return*/];
-                                }
-                                return [4 /*yield*/, wiki_1.getMembers(kind)];
-                            case 1:
-                                members = _a.sent();
-                                if (!members) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                tommorow = new Date();
-                                tommorow.setDate(tommorow.getDate() + 10);
-                                cacher.saveCache(members, tommorow);
-                                res.send(JSON.stringify(members));
-                                return [2 /*return*/];
-                        }
-                    });
-                }); });
                 app.get('/api/member-table', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
                     var kind, cacher, cache, tables, tommorow;
                     return __generator(this, function (_a) {
@@ -197,6 +169,89 @@ var wiki_1 = require("./scraper-utils/wiki");
                             case 1:
                                 magazines = _a.sent();
                                 res.send(JSON.stringify(magazines));
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                app.get('/api/member-links', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+                    var kind, tommorow, cache;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                kind = req.query.kind;
+                                if (!typing_1.idleKinds.includes(kind)) {
+                                    res.sendStatus(400).end();
+                                    return [2 /*return*/];
+                                }
+                                tommorow = new Date();
+                                tommorow.setMonth(tommorow.getMonth() + 6);
+                                return [4 /*yield*/, cache_1.getCache(kind + "-member-link", tommorow, function () { return __awaiter(void 0, void 0, void 0, function () {
+                                        var linksForSites, links;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0: return [4 /*yield*/, Promise.all([
+                                                        (function () { return __awaiter(void 0, void 0, void 0, function () {
+                                                            var browser, page, blogLinks;
+                                                            return __generator(this, function (_a) {
+                                                                switch (_a.label) {
+                                                                    case 0: return [4 /*yield*/, puppeteer_1.launch()];
+                                                                    case 1:
+                                                                        browser = _a.sent();
+                                                                        return [4 /*yield*/, browser.newPage()];
+                                                                    case 2:
+                                                                        page = _a.sent();
+                                                                        return [4 /*yield*/, blog_1.getBlogLinks(page, kind)];
+                                                                    case 3:
+                                                                        blogLinks = _a.sent();
+                                                                        browser.close();
+                                                                        return [2 /*return*/, blogLinks];
+                                                                }
+                                                            });
+                                                        }); })(),
+                                                        wiki_2.getWikiLinks(kind),
+                                                    ])];
+                                                case 1:
+                                                    linksForSites = _a.sent();
+                                                    links = {};
+                                                    linksForSites.forEach(function (site) {
+                                                        site
+                                                            .filter(function (nameLink) { return !!nameLink.link; })
+                                                            .forEach(function (nameLink) {
+                                                            var targetName = nameLink.name.replace(/\s+/, '');
+                                                            if (!links[targetName]) {
+                                                                links[targetName] = [nameLink.link];
+                                                            }
+                                                            else {
+                                                                links[targetName].push(nameLink.link);
+                                                            }
+                                                        });
+                                                    });
+                                                    return [2 /*return*/, Object.entries(links)
+                                                            .map(function (_a) {
+                                                            var name = _a[0], links = _a[1];
+                                                            return { name: name, links: links };
+                                                        })
+                                                            .sort(function (a, b) {
+                                                            if (a < b) {
+                                                                return -1;
+                                                            }
+                                                            else if (a > b) {
+                                                                return 1;
+                                                            }
+                                                            else {
+                                                                return 0;
+                                                            }
+                                                        })];
+                                            }
+                                        });
+                                    }); })];
+                            case 1:
+                                cache = _a.sent();
+                                if (cache) {
+                                    res.send(JSON.stringify(cache));
+                                    return [2 /*return*/];
+                                }
+                                res.sendStatus(500);
                                 return [2 /*return*/];
                         }
                     });

@@ -7,21 +7,9 @@
   <div class="chat">
     <a routerLink="/chat">chat</a>
   </div>
+  <div>
+    <a routerLink="/google-search">google search</a>
+  </div>
 
-  <app-idle-switcher [value]="idleSwitchState"></app-idle-switcher>
-  <ng-container *ngIf="idleSwitchState.nogizakaCheck">
-    <app-site [siteName]="'nogizaka-koshiki'"></app-site>
-    <app-site [siteName]="'nogizaka-blog'"></app-site>
-    <app-twitter [idle]="'nogizaka'"></app-twitter>
-  </ng-container>
-  <ng-container *ngIf="idleSwitchState.sakurazakaCheck">
-    <app-site [siteName]="'sakurazaka-koshiki'"></app-site>
-    <app-site [siteName]="'sakurazaka-blog'"></app-site>
-    <app-twitter [idle]="'sakurazaka'"></app-twitter>
-  </ng-container>
-  <ng-container *ngIf="idleSwitchState.hinatazakaCheck">
-    <app-site [siteName]="'hinatazaka-koshiki'"></app-site>
-    <app-site [siteName]="'hinatazaka-blog'"></app-site>
-    <app-twitter [idle]="'hinatazaka'"></app-twitter>
-  </ng-container>
+  <app-news></app-news>
 </main>

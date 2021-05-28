@@ -39,93 +39,85 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberTable = exports.extractExternalLinks = void 0;
+exports.getWikiLinks = exports.switchWikiLink = void 0;
 var axios_1 = __importDefault(require("axios"));
 var libxmljs2_1 = require("libxmljs2");
-var wiki_1 = require("./links/wiki");
-var formatTable = function (element) {
-    element.childNodes().forEach(function (node) {
-        if (node.type() === 'element') {
-            if (node.name() === 'a') {
-                node.attr('target', '_blank');
-            }
-            var style = node.attr('style');
-            if (style && /display:none/.test(style.value())) {
-                node.remove();
-            }
-            if (node) {
-                node = formatTable(node);
-            }
-        }
-    });
-    return element;
-};
-var extractExternalLinks = function (htmlString) {
-    var links = [];
-    var html = libxmljs2_1.parseHtml(htmlString);
-    var h2 = html.get('//*[@id="外部リンク"]');
-    // console.log(h2?.parent().toString())
-    // console.log((h2?.parent() as Element).nextSibling()?.toString())
-    var sibling = (h2 === null || h2 === void 0 ? void 0 : h2.parent()).nextSibling();
-    while (true) {
-        if (sibling.name() === 'ul') {
+var switchWikiLink = function (idle) {
+    switch (idle) {
+        case 'nogizaka':
+            return '/wiki/%E4%B9%83%E6%9C%A8%E5%9D%8246#%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC';
             break;
-        }
-        sibling = (sibling === null || sibling === void 0 ? void 0 : sibling.nextSibling()) || null;
+        case 'sakurazaka':
+            return '/wiki/%E6%AB%BB%E5%9D%8246';
+            break;
+        case 'hinatazaka':
+            return '/wiki/%E6%97%A5%E5%90%91%E5%9D%8246';
+            break;
+        default:
+            throw Error("not impletemnetd type " + idle);
     }
-    if (sibling) {
-        sibling
-            .childNodes()
-            .filter(function (li) { return li.type() === 'element'; })
-            .forEach(function (li) {
-            li
-                .childNodes()
-                .filter(function (a) { return a.name() === 'a'; })
-                .slice(0, 1)
-                .forEach(function (a) {
-                var _a;
-                var href = (_a = a.attr('href')) === null || _a === void 0 ? void 0 : _a.value();
-                if (href) {
-                    links.push(href);
-                }
-            });
-        });
-    }
-    return links;
 };
-exports.extractExternalLinks = extractExternalLinks;
-var getMemberTable = function (idle) { return __awaiter(void 0, void 0, void 0, function () {
-    var baseUrl, url, homeResponse, urlReplacer, tables, html, membersTable, oldMembersTable;
+exports.switchWikiLink = switchWikiLink;
+var parseTable = function (membersTable) {
+    var members = [];
+    membersTable
+        .childNodes()
+        .filter(function (node) { return node.name() === 'tr'; })
+        .forEach(function (node) {
+        node
+            .childNodes()
+            .filter(function (td) { return td.name() === 'td'; })
+            .slice(0, 1)
+            .forEach(function (td) {
+            var _a;
+            var anchor = td.child(0);
+            var name = td.text();
+            if (anchor.name() === 'a') {
+                var href = (_a = anchor.attr('href')) === null || _a === void 0 ? void 0 : _a.value();
+                if (href) {
+                    members.push([name, href]);
+                    return;
+                }
+            }
+            members.push([name]);
+        });
+    });
+    return members;
+};
+var extractMembers = function (htmlString) {
+    var members = [];
+    var html = libxmljs2_1.parseHtml(htmlString);
+    var membersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[2]/tbody');
+    if ((membersTable === null || membersTable === void 0 ? void 0 : membersTable.type()) === 'element') {
+        members.push.apply(members, parseTable(membersTable));
+    }
+    var oldMembersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[3]/tbody');
+    if ((oldMembersTable === null || oldMembersTable === void 0 ? void 0 : oldMembersTable.type()) === 'element') {
+        members.push.apply(members, parseTable(oldMembersTable));
+    }
+    return members;
+};
+var getWikiLinks = function (idle) { return __awaiter(void 0, void 0, void 0, function () {
+    var baseUrl, url, homeResponse, members;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 baseUrl = 'https://ja.wikipedia.org';
-                url = baseUrl + wiki_1.switchWikiLink(idle);
+                url = baseUrl + exports.switchWikiLink(idle);
                 return [4 /*yield*/, axios_1.default.get(url)];
             case 1:
                 homeResponse = _a.sent();
                 if (homeResponse.status !== 200) {
                     return [2 /*return*/, Promise.reject(Error("status " + homeResponse.status))];
                 }
-                urlReplacer = function (match, p) {
-                    return match.replace(p, baseUrl + p);
-                };
-                tables = [];
-                html = libxmljs2_1.parseHtml(homeResponse.data);
-                membersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[2]');
-                if ((membersTable === null || membersTable === void 0 ? void 0 : membersTable.type()) === 'element') {
-                    tables.push(formatTable(membersTable)
-                        .toString()
-                        .replace(/href="(.[^"]*)/g, urlReplacer));
-                }
-                oldMembersTable = html.get('//*[@id="mw-content-text"]/div[1]/table[3]');
-                if ((oldMembersTable === null || oldMembersTable === void 0 ? void 0 : oldMembersTable.type()) === 'element') {
-                    tables.push(formatTable(oldMembersTable)
-                        .toString()
-                        .replace(/href="(.[^"]*)/g, urlReplacer));
-                }
-                return [2 /*return*/, tables];
+                members = extractMembers(homeResponse.data).map(function (member) {
+                    return {
+                        name: member[0],
+                        link: member[1] ? baseUrl + member[1] : undefined,
+                    };
+                });
+                return [2 /*return*/, members];
         }
     });
 }); };
-exports.getMemberTable = getMemberTable;
+exports.getWikiLinks = getWikiLinks;
