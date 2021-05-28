@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleSwitchState, Post } from '../typing';
@@ -8,6 +8,7 @@ import { NewsService } from './news.service';
   selector: 'app-news',
   templateUrl: './news.component.html',
   styleUrls: ['./news.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewsComponent implements OnInit, OnDestroy {
   posts: Post[];

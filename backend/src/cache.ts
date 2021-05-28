@@ -44,3 +44,24 @@ export class Cacher<T> {
     });
   }
 }
+
+export async function getCache<T>(
+  key: string,
+  expiration: Date,
+  func: (...args: any[]) => Promise<T>,
+  forceNew = false
+): Promise<T | undefined> {
+  const cacher = new Cacher<T>(key);
+  if (!forceNew) {
+    const cache = cacher.getCache();
+    if (cache) {
+      return cache;
+    }
+  }
+  const value = await func();
+  if (!value) {
+    return undefined;
+  }
+  cacher.saveCache(value, expiration);
+  return value;
+}
