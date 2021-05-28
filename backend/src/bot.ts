@@ -1,4 +1,5 @@
 import { Client, ClientConfig, Message } from '@line/bot-sdk';
+import axios from 'axios';
 import { ENV_SETTINGS } from './conf';
 import { todaysMagazines } from './magazine';
 
@@ -20,7 +21,7 @@ const magazineText = async (): Promise<string> => {
   return text;
 };
 
-(async () => {
+const lineBroadCastMagazine = async () => {
   const clientConfig: ClientConfig = {
     channelAccessToken: ENV_SETTINGS.LINE_CHANNEL_ACCESS_TOKEN,
   };
@@ -33,5 +34,26 @@ const magazineText = async (): Promise<string> => {
     type: 'text',
     text: text,
   };
-  client.broadcast(message);
+  return client.broadcast(message);
+};
+
+const discordMagazine = async () => {
+  const magazines = await magazineText();
+
+  return axios.post(ENV_SETTINGS.DISCORD_URL, {
+    content: magazines,
+  });
+};
+
+(async () => {
+  const app = process.env.APPLICATION_TYPE;
+  switch (app) {
+    case 'line':
+      await lineBroadCastMagazine();
+      break;
+    case 'discord':
+    default:
+      await discordMagazine();
+      break;
+  }
 })();
