@@ -1,2 +1,8 @@
-<app-magazine></app-magazine>
-<app-news></app-news>
+<div class="home-magazines">
+  <ng-container *ngFor="let date of dates">
+    <app-magazine [date]="date"></app-magazine>
+  </ng-container>
+</div>
+<div class="app-news">
+  <app-news></app-news>
+</div>

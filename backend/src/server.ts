@@ -7,6 +7,7 @@ import {
   SiteName,
   idleKinds,
   siteNames,
+  Magazine,
 } from './typing';
 import { Cacher, getCache } from './cache';
 import {
@@ -114,7 +115,13 @@ import { todaysMagazines } from './magazine';
   });
 
   app.get('/api/magazines', async (req, res) => {
-    const magazines = await todaysMagazines();
+    const date = req.query.date;
+    let magazines: Magazine[][];
+    if (date) {
+      magazines = await todaysMagazines(date as string);
+    } else {
+      magazines = await todaysMagazines();
+    }
     res.send(JSON.stringify(magazines));
     return;
   });

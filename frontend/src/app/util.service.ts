@@ -10,7 +10,6 @@ import { IdleKind, Magazine, Member } from './typing';
 export class UtilService {
   constructor(private http: HttpClient) {}
 
-
   getMemberTable(idle: IdleKind): Observable<string[]> {
     return this.http.get<Member[]>(`api/member-table?kind=${idle}`).pipe(
       catchError((err) => {
@@ -20,8 +19,8 @@ export class UtilService {
     );
   }
 
-  getMagazines(): Observable<Magazine[][]> {
-    return this.http.get<Magazine[][]>('api/magazines').pipe(
+  getMagazines(date: string): Observable<Magazine[][]> {
+    return this.http.get<Magazine[][]>(`api/magazines?date=${date}`).pipe(
       catchError((err) => {
         console.error(err);
         return of(undefined);

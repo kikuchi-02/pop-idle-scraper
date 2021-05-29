@@ -161,12 +161,21 @@ var magazine_1 = require("./magazine");
                     });
                 }); });
                 app.get('/api/magazines', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var magazines;
+                    var date, magazines;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
-                            case 0: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                            case 0:
+                                date = req.query.date;
+                                if (!date) return [3 /*break*/, 2];
+                                return [4 /*yield*/, magazine_1.todaysMagazines(date)];
                             case 1:
                                 magazines = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                            case 3:
+                                magazines = _a.sent();
+                                _a.label = 4;
+                            case 4:
                                 res.send(JSON.stringify(magazines));
                                 return [2 /*return*/];
                         }

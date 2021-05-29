@@ -167,11 +167,16 @@ var magazines4 = function (date) {
     }
     return magazines;
 };
-var todaysMagazines = function () { return __awaiter(void 0, void 0, void 0, function () {
+/**
+ *
+ * @param date like 2020-01-01
+ * @returns
+ */
+var todaysMagazines = function (date) { return __awaiter(void 0, void 0, void 0, function () {
     var dates;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, time_1.publishDates()];
+            case 0: return [4 /*yield*/, time_1.publishDates(date)];
             case 1:
                 dates = _a.sent();
                 return [2 /*return*/, [magazines1, magazines2, magazines3, magazines4].map(function (func) {
