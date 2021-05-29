@@ -95,8 +95,9 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
-    const input = this.control.value.trim();
+    const input = this.control.value?.trim();
     if (!input) {
+      alert('enter keyword');
       return;
     }
     this.keywords = [input];
@@ -118,5 +119,9 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     }
 
     window.open(query, '_blank');
+  }
+
+  clearAll(): void {
+    window.location.reload();
   }
 }

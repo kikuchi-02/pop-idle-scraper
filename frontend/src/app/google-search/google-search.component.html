@@ -1,11 +1,11 @@
-<h1>member search</h1>
 
 <div class="google_search-input">
-  <form class="example-form">
+  <form>
     <input
+      class="google_search-input_input"
       type="text"
       matInput
-      placeholder="Search for a street"
+      placeholder="Search Idle info"
       [formControl]="control"
       [matAutocomplete]="auto"
     />
@@ -15,6 +15,7 @@
       </mat-option>
     </mat-autocomplete>
     <button (click)="submit()">open in new tab</button>
+    <button (click)="clearAll()">clear all</button>
   </form>
 </div>
 

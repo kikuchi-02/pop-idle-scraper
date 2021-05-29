@@ -143,8 +143,13 @@ const magazines4 = (date: Date): string[][] => {
   return magazines;
 };
 
-export const todaysMagazines = async (): Promise<Magazine[][]> => {
-  const dates = await publishDates();
+/**
+ *
+ * @param date like 2020-01-01
+ * @returns
+ */
+export const todaysMagazines = async (date?: string): Promise<Magazine[][]> => {
+  const dates = await publishDates(date);
 
   return [magazines1, magazines2, magazines3, magazines4].map((func) => {
     return dates.reduce((acc: Magazine[], curr: Date) => {

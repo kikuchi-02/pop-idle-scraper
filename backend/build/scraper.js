@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchTweets = exports.createPuppeteerCluster = exports.scrape = exports.switchTwitterAccount = void 0;
+exports.searchTweets = exports.createPuppeteerCluster = exports.scrape2 = exports.scrape = exports.switchTwitterAccount = void 0;
 var puppeteer_cluster_1 = require("puppeteer-cluster");
 var sites_1 = require("./scraper-utils/sites");
 var twitter_v2_1 = __importDefault(require("twitter-v2"));
@@ -59,6 +59,24 @@ var switchSite = function (site) {
             return sites_1.hinatazakaKoshiki;
         case 'hinatazaka-blog':
             return sites_1.hinatazakaBlog;
+        default:
+            throw Error("not implemented type " + site);
+    }
+};
+var switchSite2 = function (site) {
+    switch (site) {
+        case 'nogizaka-koshiki':
+            return sites_1.nogizakaKoshiki2;
+        case 'nogizaka-blog':
+            return sites_1.nogizakaBlog2;
+        case 'sakurazaka-koshiki':
+            return sites_1.sakurazakaKoshiki2;
+        case 'sakurazaka-blog':
+            return sites_1.sakurazakaBlog2;
+        case 'hinatazaka-koshiki':
+            return sites_1.hinatazakaKoshiki2;
+        case 'hinatazaka-blog':
+            return sites_1.hinatazakaBlog2;
         default:
             throw Error("not implemented type " + site);
     }
@@ -102,6 +120,29 @@ var scrape = function (_a) {
     });
 };
 exports.scrape = scrape;
+var scrape2 = function (site) { return __awaiter(void 0, void 0, void 0, function () {
+    var scrapedResult;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.log("start " + site);
+                return [4 /*yield*/, switchSite2(site)().catch(function (err) {
+                        console.error("got error while scraping: " + site + ", " + err);
+                        return { siteTitle: site };
+                    })];
+            case 1:
+                scrapedResult = _a.sent();
+                (scrapedResult.posts || []).forEach(function (post) {
+                    if (post.date) {
+                        post.hDate = utils_1.formatDate(post.date);
+                    }
+                });
+                console.log("end " + site);
+                return [2 /*return*/, scrapedResult];
+        }
+    });
+}); };
+exports.scrape2 = scrape2;
 var createPuppeteerCluster = function () { return __awaiter(void 0, void 0, void 0, function () {
     var cluster;
     return __generator(this, function (_a) {

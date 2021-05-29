@@ -93,18 +93,29 @@ var isDayOff = function (date, holidaies) {
     }
     return false;
 };
-var publishDates = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var holydaies, today, targetDate, accdate;
+/**
+ *
+ * @param date like 2020-01-01
+ * @returns
+ */
+var publishDates = function (date) { return __awaiter(void 0, void 0, void 0, function () {
+    var holydaies, target, targetDate, accdate;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, getHolydaies()];
             case 1:
                 holydaies = _a.sent();
-                today = new Date();
-                if (isDayOff(today, holydaies)) {
+                if (date) {
+                    target = new Date(date);
+                }
+                else {
+                    // today
+                    target = new Date();
+                }
+                if (isDayOff(target, holydaies)) {
                     return [2 /*return*/, []];
                 }
-                targetDate = new Date(today.getTime());
+                targetDate = new Date(target.getTime());
                 accdate = [new Date(targetDate.getTime())];
                 targetDate.setDate(targetDate.getDate() - 1);
                 while (isDayOff(targetDate, holydaies) && accdate.length < 5) {

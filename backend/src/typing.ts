@@ -69,7 +69,7 @@ export interface Magazine {
 
 export interface BlogLink {
   name: string;
-  link: string;
+  link?: string;
 }
 
 export interface MemberLinks {

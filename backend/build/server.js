@@ -46,7 +46,6 @@ var express_1 = __importDefault(require("express"));
 var blog_1 = require("./scraper-utils/links/blog");
 var wiki_1 = require("./scraper-utils/wiki");
 var wiki_2 = require("./scraper-utils/links/wiki");
-var puppeteer_1 = require("puppeteer");
 var magazine_1 = require("./magazine");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var app, cluster, port;
@@ -115,7 +114,7 @@ var magazine_1 = require("./magazine");
                                     res.send(JSON.stringify(cache));
                                     return [2 /*return*/];
                                 }
-                                return [4 /*yield*/, cluster.execute({ site: query })];
+                                return [4 /*yield*/, scraper_1.scrape2(query)];
                             case 1:
                                 value = _a.sent();
                                 if (!value) {
@@ -162,12 +161,21 @@ var magazine_1 = require("./magazine");
                     });
                 }); });
                 app.get('/api/magazines', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var magazines;
+                    var date, magazines;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
-                            case 0: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                            case 0:
+                                date = req.query.date;
+                                if (!date) return [3 /*break*/, 2];
+                                return [4 /*yield*/, magazine_1.todaysMagazines(date)];
                             case 1:
                                 magazines = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                            case 3:
+                                magazines = _a.sent();
+                                _a.label = 4;
+                            case 4:
                                 res.send(JSON.stringify(magazines));
                                 return [2 /*return*/];
                         }
@@ -190,24 +198,7 @@ var magazine_1 = require("./magazine");
                                         return __generator(this, function (_a) {
                                             switch (_a.label) {
                                                 case 0: return [4 /*yield*/, Promise.all([
-                                                        (function () { return __awaiter(void 0, void 0, void 0, function () {
-                                                            var browser, page, blogLinks;
-                                                            return __generator(this, function (_a) {
-                                                                switch (_a.label) {
-                                                                    case 0: return [4 /*yield*/, puppeteer_1.launch()];
-                                                                    case 1:
-                                                                        browser = _a.sent();
-                                                                        return [4 /*yield*/, browser.newPage()];
-                                                                    case 2:
-                                                                        page = _a.sent();
-                                                                        return [4 /*yield*/, blog_1.getBlogLinks(page, kind)];
-                                                                    case 3:
-                                                                        blogLinks = _a.sent();
-                                                                        browser.close();
-                                                                        return [2 /*return*/, blogLinks];
-                                                                }
-                                                            });
-                                                        }); })(),
+                                                        blog_1.getBlogLinks2(kind),
                                                         wiki_2.getWikiLinks(kind),
                                                     ])];
                                                 case 1:
@@ -217,12 +208,13 @@ var magazine_1 = require("./magazine");
                                                         site
                                                             .filter(function (nameLink) { return !!nameLink.link; })
                                                             .forEach(function (nameLink) {
+                                                            var link = nameLink.link;
                                                             var targetName = nameLink.name.replace(/\s+/, '');
                                                             if (!links[targetName]) {
-                                                                links[targetName] = [nameLink.link];
+                                                                links[targetName] = [link];
                                                             }
                                                             else {
-                                                                links[targetName].push(nameLink.link);
+                                                                links[targetName].push(link);
                                                             }
                                                         });
                                                     });

@@ -49,15 +49,26 @@ const isDayOff = (date: Date, holidaies: Date[]) => {
   return false;
 };
 
-export const publishDates = async (): Promise<Date[]> => {
+/**
+ *
+ * @param date like 2020-01-01
+ * @returns
+ */
+export const publishDates = async (date?: string): Promise<Date[]> => {
   const holydaies = await getHolydaies();
 
-  const today = new Date();
-  if (isDayOff(today, holydaies)) {
+  let target: Date;
+  if (date) {
+    target = new Date(date);
+  } else {
+    // today
+    target = new Date();
+  }
+  if (isDayOff(target, holydaies)) {
     return [];
   }
 
-  const targetDate = new Date(today.getTime());
+  const targetDate = new Date(target.getTime());
   const accdate = [new Date(targetDate.getTime())];
   targetDate.setDate(targetDate.getDate() - 1);
   while (isDayOff(targetDate, holydaies) && accdate.length < 5) {

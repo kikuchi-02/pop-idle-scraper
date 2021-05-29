@@ -35,10 +35,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hinatazakaBlog = exports.hinatazakaKoshiki = exports.sakurazakaBlog = exports.sakurazakaKoshiki = exports.nogizakaBlog = exports.nogizakaKoshiki = void 0;
+exports.hinatazakaBlog2 = exports.hinatazakaBlog = exports.hinatazakaKoshiki2 = exports.hinatazakaKoshiki = exports.sakurazakaBlog2 = exports.sakurazakaBlog = exports.sakurazakaKoshiki2 = exports.sakurazakaKoshiki = exports.nogizakaBlog2 = exports.nogizakaBlog = exports.nogizakaKoshiki2 = exports.nogizakaKoshiki = void 0;
+var axios_1 = __importDefault(require("axios"));
+var libxmljs2_1 = require("libxmljs2");
 var utils_1 = require("./utils");
 var defaultLimit = 7;
+var getBaseUrl = function (url) {
+    var u = new URL(url);
+    return u.protocol + '//' + u.host;
+};
 var nogizakaKoshiki = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -97,6 +106,43 @@ var nogizakaKoshiki = function (page, limit) {
     });
 };
 exports.nogizakaKoshiki = nogizakaKoshiki;
+var nogizakaKoshiki2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://www.nogizaka46.com/news';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('//*[@id="N0"]/div[4]/ul');
+                    posts = news
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'li'; })
+                        .map(function (node) {
+                        var _a;
+                        // const _name = (node as Element).get('*/span[@class="kanji"]')
+                        var _title = node.get('*/span[@class="title"]');
+                        var title = _title.text();
+                        var _summary = node.get('*/span[@class="summary"]');
+                        var summary = _summary.text().replace(/\s/g, '');
+                        var _date = node.get('span[@class="date"]');
+                        var date = new Date(_date.text()).getTime();
+                        var _link = node.get('*//a');
+                        var link = (_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value();
+                        return { title: title, summary: summary, date: date, link: link };
+                    });
+                    return [2 /*return*/, { siteTitle: title, posts: posts.slice(0, limit) }];
+            }
+        });
+    });
+};
+exports.nogizakaKoshiki2 = nogizakaKoshiki2;
 var nogizakaBlog = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -168,6 +214,60 @@ var nogizakaBlog = function (page, limit) {
     });
 };
 exports.nogizakaBlog = nogizakaBlog;
+var nogizakaBlog2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, heads, bodies, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://blog.nogizaka46.com/';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('//*[@id="sheet"]');
+                    heads = news
+                        .childNodes()
+                        .filter(function (node) {
+                        var _a;
+                        return node.type() === 'element' &&
+                            ((_a = node.attr('class')) === null || _a === void 0 ? void 0 : _a.value()) === 'clearfix';
+                    });
+                    bodies = news
+                        .childNodes()
+                        .filter(function (node) {
+                        var _a;
+                        return node.type() === 'element' &&
+                            ((_a = node.attr('class')) === null || _a === void 0 ? void 0 : _a.value()) === 'entrybody';
+                    });
+                    posts = heads
+                        .map(function (head, index) {
+                        var _a;
+                        var _yearmonth = head.get('*/span[@class="yearmonth"]');
+                        var yearmonth = _yearmonth.text().split('/');
+                        var _day = head.get('*/*/span[@class="dd1"]');
+                        var day = _day.text();
+                        var date = new Date(parseInt(yearmonth[0], 10), parseInt(yearmonth[1], 10) - 1, parseInt(day, 10)).getTime();
+                        var _author = head.get('*/span[@class="author"]');
+                        var author = _author.text();
+                        var _title = head.get('*/span[@class="entrytitle"]');
+                        var title = _title.text() + ("(" + author + ")");
+                        var _link = head.get('*/*/a');
+                        var link = (_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value();
+                        var _summary = bodies[index].text();
+                        var summary = _summary.replace(/\s/g, '').slice(0, 200);
+                        return { title: title, summary: summary, date: date, link: link };
+                    })
+                        .slice(0, limit);
+                    return [2 /*return*/, { siteTitle: title, posts: posts }];
+            }
+        });
+    });
+};
+exports.nogizakaBlog2 = nogizakaBlog2;
 var sakurazakaKoshiki = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -224,6 +324,40 @@ var sakurazakaKoshiki = function (page, limit) {
     });
 };
 exports.sakurazakaKoshiki = sakurazakaKoshiki;
+var sakurazakaKoshiki2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://sakurazaka46.com/s/s46/news/list';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('//*[@id="cate-news"]/main/div[4]/div[1]/ul');
+                    posts = news
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'li'; })
+                        .map(function (node) {
+                        var _a;
+                        var _title = node.get('*/p[@class="lead"]');
+                        var title = _title.text();
+                        var _date = node.get('*//p[@class="date wf-a"]');
+                        var date = new Date(_date.text()).getTime();
+                        var _link = node.get('a');
+                        var link = getBaseUrl(url) + ((_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value());
+                        return { title: title, date: date, link: link };
+                    });
+                    return [2 /*return*/, { siteTitle: title, posts: posts.slice(0, limit) }];
+            }
+        });
+    });
+};
+exports.sakurazakaKoshiki2 = sakurazakaKoshiki2;
 var sakurazakaBlog = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -279,6 +413,45 @@ var sakurazakaBlog = function (page, limit) {
     });
 };
 exports.sakurazakaBlog = sakurazakaBlog;
+var sakurazakaBlog2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://sakurazaka46.com/s/s46/diary/blog/list';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('//*[@id="cate-blog"]/main/div[3]/ul');
+                    posts = news
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'li'; })
+                        .map(function (node) {
+                        var _a;
+                        var _author = node.get('*//p[@class="name"]');
+                        var author = _author.text();
+                        var _title = node.get('*//h3[@class="title"]');
+                        var title = _title.text().replace(/\s/g, '') + ("(" + author + ")");
+                        var _summary = node.get('*//p[@class="lead"]');
+                        var summary = _summary.text().replace(/\s/g, '');
+                        var _date = node.get('*//p[@class="date wf-a"]');
+                        var date = new Date(_date.text()).getTime();
+                        var _link = node.get('a');
+                        var link = getBaseUrl(url) + ((_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value());
+                        return { title: title, date: date, link: link, summary: summary };
+                    })
+                        .slice(0, limit);
+                    return [2 /*return*/, { siteTitle: title, posts: posts }];
+            }
+        });
+    });
+};
+exports.sakurazakaBlog2 = sakurazakaBlog2;
 var hinatazakaKoshiki = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -343,6 +516,40 @@ var hinatazakaKoshiki = function (page, limit) {
     });
 };
 exports.hinatazakaKoshiki = hinatazakaKoshiki;
+var hinatazakaKoshiki2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://www.hinatazaka46.com/s/official/news/list';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('/html/body/div/main/section/div/div[3]/div[2]/ul');
+                    posts = news
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'li'; })
+                        .map(function (node) {
+                        var _a;
+                        var _title = node.get('*/p[@class="c-news__text"]');
+                        var title = _title.text().replace(/\s/g, '');
+                        var _date = node.get('*//time[@class="c-news__date"]');
+                        var date = new Date(_date.text()).getTime();
+                        var _link = node.get('a');
+                        var link = getBaseUrl(url) + ((_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value());
+                        return { title: title, date: date, link: link };
+                    });
+                    return [2 /*return*/, { siteTitle: title, posts: posts.slice(0, limit) }];
+            }
+        });
+    });
+};
+exports.hinatazakaKoshiki2 = hinatazakaKoshiki2;
 var hinatazakaBlog = function (page, limit) {
     if (limit === void 0) { limit = defaultLimit; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -387,3 +594,42 @@ var hinatazakaBlog = function (page, limit) {
     });
 };
 exports.hinatazakaBlog = hinatazakaBlog;
+var hinatazakaBlog2 = function (limit) {
+    if (limit === void 0) { limit = defaultLimit; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var url, response, htmlString, html, title, news, posts;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = 'https://www.hinatazaka46.com/s/official/diary/member';
+                    return [4 /*yield*/, axios_1.default.get(url)];
+                case 1:
+                    response = _a.sent();
+                    htmlString = response.data;
+                    html = libxmljs2_1.parseHtml(htmlString);
+                    title = html.get('*//title').text();
+                    news = html.get('/html/body/div/main/section/div/div[3]/div[1]/div[2]/ul');
+                    posts = news
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'li'; })
+                        .map(function (node) {
+                        var _a;
+                        var _author = node.get('*//div[@class="c-blog-top__name"]');
+                        var author = _author.text();
+                        var _title = node.get('*//p[@class="c-blog-top__title"]');
+                        var title = (_title.text() + ("(" + author + ")")).replace(/\s/g, '');
+                        // const _summary = (node as Element).get('*//p[@class="lead"]');
+                        // const summary = (_summary as Element).text().replace(/\s/g, '');
+                        var _date = node.get('*//time[@class="c-blog-top__date"]');
+                        var date = new Date(_date.text()).getTime();
+                        var _link = node.get('a');
+                        var link = getBaseUrl(url) + ((_a = _link.attr('href')) === null || _a === void 0 ? void 0 : _a.value());
+                        return { title: title, date: date, link: link };
+                    })
+                        .slice(0, limit);
+                    return [2 /*return*/, { siteTitle: title, posts: posts }];
+            }
+        });
+    });
+};
+exports.hinatazakaBlog2 = hinatazakaBlog2;
