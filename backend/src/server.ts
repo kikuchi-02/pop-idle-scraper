@@ -16,7 +16,7 @@ import {
 } from './scraper';
 
 import express from 'express';
-import { getBlogLinks } from './scraper-utils/links/blog';
+import { getBlogLinks, getBlogLinks2 } from './scraper-utils/links/blog';
 import { getMemberTable } from './scraper-utils/wiki';
 import { getWikiLinks } from './scraper-utils/links/wiki';
 import { launch } from 'puppeteer';
@@ -131,13 +131,7 @@ import { todaysMagazines } from './magazine';
       tommorow,
       async () => {
         const linksForSites = await Promise.all([
-          (async () => {
-            const browser = await launch();
-            const page = await browser.newPage();
-            const blogLinks = await getBlogLinks(page, kind as IdleKind);
-            browser.close();
-            return blogLinks;
-          })(),
+          getBlogLinks2(kind as IdleKind),
           getWikiLinks(kind as IdleKind),
         ]);
         const links: { [key: string]: string[] } = {};
@@ -145,11 +139,12 @@ import { todaysMagazines } from './magazine';
           site
             .filter((nameLink) => !!nameLink.link)
             .forEach((nameLink) => {
+              const link = nameLink.link as string;
               const targetName = nameLink.name.replace(/\s+/, '');
               if (!links[targetName]) {
-                links[targetName] = [nameLink.link];
+                links[targetName] = [link];
               } else {
-                links[targetName].push(nameLink.link);
+                links[targetName].push(link);
               }
             });
         });
@@ -166,7 +161,7 @@ import { todaysMagazines } from './magazine';
               return 0;
             }
           });
-      },
+      }
     );
     if (cache) {
       res.send(JSON.stringify(cache));

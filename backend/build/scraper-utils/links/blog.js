@@ -35,8 +35,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBlogLinks = void 0;
+exports.getBlogLinks2 = exports.getBlogLinks = void 0;
+var axios_1 = __importDefault(require("axios"));
+var libxmljs2_1 = require("libxmljs2");
+var getBaseUrl = function (url) {
+    var u = new URL(url);
+    return u.protocol + '//' + u.host;
+};
 var nogizakaBlogLinks = function (page) { return __awaiter(void 0, void 0, void 0, function () {
     var url, baseUrl, members;
     return __generator(this, function (_a) {
@@ -71,6 +80,35 @@ var nogizakaBlogLinks = function (page) { return __awaiter(void 0, void 0, void 
                                 })];
                         });
                     }); }))];
+        }
+    });
+}); };
+var nogizakaBlogLinks2 = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var url, response, htmlString, html, members;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = 'https://blog.nogizaka46.com';
+                return [4 /*yield*/, axios_1.default.get(url)];
+            case 1:
+                response = _a.sent();
+                htmlString = response.data;
+                html = libxmljs2_1.parseHtml(htmlString);
+                members = html.get('//*[@id="sidemember"]/div[@class="clearfix"]');
+                return [2 /*return*/, members
+                        .childNodes()
+                        .filter(function (node) { return node.type() === 'element' && node.name() === 'div'; })
+                        .map(function (node) {
+                        var _a;
+                        var _name = node.get('*/span[@class="kanji"]');
+                        var name = _name.text();
+                        var anchor = node.get('a');
+                        var link = (_a = anchor.attr('href')) === null || _a === void 0 ? void 0 : _a.value();
+                        if (link === null || link === void 0 ? void 0 : link.startsWith('./')) {
+                            link = url + link.slice(1);
+                        }
+                        return { name: name, link: link };
+                    })];
         }
     });
 }); };
@@ -110,6 +148,39 @@ var sakurazakaBlogLinks = function (page) { return __awaiter(void 0, void 0, voi
                             m.link = baseUrl + m.link;
                             return m;
                         });
+                    })];
+        }
+    });
+}); };
+var sakurazakaBlogLinks2 = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var url, response, htmlString, html, members;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = 'https://sakurazaka46.com/s/s46/diary/blog/list';
+                return [4 /*yield*/, axios_1.default.get(url)];
+            case 1:
+                response = _a.sent();
+                htmlString = response.data;
+                html = libxmljs2_1.parseHtml(htmlString);
+                members = html.get('//select');
+                return [2 /*return*/, members
+                        .childNodes()
+                        .filter(function (node) {
+                        var _a;
+                        return node.type() === 'element' &&
+                            node.name() === 'option' &&
+                            ((_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value());
+                    })
+                        .map(function (node) {
+                        var _a;
+                        var name = node.text();
+                        name = name.slice(0, name.indexOf('('));
+                        var link = (_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value();
+                        if (link === null || link === void 0 ? void 0 : link.startsWith('/')) {
+                            link = getBaseUrl(url) + link.slice(1);
+                        }
+                        return { name: name, link: link };
                     })];
         }
     });
@@ -154,6 +225,39 @@ var hinatazakaBlogLinks = function (page) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
+var hinatazakaBlogLinks2 = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var url, response, htmlString, html, members;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = 'https://www.hinatazaka46.com/s/official/diary/member/list';
+                return [4 /*yield*/, axios_1.default.get(url)];
+            case 1:
+                response = _a.sent();
+                htmlString = response.data;
+                html = libxmljs2_1.parseHtml(htmlString);
+                members = html.get('//select');
+                return [2 /*return*/, members
+                        .childNodes()
+                        .filter(function (node) {
+                        var _a;
+                        return node.type() === 'element' &&
+                            node.name() === 'option' &&
+                            ((_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value());
+                    })
+                        .map(function (node) {
+                        var _a;
+                        var name = node.text();
+                        name = name.slice(0, name.indexOf('('));
+                        var link = (_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value();
+                        if (link === null || link === void 0 ? void 0 : link.startsWith('/')) {
+                            link = getBaseUrl(url) + link.slice(1);
+                        }
+                        return { name: name, link: link };
+                    })];
+        }
+    });
+}); };
 var getBlogLinks = function (page, kind) {
     switch (kind) {
         case 'nogizaka':
@@ -167,3 +271,16 @@ var getBlogLinks = function (page, kind) {
     }
 };
 exports.getBlogLinks = getBlogLinks;
+var getBlogLinks2 = function (kind) {
+    switch (kind) {
+        case 'nogizaka':
+            return nogizakaBlogLinks2();
+        case 'hinatazaka':
+            return hinatazakaBlogLinks2();
+        case 'sakurazaka':
+            return sakurazakaBlogLinks2();
+        default:
+            throw Error('not valid kind');
+    }
+};
+exports.getBlogLinks2 = getBlogLinks2;
