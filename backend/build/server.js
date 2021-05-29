@@ -114,7 +114,7 @@ var magazine_1 = require("./magazine");
                                     res.send(JSON.stringify(cache));
                                     return [2 /*return*/];
                                 }
-                                return [4 /*yield*/, cluster.execute({ site: query })];
+                                return [4 /*yield*/, scraper_1.scrape2(query)];
                             case 1:
                                 value = _a.sent();
                                 if (!value) {

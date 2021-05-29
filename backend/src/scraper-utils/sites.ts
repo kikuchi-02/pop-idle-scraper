@@ -1,8 +1,15 @@
+import axios from 'axios';
+import { parseHtml, Element } from 'libxmljs2';
 import { Page } from 'puppeteer';
 import { Post, ScrapedResult } from '../typing';
 import { setLanguage } from './utils';
 
 const defaultLimit = 7;
+
+const getBaseUrl = (url: string) => {
+  const u = new URL(url);
+  return u.protocol + '//' + u.host;
+};
 
 export const nogizakaKoshiki = async (
   page: Page,
@@ -49,6 +56,40 @@ export const nogizakaKoshiki = async (
 
   const siteTitle = await page.title();
   return { siteTitle, posts };
+};
+
+export const nogizakaKoshiki2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://www.nogizaka46.com/news';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get('//*[@id="N0"]/div[4]/ul');
+
+  const posts = (news as Element)
+    .childNodes()
+    .filter(
+      (node) => node.type() === 'element' && (node as Element).name() === 'li'
+    )
+    .map((node) => {
+      // const _name = (node as Element).get('*/span[@class="kanji"]')
+      const _title = (node as Element).get('*/span[@class="title"]');
+      const title = (_title as Element).text();
+
+      const _summary = (node as Element).get('*/span[@class="summary"]');
+      const summary = (_summary as Element).text().replace(/\s/g, '');
+
+      const _date = (node as Element).get('span[@class="date"]');
+      const date = new Date((_date as Element).text()).getTime();
+
+      const _link = (node as Element).get('*//a');
+      const link = (_link as Element).attr('href')?.value();
+
+      return { title, summary, date, link };
+    });
+  return { siteTitle: title, posts: posts.slice(0, limit) };
 };
 
 export const nogizakaBlog = async (
@@ -113,6 +154,62 @@ export const nogizakaBlog = async (
   return { siteTitle, posts };
 };
 
+export const nogizakaBlog2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://blog.nogizaka46.com/';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get('//*[@id="sheet"]');
+
+  const heads = (news as Element)
+    .childNodes()
+    .filter(
+      (node) =>
+        node.type() === 'element' &&
+        (node as Element).attr('class')?.value() === 'clearfix'
+    );
+  const bodies = (news as Element)
+    .childNodes()
+    .filter(
+      (node) =>
+        node.type() === 'element' &&
+        (node as Element).attr('class')?.value() === 'entrybody'
+    );
+
+  const posts = heads
+    .map((head, index) => {
+      const _yearmonth = (head as Element).get('*/span[@class="yearmonth"]');
+      const yearmonth = (_yearmonth as Element).text().split('/');
+      const _day = (head as Element).get('*/*/span[@class="dd1"]');
+      const day = (_day as Element).text();
+      const date = new Date(
+        parseInt(yearmonth[0], 10),
+        parseInt(yearmonth[1], 10) - 1,
+        parseInt(day, 10)
+      ).getTime();
+
+      const _author = (head as Element).get('*/span[@class="author"]');
+      const author = (_author as Element).text();
+
+      const _title = (head as Element).get('*/span[@class="entrytitle"]');
+      const title = (_title as Element).text() + `(${author})`;
+
+      const _link = (head as Element).get('*/*/a');
+      const link = (_link as Element).attr('href')?.value();
+
+      const _summary = (bodies[index] as Element).text();
+      const summary = _summary.replace(/\s/g, '').slice(0, 200);
+      return { title, summary, date, link };
+    })
+    .slice(0, limit);
+
+  return { siteTitle: title, posts };
+};
+
 export const sakurazakaKoshiki = async (
   page: Page,
   limit = defaultLimit
@@ -159,6 +256,36 @@ export const sakurazakaKoshiki = async (
   return { siteTitle, posts };
 };
 
+export const sakurazakaKoshiki2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://sakurazaka46.com/s/s46/news/list';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get('//*[@id="cate-news"]/main/div[4]/div[1]/ul');
+
+  const posts = (news as Element)
+    .childNodes()
+    .filter(
+      (node) => node.type() === 'element' && (node as Element).name() === 'li'
+    )
+    .map((node) => {
+      const _title = (node as Element).get('*/p[@class="lead"]');
+      const title = (_title as Element).text();
+
+      const _date = (node as Element).get('*//p[@class="date wf-a"]');
+      const date = new Date((_date as Element).text()).getTime();
+
+      const _link = (node as Element).get('a');
+      const link = getBaseUrl(url) + (_link as Element).attr('href')?.value();
+
+      return { title, date, link };
+    });
+  return { siteTitle: title, posts: posts.slice(0, limit) };
+};
+
 export const sakurazakaBlog = async (
   page: Page,
   limit = defaultLimit
@@ -200,6 +327,46 @@ export const sakurazakaBlog = async (
     .then((_posts) => _posts.slice(0, limit));
   const siteTitle = await page.title();
   return { siteTitle, posts };
+};
+
+export const sakurazakaBlog2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://sakurazaka46.com/s/s46/diary/blog/list';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get('//*[@id="cate-blog"]/main/div[3]/ul');
+
+  const posts = (news as Element)
+    .childNodes()
+    .filter(
+      (node) => node.type() === 'element' && (node as Element).name() === 'li'
+    )
+    .map((node) => {
+      const _author = (node as Element).get('*//p[@class="name"]');
+      const author = (_author as Element).text();
+
+      const _title = (node as Element).get('*//h3[@class="title"]');
+      const title =
+        (_title as Element).text().replace(/\s/g, '') + `(${author})`;
+
+      const _summary = (node as Element).get('*//p[@class="lead"]');
+      const summary = (_summary as Element).text().replace(/\s/g, '');
+
+      const _date = (node as Element).get('*//p[@class="date wf-a"]');
+      const date = new Date((_date as Element).text()).getTime();
+
+      const _link = (node as Element).get('a');
+      const link = getBaseUrl(url) + (_link as Element).attr('href')?.value();
+
+      return { title, date, link, summary };
+    })
+    .slice(0, limit);
+
+  return { siteTitle: title, posts };
 };
 
 export const hinatazakaKoshiki = async (
@@ -259,6 +426,36 @@ export const hinatazakaKoshiki = async (
   return { siteTitle, posts };
 };
 
+export const hinatazakaKoshiki2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://www.hinatazaka46.com/s/official/news/list';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get('/html/body/div/main/section/div/div[3]/div[2]/ul');
+
+  const posts = (news as Element)
+    .childNodes()
+    .filter(
+      (node) => node.type() === 'element' && (node as Element).name() === 'li'
+    )
+    .map((node) => {
+      const _title = (node as Element).get('*/p[@class="c-news__text"]');
+      const title = (_title as Element).text().replace(/\s/g, '');
+
+      const _date = (node as Element).get('*//time[@class="c-news__date"]');
+      const date = new Date((_date as Element).text()).getTime();
+
+      const _link = (node as Element).get('a');
+      const link = getBaseUrl(url) + (_link as Element).attr('href')?.value();
+
+      return { title, date, link };
+    });
+  return { siteTitle: title, posts: posts.slice(0, limit) };
+};
+
 export const hinatazakaBlog = async (
   page: Page,
   limit = defaultLimit
@@ -294,4 +491,50 @@ export const hinatazakaBlog = async (
     .then((_posts) => _posts.slice(0, limit));
   const siteTitle = await page.title();
   return { siteTitle, posts };
+};
+
+export const hinatazakaBlog2 = async (
+  limit = defaultLimit
+): Promise<ScrapedResult> => {
+  const url = 'https://www.hinatazaka46.com/s/official/diary/member';
+  const response = await axios.get(url);
+  const htmlString = response.data;
+  const html = parseHtml(htmlString);
+
+  const title = (html.get('*//title') as Element).text();
+  const news = html.get(
+    '/html/body/div/main/section/div/div[3]/div[1]/div[2]/ul'
+  );
+
+  const posts = (news as Element)
+    .childNodes()
+    .filter(
+      (node) => node.type() === 'element' && (node as Element).name() === 'li'
+    )
+    .map((node) => {
+      const _author = (node as Element).get(
+        '*//div[@class="c-blog-top__name"]'
+      );
+      const author = (_author as Element).text();
+
+      const _title = (node as Element).get('*//p[@class="c-blog-top__title"]');
+      const title = ((_title as Element).text() + `(${author})`).replace(
+        /\s/g,
+        ''
+      );
+
+      // const _summary = (node as Element).get('*//p[@class="lead"]');
+      // const summary = (_summary as Element).text().replace(/\s/g, '');
+
+      const _date = (node as Element).get('*//time[@class="c-blog-top__date"]');
+      const date = new Date((_date as Element).text()).getTime();
+
+      const _link = (node as Element).get('a');
+      const link = getBaseUrl(url) + (_link as Element).attr('href')?.value();
+
+      return { title, date, link };
+    })
+    .slice(0, limit);
+
+  return { siteTitle: title, posts };
 };

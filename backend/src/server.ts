@@ -11,6 +11,7 @@ import {
 import { Cacher, getCache } from './cache';
 import {
   createPuppeteerCluster,
+  scrape2,
   searchTweets,
   switchTwitterAccount,
 } from './scraper';
@@ -76,7 +77,7 @@ import { todaysMagazines } from './magazine';
       return;
     }
 
-    const value = await cluster.execute({ site: query });
+    const value = await scrape2(query as SiteName);
     if (!value) {
       res.sendStatus(400).end();
       return;
