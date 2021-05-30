@@ -4,3 +4,11 @@
 .magazine-title {
   font-size: 20px;
 }
+
+.magazine-group {
+  &-list {
+    list-style-type: none;
+    padding-left: 5px;
+    margin: 2px;
+  }
+}

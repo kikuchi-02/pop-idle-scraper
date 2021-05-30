@@ -1,6 +1,10 @@
 .home-magazines {
   display: inline-flex;
   margin-bottom: 30px;
+
+  &_form{
+    display: inline-flex;
+  }
 }
 
 .home-news {

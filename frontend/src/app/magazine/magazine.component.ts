@@ -6,7 +6,7 @@ import {
   ChangeDetectorRef,
   Input,
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { Magazine } from '../typing';
 import { UtilService } from '../util.service';
@@ -18,9 +18,18 @@ import { UtilService } from '../util.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MagazineComponent implements OnInit, OnDestroy {
-  magazineGroups: Magazine[][];
-  targetDate: string;
-  dateSubject$ = new Subject<string>();
+  // magazineGroups: Magazine[][];
+  mmm: Magazine[][];
+  set magazineGroups(m: Magazine[][]) {
+    console.log('mmmm', m);
+    this.mmm = m;
+  }
+  get magazineGroups(): Magazine[][] {
+    console.log('get', this.mmm);
+    return this.mmm;
+  }
+
+  dateSubject$ = new ReplaySubject<Date>();
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
@@ -28,7 +37,10 @@ export class MagazineComponent implements OnInit, OnDestroy {
     this.dateSubject$
       .pipe(
         distinctUntilChanged(),
-        switchMap((targetDate) => this.utilService.getMagazines(targetDate)),
+        switchMap((targetDate) => {
+          const dateString = this.dateToString(targetDate);
+          return this.utilService.getMagazines(dateString);
+        }),
         takeUntil(this.unsubscriber$)
       )
       .subscribe((magazineGroups) => {
@@ -38,9 +50,11 @@ export class MagazineComponent implements OnInit, OnDestroy {
   }
 
   @Input() set date(d: string | Date | number) {
+    if (!d) {
+      return;
+    }
     const target = new Date(d);
-    this.targetDate = this.dateToString(target);
-    this.dateSubject$.next(this.targetDate);
+    this.dateSubject$.next(target);
   }
 
   ngOnInit(): void {}
@@ -50,6 +64,10 @@ export class MagazineComponent implements OnInit, OnDestroy {
   }
 
   dateToString(date: Date): string {
-    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  }
+
+  notPublished(groups: Magazine[][]): boolean {
+    return !!groups && groups.every((group) => group.length === 0);
   }
 }
