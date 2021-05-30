@@ -43,6 +43,7 @@ export interface Settings {
   TWITTER_ACCESS_TOKEN: string;
   TWITTER_ACCESS_TOKEN_SECRET: string;
   LINE_CHANNEL_ACCESS_TOKEN: string;
+  DISCORD_URL: string;
 }
 
 export interface Tweet {

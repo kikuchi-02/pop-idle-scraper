@@ -17,6 +17,9 @@ import { MemberComponent } from './member/member.component';
 import { NewsComponent } from './news/news.component';
 import { NgModule } from '@angular/core';
 import { UtilService } from './util.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
   declarations: [
@@ -40,6 +43,9 @@ import { UtilService } from './util.service';
     MatIconModule,
     MatAutocompleteModule,
     ReactiveFormsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
   ],
   providers: [UtilService],
   bootstrap: [AppComponent],

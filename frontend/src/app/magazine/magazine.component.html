@@ -1,12 +1,12 @@
-<p class="magazine-title">{{ targetDate }}</p>
+<p class="magazine-title">{{ dateSubject$ | async | date: 'M/d(E)' }}</p>
 <div class="magazine-group" *ngFor="let group of magazineGroups; index as i">
-  <div>優先度{{ i + 1 }}</div>
-  <ng-container *ngIf="group.length > 0; else noMagazines">
+  <!-- <div>優先度{{ i + 1 }}</div> -->
+  <ul class="magazine-group-list" *ngIf="group.length > 0">
     <li class="magazine-group-detail" *ngFor="let magazine of group">
       <a [href]="magazine.link" target="_blank">
         {{ magazine.title }}
       </a>
     </li>
-  </ng-container>
-  <ng-template #noMagazines> 発売なし。 </ng-template>
+  </ul>
 </div>
+<ng-template #noMagazines> 発売なし </ng-template>

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+} from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -8,11 +13,18 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
   today = new Date();
-  dates = [...Array(5)].map((_, i) =>
-    this.today.setDate(this.today.getDate() - i)
-  );
+  dates = [...Array(7)].map((_, i) => {
+    const copied = new Date(this.today.getTime());
+    copied.setDate(copied.getDate() - i);
+    return copied;
+  });
+  selectedDate: Date;
 
   constructor() {}
+
+  selectDate(d): void {
+    this.selectedDate = d.value;
+  }
 
   ngOnInit(): void {}
 }
