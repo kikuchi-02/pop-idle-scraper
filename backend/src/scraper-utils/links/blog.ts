@@ -116,7 +116,7 @@ const sakurazakaBlogLinks2 = async (): Promise<BlogLink[]> => {
 
       let link = (node as Element).attr('value')?.value();
       if (link?.startsWith('/')) {
-        link = getBaseUrl(url) + link.slice(1);
+        link = getBaseUrl(url) + link;
       }
 
       return { name, link };
@@ -177,7 +177,7 @@ const hinatazakaBlogLinks2 = async (): Promise<BlogLink[]> => {
 
       let link = (node as Element).attr('value')?.value();
       if (link?.startsWith('/')) {
-        link = getBaseUrl(url) + link.slice(1);
+        link = getBaseUrl(url) + link
       }
 
       return { name, link };

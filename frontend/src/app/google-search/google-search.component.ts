@@ -6,10 +6,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { GoogleSearchService } from './google-search.service';
 import { MemberLinks } from '../typing';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
+
+interface MemberLinkChecks extends MemberLinks {
+  checks: boolean[];
+}
 
 @Component({
   selector: 'app-google-search',
@@ -18,7 +22,11 @@ import { FormControl } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoogleSearchComponent implements OnInit, OnDestroy {
-  control = new FormControl();
+  formGroup = new FormGroup({
+    input: new FormControl(),
+    startDate: new FormControl(),
+    endDate: new FormControl(),
+  });
 
   candidates: string[];
 
@@ -26,7 +34,7 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   sakurazakaLinks: MemberLinks[];
   hinatazakaLinks: MemberLinks[];
 
-  targetLinks: MemberLinks[] = [];
+  targetMembers: MemberLinkChecks[] = [];
 
   private unsubscriber$ = new Subject<void>();
 
@@ -45,8 +53,12 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) {
     this.candidates = this.keywords;
-    this.control.valueChanges
-      .pipe(takeUntil(this.unsubscriber$))
+
+    this.formGroup.controls.input.valueChanges
+      .pipe(
+        filter((value) => !!value),
+        takeUntil(this.unsubscriber$)
+      )
       .subscribe((value) => {
         this.candidates = this.keywords.filter((key) =>
           key.includes(value.trim())
@@ -82,46 +94,85 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     this.unsubscriber$.next();
   }
 
-  changed(event, link: MemberLinks): void {
-    if (event.target.checked) {
-      this.targetLinks.push(link);
+  changed(check: boolean, member: MemberLinks): void {
+    const checks = member as MemberLinkChecks;
+    checks.checks = [...Array(checks.links.length)].map(() => true);
+
+    if (check) {
+      this.targetMembers.push(checks);
     } else {
-      const index = this.targetLinks.findIndex((b) => b.name === link.name);
+      const index = this.targetMembers.findIndex((b) => b.name === member.name);
       if (index >= 0) {
-        this.targetLinks.splice(index, 1);
+        this.targetMembers.splice(index, 1);
       }
     }
     this.cd.markForCheck();
   }
 
+  isChecked(member: MemberLinks | MemberLinkChecks): boolean {
+    return (
+      this.targetMembers.findIndex((target) => target.name === member.name) > -1
+    );
+  }
+
   submit(): void {
-    const input = this.control.value?.trim();
+    const input = this.formGroup.controls.input.value?.trim();
     if (!input) {
       alert('enter keyword');
       return;
     }
     this.keywords = [input];
 
-    const words = input.split(/\s+/).join('+');
+    const words = input.split(/\s+/).map(encodeURIComponent).join('+');
     let query = `https://www.google.com/search?q=${words}`;
 
-    if (
-      this.targetLinks.length === 1 &&
-      this.targetLinks[0].links.length === 1
-    ) {
-      query += `+site:${this.targetLinks[0].links[0]}`;
-    } else if (this.targetLinks.length > 0) {
-      const linkQuery = this.targetLinks
-        .map((member) => member.links.map((l) => `site:${l}`))
-        .flat()
-        .join('+OR+');
-      query += `+(${linkQuery})`;
+    const links = this.targetMembers.reduce((acc, cur) => {
+      cur.links.forEach((link, index) => {
+        if (cur.checks[index] && !!link) {
+          let queryLink: string;
+          if (link.includes('?')) {
+            queryLink = this.removeQueryParams(link);
+            queryLink = `site:${encodeURIComponent(queryLink)}`;
+            queryLink = `${encodeURIComponent(cur.name)}+AND+${queryLink}`;
+          } else {
+            queryLink = `site:${encodeURIComponent(link)}`;
+          }
+          acc.push(queryLink);
+        }
+      });
+      return acc;
+    }, []);
+    if (links.length === 1) {
+      query += `+${links[0]}`;
+    } else {
+      const linkQuery = links.join('+OR+');
+      query += `+${linkQuery}`;
+    }
+    const start = this.formGroup.controls.startDate.value;
+    if (!!start) {
+      query += `+after:${this.dateToString(start)}`;
+    }
+    const end = this.formGroup.controls.endDate.value;
+    if (!!end) {
+      query += `+before:${this.dateToString(end)}`;
     }
 
     window.open(query, '_blank');
   }
 
   clearAll(): void {
-    window.location.reload();
+    this.targetMembers.length = 0;
+    this.cd.markForCheck();
+  }
+
+  dateToString(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  }
+
+  private removeQueryParams(url: string): string {
+    if (!url.includes('?')) {
+      return url;
+    }
+    return url.slice(0, url.indexOf('?'));
   }
 }

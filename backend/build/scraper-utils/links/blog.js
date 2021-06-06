@@ -178,7 +178,7 @@ var sakurazakaBlogLinks2 = function () { return __awaiter(void 0, void 0, void 0
                         name = name.slice(0, name.indexOf('('));
                         var link = (_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value();
                         if (link === null || link === void 0 ? void 0 : link.startsWith('/')) {
-                            link = getBaseUrl(url) + link.slice(1);
+                            link = getBaseUrl(url) + link;
                         }
                         return { name: name, link: link };
                     })];
@@ -251,7 +251,7 @@ var hinatazakaBlogLinks2 = function () { return __awaiter(void 0, void 0, void 0
                         name = name.slice(0, name.indexOf('('));
                         var link = (_a = node.attr('value')) === null || _a === void 0 ? void 0 : _a.value();
                         if (link === null || link === void 0 ? void 0 : link.startsWith('/')) {
-                            link = getBaseUrl(url) + link.slice(1);
+                            link = getBaseUrl(url) + link;
                         }
                         return { name: name, link: link };
                     })];
