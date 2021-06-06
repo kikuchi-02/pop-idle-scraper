@@ -11,6 +11,10 @@ import { GoogleSearchService } from './google-search.service';
 import { MemberLinks } from '../typing';
 import { FormControl } from '@angular/forms';
 
+interface MemberLinkChecks extends MemberLinks {
+  checks: boolean[];
+}
+
 @Component({
   selector: 'app-google-search',
   templateUrl: './google-search.component.html',
@@ -26,7 +30,7 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   sakurazakaLinks: MemberLinks[];
   hinatazakaLinks: MemberLinks[];
 
-  targetLinks: MemberLinks[] = [];
+  targetMembers: MemberLinkChecks[] = [];
 
   private unsubscriber$ = new Subject<void>();
 
@@ -82,16 +86,25 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     this.unsubscriber$.next();
   }
 
-  changed(event, link: MemberLinks): void {
-    if (event.target.checked) {
-      this.targetLinks.push(link);
+  changed(check: boolean, member: MemberLinks): void {
+    const checks = member as MemberLinkChecks;
+    checks.checks = [...Array(checks.links.length)].map(() => true);
+
+    if (check) {
+      this.targetMembers.push(checks);
     } else {
-      const index = this.targetLinks.findIndex((b) => b.name === link.name);
+      const index = this.targetMembers.findIndex((b) => b.name === member.name);
       if (index >= 0) {
-        this.targetLinks.splice(index, 1);
+        this.targetMembers.splice(index, 1);
       }
     }
     this.cd.markForCheck();
+  }
+
+  isChecked(member: MemberLinks | MemberLinkChecks): boolean {
+    return (
+      this.targetMembers.findIndex((target) => target.name === member.name) > -1
+    );
   }
 
   submit(): void {
@@ -102,26 +115,44 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     }
     this.keywords = [input];
 
-    const words = input.split(/\s+/).join('+');
+    const words = input.split(/\s+/).map(encodeURIComponent).join('+');
     let query = `https://www.google.com/search?q=${words}`;
 
-    if (
-      this.targetLinks.length === 1 &&
-      this.targetLinks[0].links.length === 1
-    ) {
-      query += `+site:${this.targetLinks[0].links[0]}`;
-    } else if (this.targetLinks.length > 0) {
-      const linkQuery = this.targetLinks
-        .map((member) => member.links.map((l) => `site:${l}`))
-        .flat()
-        .join('+OR+');
-      query += `+(${linkQuery})`;
+    const links = this.targetMembers.reduce((acc, cur) => {
+      cur.links.forEach((link, index) => {
+        if (cur.checks[index] && !!link) {
+          let queryLink: string;
+          if (link.includes('?')) {
+            queryLink = this.removeQueryParams(link);
+            queryLink = `site:${encodeURIComponent(queryLink)}`;
+            queryLink = `${encodeURIComponent(cur.name)}+AND+${queryLink}`;
+          } else {
+            queryLink = `site:${encodeURIComponent(link)}`;
+          }
+          acc.push(queryLink);
+        }
+      });
+      return acc;
+    }, []);
+    if (links.length === 1) {
+      query += `+${links[0]}`;
+    } else {
+      const linkQuery = links.join('+OR+');
+      query += `+${linkQuery}`;
     }
 
     window.open(query, '_blank');
   }
 
   clearAll(): void {
-    window.location.reload();
+    this.targetMembers.length = 0;
+    this.cd.markForCheck();
+  }
+
+  private removeQueryParams(url: string): string {
+    if (!url.includes('?')) {
+      return url;
+    }
+    return url.slice(0, url.indexOf('?'));
   }
 }

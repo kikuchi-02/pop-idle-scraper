@@ -1,4 +1,3 @@
-
 <div class="google_search-input">
   <form>
     <input
@@ -19,31 +18,49 @@
   </form>
 </div>
 
+<div class="google_search-candidates">
+  <h3>Links</h3>
+  <div
+    *ngFor="let member of targetMembers"
+    class="google_search-candidates-container"
+  >
+    <div class="google_search-candidates-container-label">
+      <input
+        type="checkbox"
+        (change)="changed($event.target.checked, member)"
+        [checked]="isChecked(member)"
+      />
+      <span class="google_search-candidates-container-label-name">
+        {{ member.name }}
+      </span>
+    </div>
+    <ul class="google_search-candidates-container-links">
+      <li *ngFor="let link of member.links; index as i">
+      <input type="checkbox" [checked]="member.checks[i]" />
+        <span class="google_search-candidates-container-links-link">
+          <a [href]="link" target="_blank">{{ link }}</a>
+        </span>
+      </li>
+    </ul>
+  </div>
+</div>
+
 <div class="google_search-accordions">
+  <h3>Checkboxes</h3>
   <div class="google_search-accordions-accordion">
     <mat-accordion>
       <mat-expansion-panel [expanded]="true">
-        <mat-expansion-panel-header>
-          <mat-panel-title> checked </mat-panel-title>
-        </mat-expansion-panel-header>
-        <ng-container *ngFor="let blog of targetLinks">
-          <div>
-            {{ blog.name }}
-          </div>
-        </ng-container>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </div>
-  <div class="google_search-accordions-accordion">
-    <mat-accordion>
-      <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title> 乃木坂46 </mat-panel-title>
         </mat-expansion-panel-header>
 
         <ng-container *ngFor="let blog of nogizakaLinks">
           <div>
-            <input type="checkbox" (change)="changed($event, blog)" />
+            <input
+              type="checkbox"
+              (change)="changed($event.target.checked, blog)"
+              [checked]="isChecked(blog)"
+            />
             {{ blog.name }}
           </div>
         </ng-container>
@@ -53,14 +70,18 @@
 
   <div class="google_search-accordions-accordion">
     <mat-accordion>
-      <mat-expansion-panel>
+      <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title> 櫻坂46 </mat-panel-title>
         </mat-expansion-panel-header>
         <div>
           <ng-container *ngFor="let blog of sakurazakaLinks">
             <div>
-              <input type="checkbox" (change)="changed($event, blog)" />
+              <input
+                type="checkbox"
+                (change)="changed($event.target.checked, blog)"
+                [checked]="isChecked(blog)"
+              />
               {{ blog.name }}
             </div>
           </ng-container>
@@ -71,14 +92,18 @@
 
   <div class="google_search-accordions-accordion">
     <mat-accordion>
-      <mat-expansion-panel>
+      <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title> 日向坂46 </mat-panel-title>
         </mat-expansion-panel-header>
         <div>
           <ng-container *ngFor="let blog of hinatazakaLinks">
             <div>
-              <input type="checkbox" (change)="changed($event, blog)" />
+              <input
+                type="checkbox"
+                (change)="changed($event.target.checked, blog)"
+                [checked]="isChecked(blog)"
+              />
               {{ blog.name }}
             </div>
           </ng-container>
