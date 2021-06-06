@@ -1,5 +1,8 @@
 .google_search {
   &-input {
+    mat-form-field {
+      margin-right: 5px;
+    }
     &_input {
       width: 500px;
     }

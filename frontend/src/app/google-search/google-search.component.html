@@ -1,20 +1,62 @@
 <div class="google_search-input">
-  <form>
-    <input
-      class="google_search-input_input"
-      type="text"
-      matInput
-      placeholder="Search Idle info"
-      [formControl]="control"
-      [matAutocomplete]="auto"
-    />
-    <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let candidate of candidates" [value]="candidate">
-        {{ candidate }}
-      </mat-option>
-    </mat-autocomplete>
-    <button (click)="submit()">open in new tab</button>
-    <button (click)="clearAll()">clear all</button>
+  <form [formGroup]="formGroup">
+    <div>
+      <mat-form-field appearance="fill">
+        <input
+          class="google_search-input_input"
+          type="text"
+          matInput
+          placeholder="keyword"
+          formControlName="input"
+          required
+          [matAutocomplete]="auto"
+        />
+        <button
+          *ngIf="!!formGroup.controls.input.value"
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="formGroup.controls.input.reset()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let candidate of candidates" [value]="candidate">
+            {{ candidate }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Choose a start date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="startPicker"
+          formControlName="startDate"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="startPicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Choose a end date</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="endPicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div>
+      <button mat-stroked-button color="primary" (click)="submit()">
+        open in new tab
+      </button>
+      <button mat-stroked-button color="primary" (click)="clearAll()">
+        clear all
+      </button>
+    </div>
   </form>
 </div>
 
@@ -25,18 +67,18 @@
     class="google_search-candidates-container"
   >
     <div class="google_search-candidates-container-label">
-      <input
-        type="checkbox"
-        (change)="changed($event.target.checked, member)"
+      <mat-checkbox
+        (change)="changed($event.checked, member)"
         [checked]="isChecked(member)"
-      />
+      >
+      </mat-checkbox>
       <span class="google_search-candidates-container-label-name">
         {{ member.name }}
       </span>
     </div>
     <ul class="google_search-candidates-container-links">
       <li *ngFor="let link of member.links; index as i">
-      <input type="checkbox" [checked]="member.checks[i]" />
+        <mat-checkbox [checked]="member.checks[i]"></mat-checkbox>
         <span class="google_search-candidates-container-links-link">
           <a [href]="link" target="_blank">{{ link }}</a>
         </span>
@@ -56,11 +98,11 @@
 
         <ng-container *ngFor="let blog of nogizakaLinks">
           <div>
-            <input
-              type="checkbox"
-              (change)="changed($event.target.checked, blog)"
+            <mat-checkbox
+              (change)="changed($event.checked, blog)"
               [checked]="isChecked(blog)"
-            />
+            >
+            </mat-checkbox>
             {{ blog.name }}
           </div>
         </ng-container>
@@ -77,11 +119,11 @@
         <div>
           <ng-container *ngFor="let blog of sakurazakaLinks">
             <div>
-              <input
-                type="checkbox"
-                (change)="changed($event.target.checked, blog)"
+              <mat-checkbox
+                (change)="changed($event.checked, blog)"
                 [checked]="isChecked(blog)"
-              />
+              >
+              </mat-checkbox>
               {{ blog.name }}
             </div>
           </ng-container>
@@ -99,11 +141,11 @@
         <div>
           <ng-container *ngFor="let blog of hinatazakaLinks">
             <div>
-              <input
-                type="checkbox"
-                (change)="changed($event.target.checked, blog)"
+              <mat-checkbox
+                (change)="changed($event.checked, blog)"
                 [checked]="isChecked(blog)"
-              />
+              >
+              </mat-checkbox>
               {{ blog.name }}
             </div>
           </ng-container>

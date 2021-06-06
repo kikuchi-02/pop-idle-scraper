@@ -6,10 +6,10 @@ import {
   OnInit,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { GoogleSearchService } from './google-search.service';
 import { MemberLinks } from '../typing';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 
 interface MemberLinkChecks extends MemberLinks {
   checks: boolean[];
@@ -22,7 +22,11 @@ interface MemberLinkChecks extends MemberLinks {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoogleSearchComponent implements OnInit, OnDestroy {
-  control = new FormControl();
+  formGroup = new FormGroup({
+    input: new FormControl(),
+    startDate: new FormControl(),
+    endDate: new FormControl(),
+  });
 
   candidates: string[];
 
@@ -49,8 +53,12 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) {
     this.candidates = this.keywords;
-    this.control.valueChanges
-      .pipe(takeUntil(this.unsubscriber$))
+
+    this.formGroup.controls.input.valueChanges
+      .pipe(
+        filter((value) => !!value),
+        takeUntil(this.unsubscriber$)
+      )
       .subscribe((value) => {
         this.candidates = this.keywords.filter((key) =>
           key.includes(value.trim())
@@ -108,7 +116,7 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
-    const input = this.control.value?.trim();
+    const input = this.formGroup.controls.input.value?.trim();
     if (!input) {
       alert('enter keyword');
       return;
@@ -140,6 +148,14 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
       const linkQuery = links.join('+OR+');
       query += `+${linkQuery}`;
     }
+    const start = this.formGroup.controls.startDate.value;
+    if (!!start) {
+      query += `+after:${this.dateToString(start)}`;
+    }
+    const end = this.formGroup.controls.endDate.value;
+    if (!!end) {
+      query += `+before:${this.dateToString(end)}`;
+    }
 
     window.open(query, '_blank');
   }
@@ -147,6 +163,10 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
   clearAll(): void {
     this.targetMembers.length = 0;
     this.cd.markForCheck();
+  }
+
+  dateToString(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   }
 
   private removeQueryParams(url: string): string {
