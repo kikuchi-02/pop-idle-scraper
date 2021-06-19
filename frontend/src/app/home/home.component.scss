@@ -1,12 +1,17 @@
+@import '../../styles.scss';
+.home_Wrapper {
+  @include wrapper;
+}
+
 .home-magazines {
   display: inline-flex;
   margin-bottom: 30px;
 
-  &_form{
+  &_form {
     display: inline-flex;
   }
 }
 
 .home-news {
   margin-bottom: 50px;
-  }
+}

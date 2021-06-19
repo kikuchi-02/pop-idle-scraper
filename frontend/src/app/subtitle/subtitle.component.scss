@@ -1,0 +1,50 @@
+@import '../../styles.scss';
+.subtitle_Wrapper {
+  @include wrapper;
+  width: 100%;
+  max-width: none;
+
+  .subtitle_MainButton {
+    margin: 20px;
+    height: 50px;
+    width: 500px;
+  }
+  .subtitle_Layout_Buttons {
+    margin: 20px;
+    button {
+      width: 300px;
+      height: 50px;
+
+      &.clicked {
+        background-color: #444;
+      }
+    }
+  }
+
+  .subtitle_Inner {
+    .subtitle_Labels {
+      display: flex;
+      width: 100%;
+
+      label {
+        flex-grow: 1;
+        font-size: 30px;
+        margin: 10px 30px
+      }
+    }
+    .subtitle_TextAreas {
+      display: flex;
+      width: 100%;
+
+      .subtitle_TextArea {
+        height: 1000px;
+        margin: 0 20px;
+        flex-grow: 1;
+      }
+    }
+  }
+}
+
+.hide {
+  display: none;
+}

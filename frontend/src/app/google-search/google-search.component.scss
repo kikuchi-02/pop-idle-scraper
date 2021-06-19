@@ -1,3 +1,8 @@
+@import '../../styles.scss';
+
+.google-search_Wrapper {
+  @include wrapper;
+}
 .google_search {
   &-input {
     mat-form-field {
