@@ -1,7 +1,9 @@
-<p>chat works!</p>
-<a routerLink="/home">home</a>
+<div class="chat_Wrapper">
+  <p>chat works!</p>
+  <a routerLink="/home">home</a>
 
-<button (click)="save()" disabled="true">save</button>
-<p>{{text}}</p>
+  <button (click)="save()" disabled="true">save</button>
+  <p>{{ text }}</p>
 
-<textarea (ngModelChange)="change($event)" [ngModel]="text"></textarea>
+  <textarea (ngModelChange)="change($event)" [ngModel]="text"></textarea>
+</div>

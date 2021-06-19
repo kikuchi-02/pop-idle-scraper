@@ -1,0 +1,33 @@
+<div class="subtitle_Wrapper">
+  <button
+    class="subtitle_MainButton"
+    type="button"
+    (click)="generateSubtitle()"
+  >
+    generate subtitle
+  </button>
+  <div class="subtitle_Layout_Buttons">
+    <button (click)="applyLayout('left')" [class.clicked]="layout==='left'">input</button>
+    <button (click)="applyLayout('right')" [class.clicked]="layout==='right'">output</button>
+    <button (click)="applyLayout('both')" [class.clicked]="layout==='both'">both</button>
+  </div>
+  <div class="subtitle_Inner">
+    <div class="subtitle_Labels">
+      <label [class.hide]="layout === 'right'">input</label>
+      <label [class.hide]="layout === 'left'">output</label>
+    </div>
+    <div class="subtitle_TextAreas">
+      <textarea
+        class="subtitle_TextArea left"
+        [class.hide]="layout === 'right'"
+        [(ngModel)]="inputArea"
+        placeholder="paste subtitle here"
+      ></textarea>
+      <textarea
+        class="subtitle_TextArea right"
+        [class.hide]="layout === 'left'"
+        [(ngModel)]="outputArea"
+      ></textarea>
+    </div>
+  </div>
+</div>

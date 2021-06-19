@@ -22,6 +22,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SubtitleComponent } from './subtitle/subtitle.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     ChatComponent,
     NewsComponent,
     GoogleSearchComponent,
+    SubtitleComponent,
   ],
   imports: [
     BrowserModule,
