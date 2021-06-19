@@ -1,0 +1,66 @@
+.editor_NotReady {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 150px;
+  color: red;
+  opacity: 0.7;
+}
+
+.editor_Inner {
+  width: 900px;
+  margin-left: auto;
+  // max-height: 1000px;
+  box-sizing: border-box;
+  padding: 70px 50px;
+  background-color: #eef5fa;
+  border-radius: 100px;
+  // overflow-y: scroll;
+}
+
+.editor_Input {
+  background-color: #fff;
+}
+
+.highlighted {
+  background-color: blue;
+  font-weight: bold;
+  color: red;
+}
+
+.editor-container {
+  display: flex;
+}
+
+.line-boundary {
+
+}
+
+.line-container {
+  position: absolute;
+  height: 100px;
+  display: flex;
+
+  &-box {
+    background-color: white;
+    border: 1px solid black;
+    height: 100%;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.line {
+  border-bottom: 1px solid red;
+  width: 530px;
+  height: 50%;
+  &-bold {
+    height: 100%;
+    width: 410px;
+    margin-left: auto;
+    border-bottom: 3px solid red;
+  }
+}

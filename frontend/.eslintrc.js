@@ -38,7 +38,8 @@ module.exports = {
             "style": "camelCase"
           }
         ],
-        "new-cap":["off"]
+        "new-cap": ["off"],
+        "@typescript-eslint/member-ordering": ["off"]
       }
     },
     {

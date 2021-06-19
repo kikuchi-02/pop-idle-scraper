@@ -22,6 +22,12 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { AceModule, ACE_CONFIG } from 'ngx-ace-wrapper';
+import { MarkdownComponent } from './markdown/markdown.component';
+import { PreviewComponent } from './preview/preview.component';
+import { EditorComponent } from './editor/editor.component';
+import { EditableDirective } from './editor/editable.directive';
 
 @NgModule({
   declarations: [
@@ -33,6 +39,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     ChatComponent,
     NewsComponent,
     GoogleSearchComponent,
+    MarkdownComponent,
+    PreviewComponent,
+    EditorComponent,
+    EditableDirective,
   ],
   imports: [
     BrowserModule,
@@ -50,8 +60,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatInputModule,
     MatButtonModule,
     MatCheckboxModule,
+    AceModule,
+    DragDropModule,
   ],
-  providers: [UtilService],
+  providers: [
+    UtilService,
+    {
+      provide: ACE_CONFIG,
+      useValue: [],
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

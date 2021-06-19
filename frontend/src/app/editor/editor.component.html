@@ -1,0 +1,27 @@
+<form (ngSubmit)="highlight()">
+  <label>hight light value</label>
+  <input [formControl]="highlightValue" />
+  <button>highlight</button>
+</form>
+<div>
+  <button (click)="removeOldHighlighted()">remove highlight</button>
+  <button (click)="editorJs.clear()">clear all</button>
+  <button (click)="copy2Clipboard()">copy to clipboard</button>
+</div>
+<div class="editor-container">
+  <div class="line-boundary">
+    <div class="line-container" cdkDrag cdkDragBoundary=".line-boundary">
+      <div class="line-container-box">定規</div>
+      <div class="line">
+        <div class="line-bold"></div>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="editor_Input" #editor [textContent]="inner" appEditable></div> -->
+  <div class="editor_Inner">
+    <div class="editor_Input">
+      <div id="editorjs" #editor></div>
+    </div>
+  </div>
+</div>
+<div class="editor_NotReady" *ngIf="!initEditor">loading</div>

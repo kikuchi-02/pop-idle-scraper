@@ -18,16 +18,7 @@ import { UtilService } from '../util.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MagazineComponent implements OnInit, OnDestroy {
-  // magazineGroups: Magazine[][];
-  mmm: Magazine[][];
-  set magazineGroups(m: Magazine[][]) {
-    console.log('mmmm', m);
-    this.mmm = m;
-  }
-  get magazineGroups(): Magazine[][] {
-    console.log('get', this.mmm);
-    return this.mmm;
-  }
+  magazineGroups: Magazine[][];
 
   dateSubject$ = new ReplaySubject<Date>();
 
