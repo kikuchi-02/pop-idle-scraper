@@ -1,6 +1,6 @@
 import { LaunchOptions, Page } from 'puppeteer';
 import { Cluster } from 'puppeteer-cluster';
-import { IdleKind, ScrapedResult, SiteName, Settings, Tweet } from './typing';
+import { IdleKind, ScrapedResult, SiteName, Tweet } from './typing';
 import {
   nogizakaKoshiki,
   sakurazakaKoshiki,
