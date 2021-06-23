@@ -1,6 +1,8 @@
-from ginza import *
-import spacy
+from pprint import pprint
 from typing import List
+
+import spacy
+from ginza import *
 
 nlp = spacy.load("ja_ginza")
 # doc = nlp("銀座でランチをご一緒しましょう。明日はきっと腫れ。")
@@ -30,4 +32,8 @@ def tokenize(text: str) -> List[List[str]]:
 
 if __name__ == "__main__":
     text = "銀座でランチをご一緒しましょう。明日はきっと腫れ。"
-    print(tokenize(text))
+    pprint(tokenize(text))
+    while True:
+        print("input here: ", end="")
+        text = input()
+        pprint(tokenize(text))

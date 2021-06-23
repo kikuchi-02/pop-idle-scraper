@@ -28,6 +28,7 @@ import { MarkdownComponent } from './markdown/markdown.component';
 import { PreviewComponent } from './preview/preview.component';
 import { EditorComponent } from './editor/editor.component';
 import { EditableDirective } from './editor/editable.directive';
+import { SubtitleComponent } from './subtitle/subtitle.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { EditableDirective } from './editor/editable.directive';
     PreviewComponent,
     EditorComponent,
     EditableDirective,
+    SubtitleComponent,
   ],
   imports: [
     BrowserModule,
