@@ -1,4 +1,12 @@
-.editor_NotReady {
+.editor_Tools {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  border: 1px solid #000;
+  padding: 20px;
+}
+.editor_Loading {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -34,7 +42,6 @@
 }
 
 .line-boundary {
-
 }
 
 .line-container {

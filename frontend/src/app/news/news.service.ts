@@ -10,10 +10,10 @@ export class NewsService {
   constructor(private http: HttpClient) {}
 
   getTweets(idle: IdleKind): Observable<ScrapedResult> {
-    return this.http.get<ScrapedResult>(`api/twitter?kind=${idle}`);
+    return this.http.get<ScrapedResult>(`api/v1/twitter?kind=${idle}`);
   }
 
   getSite(site: SiteName): Observable<ScrapedResult> {
-    return this.http.get<ScrapedResult>(`api/site?kind=${site}`);
+    return this.http.get<ScrapedResult>(`api/v1/site?kind=${site}`);
   }
 }

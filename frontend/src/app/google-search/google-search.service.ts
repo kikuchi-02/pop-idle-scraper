@@ -8,6 +8,6 @@ export class GoogleSearchService {
   constructor(private http: HttpClient) {}
 
   getLinks(idle: IdleKind): Observable<MemberLinks[]> {
-    return this.http.get<MemberLinks[]>(`api/member-links?kind=${idle}`);
+    return this.http.get<MemberLinks[]>(`api/v1/member-links?kind=${idle}`);
   }
 }

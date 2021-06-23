@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -14,6 +15,8 @@ import Header from '@editorjs/header';
 import Marker from '@editorjs/marker';
 import { from, Subject } from 'rxjs';
 import { auditTime, debounceTime, takeUntil } from 'rxjs/operators';
+import { EditableDirective } from './editable.directive';
+import { EditorService } from './editor.service';
 import { MarkerTool, MyInlineTool } from './tools';
 
 @Component({
@@ -25,7 +28,7 @@ import { MarkerTool, MyInlineTool } from './tools';
 export class EditorComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editor: ElementRef;
 
-  initEditor = false;
+  loading = true;
 
   inner = '';
 
@@ -49,7 +52,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     },
     data: JSON.parse(localStorage.getItem(this.outputDataKey)) || {},
     onReady: () => {
-      this.initEditor = true;
+      this.loading = false;
       this.cd.markForCheck();
     },
     onChange: (api, blocks) => {
@@ -60,7 +63,10 @@ export class EditorComponent implements OnInit, OnDestroy {
   private unsubscriber$ = new Subject<void>();
   private editorSubject$ = new Subject<[API, BlockAPI]>();
 
-  constructor(private cd: ChangeDetectorRef) {
+  constructor(
+    private cd: ChangeDetectorRef,
+    private editorService: EditorService
+  ) {
     this.editorSubject$
       .pipe(auditTime(1000), takeUntil(this.unsubscriber$))
       .subscribe(([api, blocks]) => {
@@ -113,6 +119,25 @@ export class EditorComponent implements OnInit, OnDestroy {
       .forEach((elm) => {
         elm.insertAdjacentHTML('beforebegin', elm.textContent);
         elm.remove();
+      });
+  }
+
+  tokenize(): void {
+    if (this.loading) {
+      return;
+    }
+    this.loading = true;
+    this.cd.markForCheck();
+
+    this.editorService
+      .tokenize('こんにちは、私の名前は田中太郎です。よろしくね。')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        setTimeout(() => {
+          this.loading = false;
+          console.log(val);
+          this.cd.markForCheck();
+        }, 3000);
       });
   }
 
