@@ -8,6 +8,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import EditorJS, { API, BlockAPI } from '@editorjs/editorjs';
@@ -24,6 +25,7 @@ import { MarkerTool, MyInlineTool } from './tools';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class EditorComponent implements OnInit, OnDestroy {
   @ViewChild('editor') editor: ElementRef;
@@ -89,15 +91,14 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
     this.removeOldHighlighted();
     this.editor.nativeElement.querySelectorAll('.ce-block').forEach((block) => {
-      block.innerHTML = block.innerHTML.replace(
-        new RegExp(word, 'g'),
-        `<span class="highlighted" style="background-color: red">${word}</span>`
-      );
+      this.recursivelyApply(block, (elm) => {
+        const msg = 'hello';
+        elm.innerHTML = elm.innerHTML.replace(
+          new RegExp(word, 'g'),
+          `<span class="text--underlined">${word}<span class="underline-text">${msg}</span></span>`
+        );
+      });
     });
-    // this.editor.nativeElement.innerHTML = this.editor.nativeElement.innerHTML.replace(
-    //   new RegExp(word, 'g'),
-    //   `<span class="highlighted" style="background-color: red">${word}</span>`
-    // );
     this.cd.markForCheck();
   }
 
@@ -115,8 +116,9 @@ export class EditorComponent implements OnInit, OnDestroy {
 
   removeOldHighlighted(): void {
     this.editor.nativeElement
-      .querySelectorAll('.highlighted')
-      .forEach((elm) => {
+      .querySelectorAll('.text--underlined')
+      .forEach((elm: Element) => {
+        Array.from(elm.children).forEach((child) => child.remove());
         elm.insertAdjacentHTML('beforebegin', elm.textContent);
         elm.remove();
       });
@@ -145,6 +147,19 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.editorJs.save().then((output) => {
       localStorage.setItem(this.outputDataKey, JSON.stringify(output));
     });
+  }
+
+  private recursivelyApply(
+    element: Element,
+    callback: (element: Element) => void
+  ): void {
+    if (element.childElementCount === 0) {
+      callback(element);
+    } else {
+      Array.from(element.children).forEach((child) => {
+        this.recursivelyApply(child, callback);
+      });
+    }
   }
 }
 

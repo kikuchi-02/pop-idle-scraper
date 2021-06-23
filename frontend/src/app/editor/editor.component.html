@@ -1,5 +1,5 @@
-<div class="editor_Wrapper">
-  <div class="editor_Tools">
+<div class="wrapper">
+  <div class="tool">
     <form (ngSubmit)="highlight()">
       <label>hight light value</label>
       <input [formControl]="highlightValue" />
@@ -14,21 +14,21 @@
       <button (click)="tokenize()">tokenize</button>
     </div>
   </div>
-  <div class="editor-container">
-    <div class="line-boundary">
-      <div class="line-container" cdkDrag cdkDragBoundary=".line-boundary">
-        <div class="line-container-box">定規</div>
-        <div class="line">
-          <div class="line-bold"></div>
+  <div class="inner">
+    <div class="ruler">
+      <div class="ruler__boundary" cdkDrag cdkDragBoundary=".ruler">
+        <div class="ruler__box">定規</div>
+        <div class="ruler__line">
+          <div class="ruler__line--bold"></div>
         </div>
       </div>
     </div>
     <!-- <div class="editor_Input" #editor [textContent]="inner" appEditable></div> -->
-    <div class="editor_Inner">
-      <div class="editor_Input">
+    <div class="input-area">
+      <div class="input-area__wrapper">
         <div id="editorjs" #editor></div>
       </div>
     </div>
   </div>
-  <div class="editor_Loading" *ngIf="loading">loading</div>
+  <div class="loading-modal" *ngIf="loading">loading</div>
 </div>

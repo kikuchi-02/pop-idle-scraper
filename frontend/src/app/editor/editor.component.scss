@@ -1,4 +1,10 @@
-.editor_Tools {
+@import '../../styles.scss';
+
+.wrapper {
+  @include wrapper;
+}
+
+.tool {
   position: sticky;
   top: 0;
   background-color: #fff;
@@ -6,17 +12,40 @@
   border: 1px solid #000;
   padding: 20px;
 }
-.editor_Loading {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 150px;
-  color: red;
-  opacity: 0.7;
+
+.inner {
+  display: flex;
+
+  .ruler {
+    &__boundary {
+      position: absolute;
+      height: 100px;
+      display: flex;
+    }
+    &__box {
+      background-color: white;
+      border: 1px solid black;
+      height: 100%;
+      width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__line {
+      border-bottom: 1px solid red;
+      width: 530px;
+      height: 50%;
+      &--bold {
+        height: 100%;
+        width: 410px;
+        margin-left: auto;
+        border-bottom: 3px solid red;
+      }
+    }
+  }
 }
 
-.editor_Inner {
+.input-area {
   width: 900px;
   margin-left: auto;
   // max-height: 1000px;
@@ -25,49 +54,47 @@
   background-color: #eef5fa;
   border-radius: 100px;
   // overflow-y: scroll;
+
+  &__wrapper {
+    background-color: #fff;
+
+    .text--highlighted {
+      background-color: blue;
+      font-weight: bold;
+      color: red;
+    }
+
+    .text--underlined {
+      background: linear-gradient(transparent 70%, #ffc037 70%);
+      position: relative;
+
+      .underline-text {
+        visibility: hidden;
+        border: 1px solid #a9acb1;
+        text-align: center;
+        padding: 3px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        bottom: 100%;
+        transform: translate(-50%, 0);
+      }
+      &:hover {
+        .underline-text {
+          visibility: visible;
+        }
+      }
+    }
+  }
 }
 
-.editor_Input {
-  background-color: #fff;
-}
-
-.highlighted {
-  background-color: blue;
-  font-weight: bold;
+.loading-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 150px;
   color: red;
-}
-
-.editor-container {
-  display: flex;
-}
-
-.line-boundary {
-}
-
-.line-container {
-  position: absolute;
-  height: 100px;
-  display: flex;
-
-  &-box {
-    background-color: white;
-    border: 1px solid black;
-    height: 100%;
-    width: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.line {
-  border-bottom: 1px solid red;
-  width: 530px;
-  height: 50%;
-  &-bold {
-    height: 100%;
-    width: 410px;
-    margin-left: auto;
-    border-bottom: 3px solid red;
-  }
+  opacity: 0.7;
 }
