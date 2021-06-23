@@ -25,10 +25,10 @@ import { launch } from 'puppeteer';
 import { todaysMagazines } from './magazine';
 
 (async () => {
-  const app = express();
-  const cluster = await createPuppeteerCluster();
+  const router = express.Router();
+  // const cluster = await createPuppeteerCluster();
 
-  app.get('*', (req, res, next) => {
+  router.get('*', (req, res, next) => {
     console.log('request', req.path);
 
     // TODO
@@ -40,7 +40,7 @@ import { todaysMagazines } from './magazine';
     next();
   });
 
-  app.get('/api/twitter', async (req, res) => {
+  router.get('/twitter', async (req, res) => {
     const kind = req.query.kind;
     if (!idleKinds.includes(kind as IdleKind)) {
       res.sendStatus(400).end();
@@ -65,7 +65,7 @@ import { todaysMagazines } from './magazine';
     return;
   });
 
-  app.get('/api/site', async (req, res) => {
+  router.get('/site', async (req, res) => {
     const query = req.query.kind;
     if (!siteNames.includes(query as SiteName)) {
       res.sendStatus(400).end();
@@ -90,7 +90,7 @@ import { todaysMagazines } from './magazine';
     return;
   });
 
-  app.get('/api/member-table', async (req, res) => {
+  router.get('/member-table', async (req, res) => {
     const kind = req.query.kind;
     if (!idleKinds.includes(kind as IdleKind)) {
       res.sendStatus(400).end();
@@ -114,7 +114,7 @@ import { todaysMagazines } from './magazine';
     return;
   });
 
-  app.get('/api/magazines', async (req, res) => {
+  router.get('/magazines', async (req, res) => {
     const date = req.query.date;
     let magazines: Magazine[][];
     if (date) {
@@ -126,7 +126,7 @@ import { todaysMagazines } from './magazine';
     return;
   });
 
-  app.get('/api/member-links', async (req, res) => {
+  router.get('/member-links', async (req, res) => {
     const kind = req.query.kind;
     if (!idleKinds.includes(kind as IdleKind)) {
       res.sendStatus(400).end();
@@ -178,6 +178,9 @@ import { todaysMagazines } from './magazine';
     res.sendStatus(500);
     return;
   });
+
+  const app = express();
+  app.use('/api/v1', router);
 
   const port = 3000;
   console.log(`server listen ${port}`);

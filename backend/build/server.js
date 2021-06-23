@@ -48,210 +48,207 @@ var wiki_1 = require("./scraper-utils/wiki");
 var wiki_2 = require("./scraper-utils/links/wiki");
 var magazine_1 = require("./magazine");
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var app, cluster, port;
+    var router, app, port;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                app = express_1.default();
-                return [4 /*yield*/, scraper_1.createPuppeteerCluster()];
-            case 1:
-                cluster = _a.sent();
-                app.get('*', function (req, res, next) {
-                    console.log('request', req.path);
-                    // TODO
-                    // const cacher = new Cacher<ScrapedResult>(req.originalUrl);
-                    // const cache = cacher.getCache();
-                    // if (cache) {
-                    //   res.send();
-                    // }
-                    next();
-                });
-                app.get('/api/twitter', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var kind, account, cacher, cache, value, tomorrow;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                kind = req.query.kind;
-                                if (!typing_1.idleKinds.includes(kind)) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                account = scraper_1.switchTwitterAccount(kind);
-                                cacher = new cache_1.Cacher(account);
-                                cache = cacher.getCache();
-                                if (cache) {
-                                    res.send(JSON.stringify(cache));
-                                    return [2 /*return*/];
-                                }
-                                return [4 /*yield*/, scraper_1.searchTweets(account)];
-                            case 1:
-                                value = _a.sent();
-                                if (!value) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                tomorrow = new Date();
-                                tomorrow.setHours(tomorrow.getHours() + 1);
-                                cacher.saveCache(value, tomorrow);
-                                res.send(JSON.stringify(value));
-                                return [2 /*return*/];
+        router = express_1.default.Router();
+        // const cluster = await createPuppeteerCluster();
+        router.get('*', function (req, res, next) {
+            console.log('request', req.path);
+            // TODO
+            // const cacher = new Cacher<ScrapedResult>(req.originalUrl);
+            // const cache = cacher.getCache();
+            // if (cache) {
+            //   res.send();
+            // }
+            next();
+        });
+        router.get('/twitter', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var kind, account, cacher, cache, value, tomorrow;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        kind = req.query.kind;
+                        if (!typing_1.idleKinds.includes(kind)) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
                         }
-                    });
-                }); });
-                app.get('/api/site', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var query, cacher, cache, value, tomorrow;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                query = req.query.kind;
-                                if (!typing_1.siteNames.includes(query)) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                cacher = new cache_1.Cacher(query);
-                                cache = cacher.getCache();
-                                if (cache) {
-                                    res.send(JSON.stringify(cache));
-                                    return [2 /*return*/];
-                                }
-                                return [4 /*yield*/, scraper_1.scrape2(query)];
-                            case 1:
-                                value = _a.sent();
-                                if (!value) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                tomorrow = new Date();
-                                tomorrow.setDate(tomorrow.getDate() + 1);
-                                cacher.saveCache(value, tomorrow);
-                                res.send(JSON.stringify(value));
-                                return [2 /*return*/];
+                        account = scraper_1.switchTwitterAccount(kind);
+                        cacher = new cache_1.Cacher(account);
+                        cache = cacher.getCache();
+                        if (cache) {
+                            res.send(JSON.stringify(cache));
+                            return [2 /*return*/];
                         }
-                    });
-                }); });
-                app.get('/api/member-table', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var kind, cacher, cache, tables, tommorow;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                kind = req.query.kind;
-                                if (!typing_1.idleKinds.includes(kind)) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                cacher = new cache_1.Cacher(kind + "-member-table");
-                                cache = cacher.getCache();
-                                if (cache) {
-                                    res.send(JSON.stringify(cache));
-                                    return [2 /*return*/];
-                                }
-                                return [4 /*yield*/, wiki_1.getMemberTable(kind)];
-                            case 1:
-                                tables = _a.sent();
-                                if (!tables) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                tommorow = new Date();
-                                tommorow.setDate(tommorow.getDate() + 10);
-                                cacher.saveCache(tables, tommorow);
-                                res.send(JSON.stringify(tables));
-                                return [2 /*return*/];
+                        return [4 /*yield*/, scraper_1.searchTweets(account)];
+                    case 1:
+                        value = _a.sent();
+                        if (!value) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
                         }
-                    });
-                }); });
-                app.get('/api/magazines', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var date, magazines;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                date = req.query.date;
-                                if (!date) return [3 /*break*/, 2];
-                                return [4 /*yield*/, magazine_1.todaysMagazines(date)];
-                            case 1:
-                                magazines = _a.sent();
-                                return [3 /*break*/, 4];
-                            case 2: return [4 /*yield*/, magazine_1.todaysMagazines()];
-                            case 3:
-                                magazines = _a.sent();
-                                _a.label = 4;
-                            case 4:
-                                res.send(JSON.stringify(magazines));
-                                return [2 /*return*/];
+                        tomorrow = new Date();
+                        tomorrow.setHours(tomorrow.getHours() + 1);
+                        cacher.saveCache(value, tomorrow);
+                        res.send(JSON.stringify(value));
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        router.get('/site', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var query, cacher, cache, value, tomorrow;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        query = req.query.kind;
+                        if (!typing_1.siteNames.includes(query)) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
                         }
-                    });
-                }); });
-                app.get('/api/member-links', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                    var kind, tommorow, cache;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                kind = req.query.kind;
-                                if (!typing_1.idleKinds.includes(kind)) {
-                                    res.sendStatus(400).end();
-                                    return [2 /*return*/];
-                                }
-                                tommorow = new Date();
-                                tommorow.setMonth(tommorow.getMonth() + 6);
-                                return [4 /*yield*/, cache_1.getCache(kind + "-member-link", tommorow, function () { return __awaiter(void 0, void 0, void 0, function () {
-                                        var linksForSites, links;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, Promise.all([
-                                                        blog_1.getBlogLinks2(kind),
-                                                        wiki_2.getWikiLinks(kind),
-                                                    ])];
-                                                case 1:
-                                                    linksForSites = _a.sent();
-                                                    links = {};
-                                                    linksForSites.forEach(function (site) {
-                                                        site
-                                                            .filter(function (nameLink) { return !!nameLink.link; })
-                                                            .forEach(function (nameLink) {
-                                                            var link = nameLink.link;
-                                                            var targetName = nameLink.name.replace(/\s+/, '');
-                                                            if (!links[targetName]) {
-                                                                links[targetName] = [link];
-                                                            }
-                                                            else {
-                                                                links[targetName].push(link);
-                                                            }
-                                                        });
-                                                    });
-                                                    return [2 /*return*/, Object.entries(links)
-                                                            .map(function (_a) {
-                                                            var name = _a[0], links = _a[1];
-                                                            return { name: name, links: links };
-                                                        })
-                                                            .sort(function (a, b) {
-                                                            if (a < b) {
-                                                                return -1;
-                                                            }
-                                                            else if (a > b) {
-                                                                return 1;
-                                                            }
-                                                            else {
-                                                                return 0;
-                                                            }
-                                                        })];
-                                            }
-                                        });
-                                    }); })];
-                            case 1:
-                                cache = _a.sent();
-                                if (cache) {
-                                    res.send(JSON.stringify(cache));
-                                    return [2 /*return*/];
-                                }
-                                res.sendStatus(500);
-                                return [2 /*return*/];
+                        cacher = new cache_1.Cacher(query);
+                        cache = cacher.getCache();
+                        if (cache) {
+                            res.send(JSON.stringify(cache));
+                            return [2 /*return*/];
                         }
-                    });
-                }); });
-                port = 3000;
-                console.log("server listen " + port);
-                app.listen(3000);
-                return [2 /*return*/];
-        }
+                        return [4 /*yield*/, scraper_1.scrape2(query)];
+                    case 1:
+                        value = _a.sent();
+                        if (!value) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
+                        }
+                        tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        cacher.saveCache(value, tomorrow);
+                        res.send(JSON.stringify(value));
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        router.get('/member-table', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var kind, cacher, cache, tables, tommorow;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        kind = req.query.kind;
+                        if (!typing_1.idleKinds.includes(kind)) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
+                        }
+                        cacher = new cache_1.Cacher(kind + "-member-table");
+                        cache = cacher.getCache();
+                        if (cache) {
+                            res.send(JSON.stringify(cache));
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, wiki_1.getMemberTable(kind)];
+                    case 1:
+                        tables = _a.sent();
+                        if (!tables) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
+                        }
+                        tommorow = new Date();
+                        tommorow.setDate(tommorow.getDate() + 10);
+                        cacher.saveCache(tables, tommorow);
+                        res.send(JSON.stringify(tables));
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        router.get('/magazines', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var date, magazines;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        date = req.query.date;
+                        if (!date) return [3 /*break*/, 2];
+                        return [4 /*yield*/, magazine_1.todaysMagazines(date)];
+                    case 1:
+                        magazines = _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, magazine_1.todaysMagazines()];
+                    case 3:
+                        magazines = _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        res.send(JSON.stringify(magazines));
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        router.get('/member-links', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var kind, tommorow, cache;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        kind = req.query.kind;
+                        if (!typing_1.idleKinds.includes(kind)) {
+                            res.sendStatus(400).end();
+                            return [2 /*return*/];
+                        }
+                        tommorow = new Date();
+                        tommorow.setMonth(tommorow.getMonth() + 6);
+                        return [4 /*yield*/, cache_1.getCache(kind + "-member-link", tommorow, function () { return __awaiter(void 0, void 0, void 0, function () {
+                                var linksForSites, links;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, Promise.all([
+                                                blog_1.getBlogLinks2(kind),
+                                                wiki_2.getWikiLinks(kind),
+                                            ])];
+                                        case 1:
+                                            linksForSites = _a.sent();
+                                            links = {};
+                                            linksForSites.forEach(function (site) {
+                                                site
+                                                    .filter(function (nameLink) { return !!nameLink.link; })
+                                                    .forEach(function (nameLink) {
+                                                    var link = nameLink.link;
+                                                    var targetName = nameLink.name.replace(/\s+/, '');
+                                                    if (!links[targetName]) {
+                                                        links[targetName] = [link];
+                                                    }
+                                                    else {
+                                                        links[targetName].push(link);
+                                                    }
+                                                });
+                                            });
+                                            return [2 /*return*/, Object.entries(links)
+                                                    .map(function (_a) {
+                                                    var name = _a[0], links = _a[1];
+                                                    return { name: name, links: links };
+                                                })
+                                                    .sort(function (a, b) {
+                                                    if (a < b) {
+                                                        return -1;
+                                                    }
+                                                    else if (a > b) {
+                                                        return 1;
+                                                    }
+                                                    else {
+                                                        return 0;
+                                                    }
+                                                })];
+                                    }
+                                });
+                            }); })];
+                    case 1:
+                        cache = _a.sent();
+                        if (cache) {
+                            res.send(JSON.stringify(cache));
+                            return [2 /*return*/];
+                        }
+                        res.sendStatus(500);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        app = express_1.default();
+        app.use('/api/v1', router);
+        port = 3000;
+        console.log("server listen " + port);
+        app.listen(3000);
+        return [2 /*return*/];
     });
 }); })();
