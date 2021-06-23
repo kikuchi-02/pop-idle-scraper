@@ -1,18 +1,18 @@
-<p>markdown works!</p>
+<div class="markdown__Wrapper">
+  <div class="markdown-input-container">
+    <div class="markdown-input-container-input">
+      <ace
+        class="ace-editor"
+        [config]="options"
+        [mode]="'markdown'"
+        [theme]="'monokai'"
+        [(value)]="value"
+        (valueChange)="onChange($event)"
+        #editor
+      ></ace>
+    </div>
 
-<div class="markdown-input-container">
-  <div class="markdown-input-container-input">
-    <ace
-      class="ace-editor"
-      [config]="options"
-      [mode]="'markdown'"
-      [theme]="'monokai'"
-      [(value)]="value"
-      (valueChange)="onChange($event)"
-      #editor
-    ></ace>
+    <app-preview class="markdown-input-container-result" [rawMarkdown]="value">
+    </app-preview>
   </div>
-
-  <app-preview class="markdown-input-container-result" [rawMarkdown]="value">
-  </app-preview>
 </div>
