@@ -13,7 +13,11 @@ export const ENV_SETTINGS = (() => {
   }
   return Object.entries(process.env).reduce((acc, [key, val]) => {
     if (val) {
-      acc[key] = val;
+      if (key === 'REDIS_PORT') {
+        acc[key] = parseInt(val, 10);
+      } else {
+        acc[key] = val;
+      }
     }
     return acc;
   }, {} as any) as Settings;
