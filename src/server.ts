@@ -24,7 +24,7 @@ import { getWikiLinks } from './scraper-utils/links/wiki';
 import { launch } from 'puppeteer';
 import { todaysMagazines } from './magazine';
 import { TextLintEngine } from 'textlint';
-
+import { join } from 'path';
 (async () => {
   const router = express.Router();
   const textLintEngine = new TextLintEngine();
@@ -195,7 +195,14 @@ import { TextLintEngine } from 'textlint';
   app.use(express.json());
   app.use('/api/v1', router);
 
-  const port = 3000;
+  if (process.env.STATIC_SERVE) {
+    app.use(express.static(join(process.cwd(), 'frontend/dist/frontend')));
+    app.get('*', (req, res) => {
+      res.sendFile(join(process.cwd(), 'frontend/dist/frontend/index.html'));
+    });
+  }
+
+  const port = process.env.PORT || 3000;
   console.log(`server listen ${port}`);
-  app.listen(3000);
+  app.listen(port);
 })();
