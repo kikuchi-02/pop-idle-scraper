@@ -10,8 +10,8 @@ export const ENV_SETTINGS = (() => {
   } catch (e) {
     console.error(e);
   }
-  const settings = new Settings(data || process.env);
   console.log(process.env);
+  const settings = new Settings(data || process.env);
   console.log({ settings });
   return settings;
 })();

@@ -55,7 +55,7 @@ export class Settings {
         if (key === 'REDIS_PORT') {
           v = parseInt(v, 10);
         }
-        this[key] = v;
+        Object.assign(this, { [key]: v });
       }
     });
   }
