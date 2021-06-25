@@ -22,6 +22,9 @@ const magazineText = async (): Promise<string> => {
 };
 
 const lineBroadCastMagazine = async () => {
+  if (!ENV_SETTINGS.LINE_CHANNEL_ACCESS_TOKEN) {
+    return;
+  }
   const clientConfig: ClientConfig = {
     channelAccessToken: ENV_SETTINGS.LINE_CHANNEL_ACCESS_TOKEN,
   };
@@ -38,6 +41,9 @@ const lineBroadCastMagazine = async () => {
 };
 
 const discordMagazine = async () => {
+  if (!ENV_SETTINGS.DISCORD_URL) {
+    return;
+  }
   const magazines = await magazineText();
 
   return axios.post(ENV_SETTINGS.DISCORD_URL, {

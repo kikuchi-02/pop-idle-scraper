@@ -124,6 +124,9 @@ export const createPuppeteerCluster = async () => {
 export const searchTweets = async (
   account: string
 ): Promise<ScrapedResult | undefined> => {
+  if (!ENV_SETTINGS.TWITTER_BEARER_TOKEN) {
+    return { siteTitle: account };
+  }
   let twitterClient;
   try {
     twitterClient = new Twitter({
