@@ -23,9 +23,11 @@ import { getMemberTable } from './scraper-utils/wiki';
 import { getWikiLinks } from './scraper-utils/links/wiki';
 import { launch } from 'puppeteer';
 import { todaysMagazines } from './magazine';
+import { TextLintEngine } from 'textlint';
 
 (async () => {
   const router = express.Router();
+  const textLintEngine = new TextLintEngine();
   // const cluster = await createPuppeteerCluster();
 
   router.get('*', (req, res, next) => {
@@ -179,7 +181,18 @@ import { todaysMagazines } from './magazine';
     return;
   });
 
+  router.post('/textlint', async (req, res) => {
+    const text = req.body?.text;
+    if (!text) {
+      res.sendStatus(400).end();
+      return;
+    }
+    const result = await textLintEngine.executeOnText(text);
+    res.send(result).end();
+  });
+
   const app = express();
+  app.use(express.json());
   app.use('/api/v1', router);
 
   const port = 3000;
