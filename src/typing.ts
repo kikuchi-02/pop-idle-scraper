@@ -44,6 +44,10 @@ export interface Settings {
   TWITTER_ACCESS_TOKEN_SECRET: string;
   LINE_CHANNEL_ACCESS_TOKEN: string;
   DISCORD_URL: string;
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_USER: string;
+  REDIS_PASSWORD: string;
 }
 
 export interface Tweet {

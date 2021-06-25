@@ -35,7 +35,7 @@ import { join } from 'path';
 
     // TODO
     // const cacher = new Cacher<ScrapedResult>(req.originalUrl);
-    // const cache = cacher.getCache();
+    // const cache = await cacher.getCache();
     // if (cache) {
     //   res.send();
     // }
@@ -50,7 +50,7 @@ import { join } from 'path';
     }
     const account = switchTwitterAccount(kind as IdleKind);
     const cacher = new Cacher<ScrapedResult>(account);
-    const cache = cacher.getCache();
+    const cache = await cacher.getCache();
     if (cache) {
       res.send(JSON.stringify(cache));
       return;
@@ -62,7 +62,7 @@ import { join } from 'path';
     }
     const tomorrow = new Date();
     tomorrow.setHours(tomorrow.getHours() + 1);
-    cacher.saveCache(value as ScrapedResult, tomorrow);
+    await cacher.saveCache(value as ScrapedResult, tomorrow);
     res.send(JSON.stringify(value));
     return;
   });
@@ -74,7 +74,7 @@ import { join } from 'path';
       return;
     }
     const cacher = new Cacher<ScrapedResult>(query as string);
-    const cache = cacher.getCache();
+    const cache = await cacher.getCache();
     if (cache) {
       res.send(JSON.stringify(cache));
       return;
@@ -87,7 +87,7 @@ import { join } from 'path';
     }
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    cacher.saveCache(value as ScrapedResult, tomorrow);
+    await cacher.saveCache(value as ScrapedResult, tomorrow);
     res.send(JSON.stringify(value));
     return;
   });
@@ -99,7 +99,7 @@ import { join } from 'path';
       return;
     }
     const cacher = new Cacher<string[]>(`${kind}-member-table`);
-    const cache = cacher.getCache();
+    const cache = await cacher.getCache();
     if (cache) {
       res.send(JSON.stringify(cache));
       return;
@@ -111,7 +111,7 @@ import { join } from 'path';
     }
     const tommorow = new Date();
     tommorow.setDate(tommorow.getDate() + 10);
-    cacher.saveCache(tables, tommorow);
+    await cacher.saveCache(tables, tommorow);
     res.send(JSON.stringify(tables));
     return;
   });

@@ -3,7 +3,7 @@ import { Cacher } from '../cache';
 
 const getHolydaies = async (): Promise<Date[]> => {
   const cacher = new Cacher<string[]>('holydaies');
-  let holydaies = cacher.getCache();
+  let holydaies = await cacher.getCache();
   if (holydaies) {
     return holydaies.map((d) => new Date(d));
   }
@@ -23,7 +23,7 @@ const getHolydaies = async (): Promise<Date[]> => {
       return acc;
     }, []);
   if (holydaies) {
-    cacher.saveCache(holydaies);
+    await cacher.saveCache(holydaies);
     return holydaies.map((d) => new Date(d));
   } else {
     return [];
@@ -49,11 +49,6 @@ const isDayOff = (date: Date, holidaies: Date[]) => {
   return false;
 };
 
-/**
- *
- * @param date like 2020-01-01
- * @returns
- */
 export const publishDates = async (date?: string): Promise<Date[]> => {
   const holydaies = await getHolydaies();
 
