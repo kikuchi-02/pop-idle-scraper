@@ -1,7 +1,7 @@
 import { readFileSync, writeFile, accessSync, constants } from 'fs';
 import { join } from 'path';
 import { CacheValue } from './typing';
-import { createClient, RedisClient } from 'redis';
+import { ClientOpts, createClient, RedisClient } from 'redis';
 import { ENV_SETTINGS } from './conf';
 import { promisify } from 'util';
 
@@ -24,10 +24,14 @@ export class Cacher<T> {
       return Promise.resolve(this.redisClient);
     }
     return new Promise<RedisClient>((resolve, reject) => {
-      const redisClient = createClient(
-        ENV_SETTINGS.REDIS_PORT,
-        ENV_SETTINGS.REDIS_HOST
-      );
+      const options: ClientOpts = {
+        port: ENV_SETTINGS.REDIS_PORT,
+        host: ENV_SETTINGS.REDIS_HOST,
+      };
+
+      options.password = ENV_SETTINGS.REDIS_PASSWORD;
+
+      const redisClient = createClient(options);
       redisClient.on('connect', () => {
         this.redisClient = redisClient;
         resolve(redisClient);

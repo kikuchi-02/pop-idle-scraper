@@ -46,7 +46,6 @@ export interface Settings {
   DISCORD_URL: string;
   REDIS_HOST: string;
   REDIS_PORT: number;
-  REDIS_USER: string;
   REDIS_PASSWORD: string;
 }
 
