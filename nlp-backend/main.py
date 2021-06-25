@@ -1,9 +1,13 @@
 import secrets
+from typing import List
 
 import yaml
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from pydantic import BaseModel
+
+from lib import ConstituencyIn, ConstituencyOut, constituency_parse
 
 with open("../envs.yaml", "r") as f:
     try:
@@ -19,8 +23,12 @@ security = HTTPBasic()
 
 
 def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = secrets.compare_digest(credentials.username, settings['USERNAME'])
-    correct_password = secrets.compare_digest(credentials.password, settings['PASSWORD'])
+    correct_username = secrets.compare_digest(
+        credentials.username, settings["USERNAME"]
+    )
+    correct_password = secrets.compare_digest(
+        credentials.password, settings["PASSWORD"]
+    )
     if not (correct_username and correct_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -43,9 +51,10 @@ def read_current_user(username: str = Depends(get_current_username)):
     return {"username": username}
 
 
-@router.get("/test")
-def read_item(item_id: int):
-    return {"hello": item_id}
+@router.post("/constituency-parse", response_model=List[List[ConstituencyOut]])
+def read_constituency_parse(item: ConstituencyIn):
+    result = constituency_parse(item.textBlocks)
+    return result
 
 
 app = FastAPI()

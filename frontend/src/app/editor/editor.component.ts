@@ -11,11 +11,11 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import EditorJS, { API, BlockAPI } from '@editorjs/editorjs';
+import EditorJS, { API, BlockAPI, OutputData } from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import Marker from '@editorjs/marker';
-import { from, Subject } from 'rxjs';
-import { auditTime, debounceTime, takeUntil } from 'rxjs/operators';
+import { from, Observable, Subject } from 'rxjs';
+import { auditTime, debounceTime, mergeMap, takeUntil } from 'rxjs/operators';
 import { EditableDirective } from './editable.directive';
 import { EditorService } from './editor.service';
 import { MarkerTool, MyInlineTool } from './tools';
@@ -124,6 +124,19 @@ export class EditorComponent implements OnInit, OnDestroy {
       });
   }
 
+  cleanupNode(node: Node): void {
+    // multiple className ?
+    if ((node as Element).className === 'text--underlined') {
+      (node as Element).insertAdjacentHTML('beforebegin', node.textContent);
+      (node as Element).remove();
+    } else if (node.nodeName === '#text') {
+    } else {
+      node.childNodes.forEach((child: Node) => {
+        this.cleanupNode(child);
+      });
+    }
+  }
+
   tokenize(): void {
     if (this.loading) {
       return;
@@ -131,20 +144,69 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.cd.markForCheck();
 
-    this.editorService
-      .tokenize('こんにちは、私の名前は田中太郎です。よろしくね。')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((val) => {
-        setTimeout(() => {
-          this.loading = false;
-          console.log(val);
-          this.cd.markForCheck();
-        }, 3000);
+    // const text = 'こんにちは、私の名前は田中太郎です。よろしくね。';
+    this.rawBlocks().forEach((block) => {
+      this.cleanupNode(block);
+      this.recursiveTextNodeFunc(block, (textNode) => {
+        this.editorService
+          .tokenize(textNode.textContent)
+          .subscribe((tokens) => {
+            console.log('some logic');
+            // TODO
+
+            const result = textNode.textContent;
+            textNode.textContent = result;
+          });
+      });
+    });
+    this.loading = false;
+    this.cd.markForCheck();
+  }
+
+  constituencyParse(): void {
+    this.getEditorOutput()
+      .pipe(
+        mergeMap((output) => {
+          const textBlocks = output.blocks.map((block) => block.data.text);
+          return this.editorService.constituencyParse(textBlocks);
+        }),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((result) => {
+        this.rawBlocks().forEach((block, i) => {
+          const targetBlock = result[i];
+          (block as Element).innerHTML = (block as Element).innerHTML
+            .split('。')
+            .map((sentence, j) => {
+              const targetSentence = targetBlock[j];
+              // TODO
+              return sentence;
+            })
+            .join();
+        });
+        this.cd.markForCheck();
       });
   }
 
+  private recursiveTextNodeFunc(
+    node: Node,
+    callback: (textNode: Node) => void
+  ): void {
+    if (node.nodeName === '#text') {
+      callback(node);
+    } else {
+      node.childNodes.forEach((child) => {
+        this.recursiveTextNodeFunc(child, callback);
+      });
+    }
+  }
+
+  private getEditorOutput(): Observable<OutputData> {
+    return from(this.editorJs.save());
+  }
+
   private save(): void {
-    this.editorJs.save().then((output) => {
+    this.getEditorOutput().subscribe((output) => {
       localStorage.setItem(this.outputDataKey, JSON.stringify(output));
     });
   }
@@ -160,6 +222,10 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.recursivelyApply(child, callback);
       });
     }
+  }
+
+  private rawBlocks(): Node[] {
+    return this.editor.nativeElement.querySelectorAll('.ce-block');
   }
 }
 
