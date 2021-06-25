@@ -36,17 +36,29 @@ export interface Cache {
   hinatazaka?: ScrapedResult[];
 }
 
-export interface Settings {
-  TWITTER_API_KEY: string;
-  TWITTER_API_SECRET_KEY: string;
-  TWITTER_BEARER_TOKEN: string;
-  TWITTER_ACCESS_TOKEN: string;
-  TWITTER_ACCESS_TOKEN_SECRET: string;
-  LINE_CHANNEL_ACCESS_TOKEN: string;
-  DISCORD_URL: string;
-  REDIS_HOST: string;
-  REDIS_PORT: number;
-  REDIS_PASSWORD: string;
+export class Settings {
+  TWITTER_API_KEY: string | undefined = undefined;
+  TWITTER_API_SECRET_KEY: string | undefined = undefined;
+  TWITTER_BEARER_TOKEN: string | undefined = undefined;
+  TWITTER_ACCESS_TOKEN: string | undefined = undefined;
+  TWITTER_ACCESS_TOKEN_SECRET: string | undefined = undefined;
+  LINE_CHANNEL_ACCESS_TOKEN: string | undefined = undefined;
+  DISCORD_URL: string | undefined = undefined;
+  REDIS_HOST: string | undefined = undefined;
+  REDIS_PORT: number | undefined = undefined;
+  REDIS_PASSWORD: string | undefined = undefined;
+
+  constructor(data: any) {
+    Reflect.ownKeys(this).forEach((key) => {
+      let v = data[key];
+      if (v !== undefined && v !== null) {
+        if (key === 'REDIS_PORT') {
+          v = parseInt(v, 10);
+        }
+        this[key] = v;
+      }
+    });
+  }
 }
 
 export interface Tweet {
