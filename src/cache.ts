@@ -29,8 +29,6 @@ export class Cacher<T> {
         host: ENV_SETTINGS.REDIS_HOST,
       };
 
-      options.password = ENV_SETTINGS.REDIS_PASSWORD;
-
       const redisClient = createClient(options);
       redisClient.on('connect', () => {
         this.redisClient = redisClient;
@@ -59,7 +57,7 @@ export class Cacher<T> {
         return promisify(redisClient.get).bind(redisClient)(this.redisKey);
       });
       if (cache) {
-        return JSON.parse(cache);
+        return JSON.parse(cache).value;
       }
     }
     if (this.cacheValue) {
