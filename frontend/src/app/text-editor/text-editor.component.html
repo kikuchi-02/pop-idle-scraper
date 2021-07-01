@@ -1,0 +1,27 @@
+<div class="wrapper">
+  <button (click)="save()">save</button>
+  <button (click)="restore()">restore</button>
+  <button (click)="copy2Clipboard()">copy to clipboard</button>
+  <div class="tool-box__wrapper">
+    <app-tool-box
+      [(value)]="innerHtml"
+      (setText)="setTextContent($event)"
+      (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
+    ></app-tool-box>
+  </div>
+
+  <div class="editor">
+    <div class="editor__subtitle-line" *ngIf="showSubtitleLine"></div>
+    <div
+      appEditable
+      #editor
+      class="editor__main"
+      placeholder="input text here"
+      [(ngModel)]="innerHtml"
+    ></div>
+
+    <div class="console__wrapper">
+      <app-console></app-console>
+    </div>
+  </div>
+</div>

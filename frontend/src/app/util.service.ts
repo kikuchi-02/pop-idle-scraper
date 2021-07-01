@@ -11,7 +11,7 @@ export class UtilService {
   constructor(private http: HttpClient) {}
 
   getMemberTable(idle: IdleKind): Observable<string[]> {
-    return this.http.get<Member[]>(`api/member-table?kind=${idle}`).pipe(
+    return this.http.get<Member[]>(`api/v1/member-table?kind=${idle}`).pipe(
       catchError((err) => {
         console.error(err);
         return of(undefined);
@@ -20,7 +20,7 @@ export class UtilService {
   }
 
   getMagazines(date: string): Observable<Magazine[][]> {
-    return this.http.get<Magazine[][]>(`api/magazines?date=${date}`).pipe(
+    return this.http.get<Magazine[][]>(`api/v1/magazines?date=${date}`).pipe(
       catchError((err) => {
         console.error(err);
         return of(undefined);

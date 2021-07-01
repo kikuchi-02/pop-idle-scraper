@@ -78,3 +78,10 @@ export interface MemberLinks {
   name: string;
   links: string[];
 }
+
+export interface ConstituencyResult {
+  subjI: number;
+  subjToken: string;
+  objI: number;
+  objToken: string;
+}
