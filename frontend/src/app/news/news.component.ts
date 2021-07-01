@@ -1,4 +1,10 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleSwitchState, Post } from '../typing';
@@ -58,24 +64,28 @@ export class NewsComponent implements OnInit, OnDestroy {
           hinatazakaBlog,
           hinatazakaTweet,
         ]) => {
-          this.nogizakaKoshiki = nogizakaKoshiki.posts;
-          this.nogizakaBlog = nogizakaBlog.posts;
-          this.nogizakaTwitter = nogizakaTweet.posts.map((tweet) => {
+          this.nogizakaKoshiki = nogizakaKoshiki?.posts || [];
+          this.nogizakaBlog = nogizakaBlog?.posts || [];
+          this.nogizakaTwitter = (nogizakaTweet?.posts || []).map((tweet) => {
             tweet.isTweet = true;
             return tweet;
           });
-          this.sakurazakaKoshiki = sakurazakaKoshiki.posts;
-          this.sakurazakaBlog = sakurazakaBlog.posts;
-          this.sakurazakaTwitter = sakurazakaTweet.posts.map((tweet) => {
-            tweet.isTweet = true;
-            return tweet;
-          });
-          this.hinatazakaKoshiki = hinatazakaKoshiki.posts;
-          this.hinatazakaBlog = hinatazakaBlog.posts;
-          this.hinatazakaTwitter = hinatazakaTweet.posts.map((tweet) => {
-            tweet.isTweet = true;
-            return tweet;
-          });
+          this.sakurazakaKoshiki = sakurazakaKoshiki?.posts || [];
+          this.sakurazakaBlog = sakurazakaBlog?.posts || [];
+          this.sakurazakaTwitter = (sakurazakaTweet?.posts || []).map(
+            (tweet) => {
+              tweet.isTweet = true;
+              return tweet;
+            }
+          );
+          this.hinatazakaKoshiki = hinatazakaKoshiki?.posts || [];
+          this.hinatazakaBlog = hinatazakaBlog?.posts || [];
+          this.hinatazakaTwitter = (hinatazakaTweet?.posts || []).map(
+            (tweet) => {
+              tweet.isTweet = true;
+              return tweet;
+            }
+          );
 
           this.switchIdle();
         },

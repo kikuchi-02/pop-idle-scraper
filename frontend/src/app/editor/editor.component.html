@@ -1,0 +1,35 @@
+<div class="wrapper">
+  <div class="tool">
+    <form (ngSubmit)="highlight()">
+      <label>hight light value</label>
+      <input [formControl]="highlightValue" />
+      <button>highlight</button>
+    </form>
+    <div>
+      <button (click)="removeOldHighlighted()">remove highlight</button>
+      <button (click)="editorJs.clear()">clear all</button>
+      <button (click)="copy2Clipboard()">copy to clipboard</button>
+    </div>
+    <div>
+      <button (click)="tokenize()">tokenize</button>
+      <button (click)="constituencyParse()">constituencyParse</button>
+    </div>
+  </div>
+  <div class="inner">
+    <div class="ruler">
+      <div class="ruler__boundary" cdkDrag cdkDragBoundary=".ruler">
+        <div class="ruler__box">定規</div>
+        <div class="ruler__line">
+          <div class="ruler__line--bold"></div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="editor_Input" #editor [textContent]="inner" appEditable></div> -->
+    <div class="input-area">
+      <div class="input-area__wrapper">
+        <div id="editorjs" #editor></div>
+      </div>
+    </div>
+  </div>
+  <div class="loading-modal" *ngIf="loading">loading</div>
+</div>
