@@ -7,6 +7,7 @@ import { HomeComponent } from './home/home.component';
 import { MarkdownComponent } from './markdown/markdown.component';
 import { MemberComponent } from './member/member.component';
 import { SubtitleComponent } from './subtitle/subtitle.component';
+import { TextEditorComponent } from './text-editor/text-editor.component';
 
 const routes: Routes = [
   {
@@ -18,6 +19,7 @@ const routes: Routes = [
   { path: 'google-search', component: GoogleSearchComponent },
   { path: 'markdown', component: MarkdownComponent },
   { path: 'editor', component: EditorComponent },
+  { path: 'text-editor', component: TextEditorComponent },
   { path: 'subtitle', component: SubtitleComponent },
   {
     path: '**',

@@ -1,0 +1,31 @@
+<div class="wrapper">
+  <div class="textlint-result">
+    <button
+      type="button"
+      class="textlint-result__collapsible-button"
+      (click)="collapse(content)"
+    >
+      Show TextLint result
+    </button>
+    <div
+      class="textlint-result__collapsible-content"
+      #content
+      [style.display]="'none'"
+    >
+      <ng-container *ngIf="!!textLintErrors; else tryTextLint">
+        <ng-container *ngIf="textLintErrors.length > 0; else NoTextLintErrors">
+          {{ 'count: ' + textLintErrors.length }}
+          <ul>
+            <li *ngFor="let error of textLintErrors">{{ error }}</li>
+          </ul>
+        </ng-container>
+        <ng-template #NoTextLintErrors>
+          <p>no text lint errors</p>
+        </ng-template>
+      </ng-container>
+      <ng-template #tryTextLint>
+        <p>try text lint</p>
+      </ng-template>
+    </div>
+  </div>
+</div>
