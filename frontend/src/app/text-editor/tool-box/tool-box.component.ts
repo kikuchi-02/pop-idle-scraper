@@ -9,7 +9,8 @@ import {
   Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { first, map, mergeMap, tap } from 'rxjs/operators';
 import { TextEditorService } from '../text-editor.service';
 
 @Component({
@@ -20,6 +21,7 @@ import { TextEditorService } from '../text-editor.service';
 })
 export class ToolBoxComponent implements OnInit {
   highlightValue = new FormControl('');
+  underlineValue = new FormControl('');
 
   @Input() value: string;
   @Output() valueChange = new EventEmitter<string>();
@@ -28,7 +30,10 @@ export class ToolBoxComponent implements OnInit {
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
 
+  @Output() loadingStateChange = new EventEmitter<boolean>();
+
   private toolBoxHighlightKey = 'tool-box-highlight-key';
+  private toolBoxUnderlineKey = 'tool-box-underline-key';
 
   constructor(
     private renderer: Renderer2,
@@ -38,6 +43,10 @@ export class ToolBoxComponent implements OnInit {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
       this.highlightValue.setValue(highlightValue);
+    }
+    const underlineValue = localStorage.getItem(this.toolBoxUnderlineKey);
+    if (underlineValue) {
+      this.underlineValue.setValue(underlineValue);
     }
   }
 
@@ -52,11 +61,9 @@ export class ToolBoxComponent implements OnInit {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
 
-    const className = 'text--highlighted';
-
     this.recursiveTextNodeFunc(elm, (textNode) => {
       const parent = textNode.parentNode as Element;
-      if (parent.tagName === 'SPAN' && parent.className === className) {
+      if (parent.tagName === 'MARK') {
         return;
       }
       const indexes = [...Array(textNode.nodeValue.length)]
@@ -68,13 +75,12 @@ export class ToolBoxComponent implements OnInit {
       const nodes: Node[] = [];
       let start = 0;
       for (const idx of indexes) {
-        const span = this.renderer.createElement('span');
-        this.renderer.addClass(span, className);
-        span.appendChild(this.renderer.createText(word));
+        const mark = this.renderer.createElement('mark');
+        mark.appendChild(this.renderer.createText(word));
         const text = textNode.nodeValue.substring(start, idx);
         start = idx + word.length;
 
-        nodes.push(this.renderer.createText(text), span);
+        nodes.push(this.renderer.createText(text), mark);
       }
       nodes.push(this.renderer.createText(textNode.nodeValue.substring(start)));
 
@@ -90,7 +96,7 @@ export class ToolBoxComponent implements OnInit {
   removeOldHighlighted(): void {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
-    elm.querySelectorAll('.text--highlighted').forEach((highlighted) => {
+    elm.querySelectorAll('mark').forEach((highlighted) => {
       highlighted.replaceWith(...highlighted.childNodes);
     });
 
@@ -98,7 +104,96 @@ export class ToolBoxComponent implements OnInit {
     this.valueChange.emit(this.value);
   }
 
+  underlineSentence(word: string) {
+    if (!word) {
+      return;
+    }
+
+    this.loadingStateChange.emit(true);
+
+    const className = 'text--underlined';
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+    this.textEditorService
+      .tokenize(word)
+      .pipe(
+        mergeMap((tokens) => {
+          const baseFormWord = tokens[0].basic_form;
+          if (baseFormWord === '*') {
+            alert(`「${word}」の表層系が見つかりません。`);
+            return of(undefined);
+          }
+          localStorage.setItem(this.toolBoxUnderlineKey, word);
+          return from(
+            Promise.all(
+              [...elm.childNodes].map((child) => {
+                if (
+                  child.nodeType === 'SPAN' &&
+                  child.className === className
+                ) {
+                  return Promise.resolve();
+                }
+                return this.includeWordForBaseForm(
+                  child.textContent,
+                  baseFormWord
+                ).then((surfaceForm) => {
+                  if (!surfaceForm) {
+                    return;
+                  }
+                  const underlineSpan = this.renderer.createElement('span');
+                  this.renderer.addClass(underlineSpan, className);
+                  this.renderer.addClass(
+                    underlineSpan,
+                    'text__tooltip-relative'
+                  );
+                  const tooltip = this.renderer.createElement('span');
+                  this.renderer.addClass(tooltip, 'text__tooltip-absolute');
+                  this.renderer.appendChild(
+                    tooltip,
+                    this.renderer.createText(surfaceForm)
+                  );
+                  this.renderer.appendChild(underlineSpan, tooltip);
+
+                  if (child.childNodes.length > 0) {
+                    child.childNodes.forEach((grandchild) => {
+                      this.renderer.appendChild(underlineSpan, grandchild);
+                    });
+                  }
+                  this.renderer.appendChild(child, underlineSpan);
+                });
+              })
+            )
+          );
+        })
+      )
+      .subscribe(() => {
+        this.value = elm.innerHTML;
+        this.valueChange.emit(this.value);
+        this.loadingStateChange.emit(false);
+      });
+  }
+
+  removeAllUnderlinedSentences(): void {
+    const className = 'text--underlined';
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+    elm.querySelectorAll(`.text__tooltip-absolute`).forEach((child) => {
+      child.remove();
+    });
+    elm.querySelectorAll(`.${className}`).forEach((child) => {
+      child.replaceWith(...child.childNodes);
+    });
+
+    this.value = elm.innerHTML;
+    this.valueChange.emit(this.value);
+  }
+
   reformat(): void {
+    if (
+      !confirm('highlightやunderlineなどのスタイルが外れますが実行しますか？')
+    ) {
+      return;
+    }
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
 
@@ -115,48 +210,23 @@ export class ToolBoxComponent implements OnInit {
     const textContent = [...elm.childNodes]
       .map((node) => {
         const content = node.textContent;
-        if (content.length < 2) {
-          return content;
-        }
-
-        const patterns = [
-          /「[^」]*」/g,
-          /（[^）]*）/g,
-          /\([^\)]*\)/g,
-          /\[[^\]]*\]/g,
-          /"[^"]*"/g,
-          /”[^”]*”/g,
-        ];
-        let masked = content;
-        patterns.forEach((pattern) => {
-          masked = masked.replace(pattern, (match) => '#'.repeat(match.length));
-        });
-
-        let result = '';
-        let start = 0;
-        [...Array(masked.length - 1)].forEach((_, i) => {
-          if (masked.charAt(i) === '。') {
-            result += content.substring(start, i + 1) + '\n';
-            start = i + 1;
-          }
-        });
-        result += content.substring(start);
-
-        return result;
+        return this.textEditorService.splitTextByNewline(content);
       })
       .join('\n');
     const splitted = textContent.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
 
     this.setText.emit(splitted);
   }
-  tokenize(): void {}
   constituencyParse(): void {}
 
   textLint(): void {
+    this.loadingStateChange.emit(true);
     this.textEditorService
       .textLint(this.getText())
       .pipe(first())
-      .subscribe(() => {});
+      .subscribe(() => {
+        this.loadingStateChange.emit(false);
+      });
   }
 
   scrollTop(): void {
@@ -184,5 +254,21 @@ export class ToolBoxComponent implements OnInit {
         this.recursiveTextNodeFunc(child, callback);
       });
     }
+  }
+
+  private async includeWordForBaseForm(
+    sentence: string,
+    baseFormWord: string
+  ): Promise<string> {
+    return this.textEditorService
+      .tokenize(sentence)
+      .pipe(
+        map(
+          (tokens): string =>
+            tokens.find((token) => token.basic_form === baseFormWord)
+              ?.surface_form
+        )
+      )
+      .toPromise();
   }
 }

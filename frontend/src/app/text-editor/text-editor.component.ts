@@ -5,8 +5,10 @@ import {
   Component,
   ElementRef,
   OnInit,
+  Renderer2,
   ViewChild,
 } from '@angular/core';
+import { BalloonComponent } from './balloon/balloon.component';
 
 import { EditableDirective } from './editable.directive';
 
@@ -22,18 +24,26 @@ export class TextEditorComponent implements OnInit, AfterViewInit {
 
   innerHtml = '';
   showSubtitleLine = true;
+  loading = false;
 
   @ViewChild(EditableDirective) editableDirective: EditableDirective;
+  @ViewChild(BalloonComponent) balloonComponent: BalloonComponent;
 
   private editorLocalStorageKey = 'editor-output';
 
-  constructor(private cd: ChangeDetectorRef) {
+  constructor(private cd: ChangeDetectorRef, private renderer: Renderer2) {
     this.restore();
   }
 
   ngOnInit(): void {}
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+    this.renderer.listen(
+      this.editableDirective.elementRef.nativeElement,
+      'mouseup',
+      (event) => this.balloonComponent.selectionChange(event)
+    );
+  }
 
   setTextContent(text: string): void {
     this.editableDirective.clearContent();
@@ -52,8 +62,15 @@ export class TextEditorComponent implements OnInit, AfterViewInit {
   }
 
   copy2Clipboard(): void {
+    const div = this.renderer.createElement('div');
+    div.innerHTML = this.innerHtml;
+
+    const textContent = [...div.childNodes]
+      .map((node) => node.textContent)
+      .join('\n');
+
     const elm = document.createElement('textarea');
-    elm.value = this.innerHtml;
+    elm.value = textContent;
     document.body.appendChild(elm);
     elm.select();
     elm.setSelectionRange(0, 9999);

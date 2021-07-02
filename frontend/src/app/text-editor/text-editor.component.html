@@ -7,14 +7,16 @@
       [(value)]="innerHtml"
       (setText)="setTextContent($event)"
       (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
+      (loadingStateChange)="loading = $event"
     ></app-tool-box>
   </div>
 
   <div class="editor">
-    <div class="editor__subtitle-line" *ngIf="showSubtitleLine"></div>
+    <div class="editor__subtitle" *ngIf="showSubtitleLine">
+      <div class="editor__subtitle-line"></div>
+    </div>
     <div
       appEditable
-      #editor
       class="editor__main"
       placeholder="input text here"
       [(ngModel)]="innerHtml"
@@ -24,4 +26,6 @@
       <app-console></app-console>
     </div>
   </div>
+  <app-balloon></app-balloon>
+  <div class="loading-modal" *ngIf="loading">loading</div>
 </div>
