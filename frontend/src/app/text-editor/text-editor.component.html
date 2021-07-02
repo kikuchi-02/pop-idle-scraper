@@ -17,7 +17,6 @@
     </div>
     <div
       appEditable
-      #editor
       class="editor__main"
       placeholder="input text here"
       [(ngModel)]="innerHtml"
@@ -27,5 +26,6 @@
       <app-console></app-console>
     </div>
   </div>
+  <app-balloon></app-balloon>
   <div class="loading-modal" *ngIf="loading">loading</div>
 </div>

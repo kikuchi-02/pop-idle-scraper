@@ -8,6 +8,7 @@ import {
   Renderer2,
   ViewChild,
 } from '@angular/core';
+import { BalloonComponent } from './balloon/balloon.component';
 
 import { EditableDirective } from './editable.directive';
 
@@ -26,6 +27,7 @@ export class TextEditorComponent implements OnInit, AfterViewInit {
   loading = false;
 
   @ViewChild(EditableDirective) editableDirective: EditableDirective;
+  @ViewChild(BalloonComponent) balloonComponent: BalloonComponent;
 
   private editorLocalStorageKey = 'editor-output';
 
@@ -35,7 +37,13 @@ export class TextEditorComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {}
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+    this.renderer.listen(
+      this.editableDirective.elementRef.nativeElement,
+      'mouseup',
+      (event) => this.balloonComponent.selectionChange(event)
+    );
+  }
 
   setTextContent(text: string): void {
     this.editableDirective.clearContent();

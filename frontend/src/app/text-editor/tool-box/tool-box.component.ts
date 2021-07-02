@@ -210,34 +210,7 @@ export class ToolBoxComponent implements OnInit {
     const textContent = [...elm.childNodes]
       .map((node) => {
         const content = node.textContent;
-        if (content.length < 2) {
-          return content;
-        }
-
-        const patterns = [
-          /「[^」]*」/g,
-          /（[^）]*）/g,
-          /\([^\)]*\)/g,
-          /\[[^\]]*\]/g,
-          /"[^"]*"/g,
-          /”[^”]*”/g,
-        ];
-        let masked = content;
-        patterns.forEach((pattern) => {
-          masked = masked.replace(pattern, (match) => '#'.repeat(match.length));
-        });
-
-        let result = '';
-        let start = 0;
-        [...Array(masked.length - 1)].forEach((_, i) => {
-          if (masked.charAt(i) === '。') {
-            result += content.substring(start, i + 1) + '\n';
-            start = i + 1;
-          }
-        });
-        result += content.substring(start);
-
-        return result;
+        return this.textEditorService.splitTextByNewline(content);
       })
       .join('\n');
     const splitted = textContent.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
