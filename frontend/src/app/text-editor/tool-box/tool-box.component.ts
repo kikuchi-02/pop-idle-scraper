@@ -9,7 +9,8 @@ import {
   Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { from, Observable, of } from 'rxjs';
+import { first, map, mergeMap, tap } from 'rxjs/operators';
 import { TextEditorService } from '../text-editor.service';
 
 @Component({
@@ -20,6 +21,7 @@ import { TextEditorService } from '../text-editor.service';
 })
 export class ToolBoxComponent implements OnInit {
   highlightValue = new FormControl('');
+  underlineValue = new FormControl('');
 
   @Input() value: string;
   @Output() valueChange = new EventEmitter<string>();
@@ -95,6 +97,84 @@ export class ToolBoxComponent implements OnInit {
     this.valueChange.emit(this.value);
   }
 
+  underlineSentence(word: string) {
+    if (!word) {
+      return;
+    }
+    const className = 'text--underlined';
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+    this.textEditorService
+      .tokenize(word)
+      .pipe(
+        mergeMap((tokens) => {
+          const baseFormWord = tokens[0].basic_form;
+          if (baseFormWord === '*') {
+            return of(undefined);
+          }
+          return from(
+            Promise.all(
+              [...elm.childNodes].map((child) => {
+                if (
+                  child.nodeType === 'SPAN' &&
+                  child.className === className
+                ) {
+                  return Promise.resolve();
+                }
+                return this.includeWordForBaseForm(
+                  child.textContent,
+                  baseFormWord
+                ).then((surfaceForm) => {
+                  if (!surfaceForm) {
+                    return;
+                  }
+                  const underlineSpan = this.renderer.createElement('span');
+                  this.renderer.addClass(underlineSpan, className);
+                  this.renderer.addClass(
+                    underlineSpan,
+                    'text__tooltip-relative'
+                  );
+                  const tooltip = this.renderer.createElement('span');
+                  this.renderer.addClass(tooltip, 'text__tooltip-absolute');
+                  this.renderer.appendChild(
+                    tooltip,
+                    this.renderer.createText(surfaceForm)
+                  );
+                  this.renderer.appendChild(underlineSpan, tooltip);
+
+                  if (child.childNodes.length > 0) {
+                    child.childNodes.forEach((grandchild) => {
+                      this.renderer.appendChild(underlineSpan, grandchild);
+                    });
+                  }
+                  this.renderer.appendChild(child, underlineSpan);
+                });
+              })
+            )
+          );
+        })
+      )
+      .subscribe(() => {
+        this.value = elm.innerHTML;
+        this.valueChange.emit(this.value);
+      });
+  }
+
+  removeAllUnderlinedSentences(): void {
+    const className = 'text--underlined';
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+    elm.querySelectorAll(`.text__tooltip-absolute`).forEach((child) => {
+      child.remove();
+    });
+    elm.querySelectorAll(`.${className}`).forEach((child) => {
+      child.replaceWith(...child.childNodes);
+    });
+
+    this.value = elm.innerHTML;
+    this.valueChange.emit(this.value);
+  }
+
   reformat(): void {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
@@ -146,7 +226,12 @@ export class ToolBoxComponent implements OnInit {
 
     this.setText.emit(splitted);
   }
-  tokenize(): void {}
+  tokenize(): void {
+    this.includeWordForBaseForm(
+      'ある日の暮方の事である。',
+      this.highlightValue.value
+    );
+  }
   constituencyParse(): void {}
 
   textLint(): void {
@@ -181,5 +266,21 @@ export class ToolBoxComponent implements OnInit {
         this.recursiveTextNodeFunc(child, callback);
       });
     }
+  }
+
+  private async includeWordForBaseForm(
+    sentence: string,
+    baseFormWord: string
+  ): Promise<string> {
+    return this.textEditorService
+      .tokenize(sentence)
+      .pipe(
+        map(
+          (tokens): string =>
+            tokens.find((token) => token.basic_form === baseFormWord)
+              ?.surface_form
+        )
+      )
+      .toPromise();
   }
 }

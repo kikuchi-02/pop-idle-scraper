@@ -6,6 +6,15 @@
       </form>
       <button (click)="removeOldHighlighted()">remove highlight</button>
     </div>
+    <div class="underline">
+      <form (ngSubmit)="underlineSentence(underlineValue.value)">
+        <input
+          [formControl]="underlineValue"
+          placeholder="underline by base form"
+        />
+      </form>
+      <button (click)="removeAllUnderlinedSentences()">remove underline</button>
+    </div>
     <div class="scroller">
       <button (click)="scrollTop()">↑</button>
     </div>
@@ -13,7 +22,7 @@
   <div class="row">
     <button (click)="reformat()">reformat</button>
     <button (click)="textLint()">textLint</button>
-    <button (click)="tokenize()" [disabled]="true">tokenize</button>
+    <button (click)="tokenize()">tokenize</button>
     <button (click)="constituencyParse()" [disabled]="true">
       constituencyParse
     </button>
