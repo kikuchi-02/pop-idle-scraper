@@ -1,8 +1,14 @@
 import { ACE_CONFIG, AceModule } from 'ngx-ace-wrapper';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MAT_COLOR_FORMATS,
+  NGX_MAT_COLOR_FORMATS,
+  NgxMatColorPickerModule,
+} from '@angular-material-components/color-picker';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { BalloonComponent } from './text-editor/balloon/balloon.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { ChatComponent } from './chat/chat.component';
@@ -52,6 +58,7 @@ import { UtilService } from './util.service';
     TextEditorComponent,
     ConsoleComponent,
     ToolBoxComponent,
+    BalloonComponent,
   ],
   imports: [
     BrowserModule,
@@ -71,6 +78,7 @@ import { UtilService } from './util.service';
     MatCheckboxModule,
     AceModule,
     DragDropModule,
+    NgxMatColorPickerModule,
   ],
   providers: [
     UtilService,
@@ -78,6 +86,7 @@ import { UtilService } from './util.service';
       provide: ACE_CONFIG,
       useValue: [],
     },
+    { provide: MAT_COLOR_FORMATS, useValue: NGX_MAT_COLOR_FORMATS },
   ],
   bootstrap: [AppComponent],
 })
