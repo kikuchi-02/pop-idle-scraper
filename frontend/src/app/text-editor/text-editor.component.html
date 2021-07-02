@@ -11,7 +11,9 @@
   </div>
 
   <div class="editor">
-    <div class="editor__subtitle-line" *ngIf="showSubtitleLine"></div>
+    <div class="editor__subtitle" *ngIf="showSubtitleLine">
+      <div class="editor__subtitle-line"></div>
+    </div>
     <div
       appEditable
       #editor
