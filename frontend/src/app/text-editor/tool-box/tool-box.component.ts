@@ -30,7 +30,10 @@ export class ToolBoxComponent implements OnInit {
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
 
+  @Output() loadingStateChange = new EventEmitter<boolean>();
+
   private toolBoxHighlightKey = 'tool-box-highlight-key';
+  private toolBoxUnderlineKey = 'tool-box-underline-key';
 
   constructor(
     private renderer: Renderer2,
@@ -40,6 +43,10 @@ export class ToolBoxComponent implements OnInit {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
       this.highlightValue.setValue(highlightValue);
+    }
+    const underlineValue = localStorage.getItem(this.toolBoxUnderlineKey);
+    if (underlineValue) {
+      this.underlineValue.setValue(underlineValue);
     }
   }
 
@@ -101,6 +108,9 @@ export class ToolBoxComponent implements OnInit {
     if (!word) {
       return;
     }
+
+    this.loadingStateChange.emit(true);
+
     const className = 'text--underlined';
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
@@ -110,8 +120,10 @@ export class ToolBoxComponent implements OnInit {
         mergeMap((tokens) => {
           const baseFormWord = tokens[0].basic_form;
           if (baseFormWord === '*') {
+            alert(`「${word}」の表層系が見つかりません。`);
             return of(undefined);
           }
+          localStorage.setItem(this.toolBoxUnderlineKey, word);
           return from(
             Promise.all(
               [...elm.childNodes].map((child) => {
@@ -157,6 +169,7 @@ export class ToolBoxComponent implements OnInit {
       .subscribe(() => {
         this.value = elm.innerHTML;
         this.valueChange.emit(this.value);
+        this.loadingStateChange.emit(false);
       });
   }
 
@@ -176,6 +189,11 @@ export class ToolBoxComponent implements OnInit {
   }
 
   reformat(): void {
+    if (
+      !confirm('highlightやunderlineなどのスタイルが外れますが実行しますか？')
+    ) {
+      return;
+    }
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
 
@@ -226,19 +244,16 @@ export class ToolBoxComponent implements OnInit {
 
     this.setText.emit(splitted);
   }
-  tokenize(): void {
-    this.includeWordForBaseForm(
-      'ある日の暮方の事である。',
-      this.highlightValue.value
-    );
-  }
   constituencyParse(): void {}
 
   textLint(): void {
+    this.loadingStateChange.emit(true);
     this.textEditorService
       .textLint(this.getText())
       .pipe(first())
-      .subscribe(() => {});
+      .subscribe(() => {
+        this.loadingStateChange.emit(false);
+      });
   }
 
   scrollTop(): void {

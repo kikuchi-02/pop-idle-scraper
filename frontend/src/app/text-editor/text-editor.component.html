@@ -7,6 +7,7 @@
       [(value)]="innerHtml"
       (setText)="setTextContent($event)"
       (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
+      (loadingStateChange)="loading = $event"
     ></app-tool-box>
   </div>
 
@@ -26,4 +27,5 @@
       <app-console></app-console>
     </div>
   </div>
+  <div class="loading-modal" *ngIf="loading">loading</div>
 </div>
