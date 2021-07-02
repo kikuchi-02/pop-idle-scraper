@@ -63,8 +63,11 @@ $toolbar-height: 100px;
 
     .text {
       &--highlighted {
-        background-color: red !important;
+        background-color: red;
         opacity: 7;
+      }
+      &--underlined {
+        border-bottom: solid 2px orange;
       }
     }
   }

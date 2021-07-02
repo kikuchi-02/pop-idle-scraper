@@ -52,11 +52,9 @@ export class ToolBoxComponent implements OnInit {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
 
-    const className = 'text--highlighted';
-
     this.recursiveTextNodeFunc(elm, (textNode) => {
       const parent = textNode.parentNode as Element;
-      if (parent.tagName === 'SPAN' && parent.className === className) {
+      if (parent.tagName === 'MARK') {
         return;
       }
       const indexes = [...Array(textNode.nodeValue.length)]
@@ -68,13 +66,12 @@ export class ToolBoxComponent implements OnInit {
       const nodes: Node[] = [];
       let start = 0;
       for (const idx of indexes) {
-        const span = this.renderer.createElement('span');
-        this.renderer.addClass(span, className);
-        span.appendChild(this.renderer.createText(word));
+        const mark = this.renderer.createElement('mark');
+        mark.appendChild(this.renderer.createText(word));
         const text = textNode.nodeValue.substring(start, idx);
         start = idx + word.length;
 
-        nodes.push(this.renderer.createText(text), span);
+        nodes.push(this.renderer.createText(text), mark);
       }
       nodes.push(this.renderer.createText(textNode.nodeValue.substring(start)));
 
@@ -90,7 +87,7 @@ export class ToolBoxComponent implements OnInit {
   removeOldHighlighted(): void {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
-    elm.querySelectorAll('.text--highlighted').forEach((highlighted) => {
+    elm.querySelectorAll('mark').forEach((highlighted) => {
       highlighted.replaceWith(...highlighted.childNodes);
     });
 
