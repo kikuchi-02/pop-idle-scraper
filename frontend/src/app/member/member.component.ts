@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IdleSwitchState, Member } from '../typing';
-import { UtilService } from '../util.service';
+import { UtilService } from '../services/util.service';
 
 @Component({
   selector: 'app-member',

@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { IdleSwitchState, Post } from '../typing';
+import { IdleSwitchState, Post } from '../../typing';
 import { NewsService } from './news.service';
 
 @Component({
