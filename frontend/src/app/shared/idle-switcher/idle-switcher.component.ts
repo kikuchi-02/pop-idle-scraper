@@ -6,7 +6,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { IdleKind, IdleSwitchState } from '../typing';
+import { IdleKind, IdleSwitchState } from '../../typing';
 
 @Component({
   selector: 'app-idle-switcher',
