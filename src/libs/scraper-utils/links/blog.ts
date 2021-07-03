@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parseHtml, Element } from 'libxmljs2';
 import { Page } from 'puppeteer';
-import { BlogLink, IdleKind } from '../../typing';
+import { BlogLink, IdleKind } from '../../../typing';
 
 const getBaseUrl = (url: string) => {
   const u = new URL(url);
@@ -177,7 +177,7 @@ const hinatazakaBlogLinks2 = async (): Promise<BlogLink[]> => {
 
       let link = (node as Element).attr('value')?.value();
       if (link?.startsWith('/')) {
-        link = getBaseUrl(url) + link
+        link = getBaseUrl(url) + link;
       }
 
       return { name, link };

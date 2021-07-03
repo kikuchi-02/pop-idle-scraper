@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parseHtml, Element } from 'libxmljs2';
 import { Page } from 'puppeteer';
-import { Post, ScrapedResult } from '../typing';
+import { Post, ScrapedResult } from '../../typing';
 import { setLanguage } from './utils';
 
 const defaultLimit = 7;

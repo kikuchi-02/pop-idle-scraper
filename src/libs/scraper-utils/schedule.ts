@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 
 import axios from 'axios';
 import { launch } from 'puppeteer';
-import { setLanguage } from './scraper-utils/utils';
+import { setLanguage } from './utils';
 
 const nogizaka = async () => {
   const browser = await launch();

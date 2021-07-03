@@ -1,4 +1,4 @@
-import { readFileSync, writeFile, accessSync, constants } from 'fs';
+import { readFileSync, writeFile } from 'fs';
 import { join } from 'path';
 import { CacheValue } from './typing';
 import { ClientOpts, createClient, RedisClient } from 'redis';

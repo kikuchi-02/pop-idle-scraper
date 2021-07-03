@@ -1,7 +1,7 @@
 import { Client, ClientConfig, Message } from '@line/bot-sdk';
 import axios from 'axios';
-import { ENV_SETTINGS } from './conf';
-import { todaysMagazines } from './magazine';
+import { ENV_SETTINGS } from '../conf';
+import { todaysMagazines } from '../libs/magazine';
 
 const magazineText = async (): Promise<string> => {
   const magazines = await todaysMagazines();

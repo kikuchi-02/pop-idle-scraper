@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:prod": "env TZ=Asia/Tokyo STATIC_SERVE=True ts-node -T src/server.ts",
+    "start:prod": "env TZ=Asia/Tokyo ts-node -T src/server.ts",
     "start": "env TZ=Asia/Tokyo ts-node-dev --respawn src/server.ts",
     "ws-server": "env TZ=Asia/Tokyo ts-node src/ws-server.ts",
     "build": "tsc"
@@ -16,6 +16,7 @@
     "@line/bot-sdk": "^7.3.0",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
+    "compression": "^1.7.4",
     "express": "^4.17.1",
     "js-yaml": "^4.1.0",
     "libxmljs2": "^0.26.7",
@@ -30,6 +31,7 @@
     "ws": "^7.4.5"
   },
   "devDependencies": {
+    "@types/compression": "^1.7.0",
     "@types/express": "^4.17.11",
     "@types/js-yaml": "^4.0.0",
     "@types/puppeteer": "^5.4.3",

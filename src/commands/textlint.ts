@@ -1,6 +1,5 @@
 import { TextLintEngine } from 'textlint';
 import { join } from 'path';
-import { writeFileSync } from 'fs';
 
 const textLintEngine = new TextLintEngine();
 

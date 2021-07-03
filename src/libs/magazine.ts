@@ -1,5 +1,5 @@
-import { publishDates } from './scraper-utils/time';
-import { Magazine } from './typing';
+import { publishDates } from '../libs/scraper-utils/time';
+import { Magazine } from '../typing';
 /*
 楽天マガジン要チェック雑誌
 芸能系
