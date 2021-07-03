@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { IdleKind, Magazine, Member } from './typing';
+import { IdleKind, Magazine, Member } from './../typing';
 
 @Injectable({
   providedIn: 'root',

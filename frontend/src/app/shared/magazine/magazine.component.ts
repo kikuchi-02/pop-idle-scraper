@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
-import { Magazine } from '../typing';
-import { UtilService } from '../util.service';
+import { Magazine } from '../../typing';
+import { UtilService } from '../../services/util.service';
 
 @Component({
   selector: 'app-magazine',

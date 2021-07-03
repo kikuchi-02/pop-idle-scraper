@@ -5,9 +5,10 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+
 import { Subject } from 'rxjs';
+import { WsService } from '../../services/ws.service';
 import { takeUntil } from 'rxjs/operators';
-import { WsService } from '../ws.service';
 
 interface Message {
   message: string;
@@ -49,11 +50,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.unsubscriber$.next();
-    
   }
 
-  save() {
-  }
+  save() {}
 
   change(event: string) {
     this.wsService.sendMessage({ message: event });
