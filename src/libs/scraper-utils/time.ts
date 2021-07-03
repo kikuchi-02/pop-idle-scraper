@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Cacher } from '../cache';
+import { Cacher } from '../../cache';
 
 const getHolydaies = async (): Promise<Date[]> => {
   const cacher = new Cacher<string[]>('holydaies');

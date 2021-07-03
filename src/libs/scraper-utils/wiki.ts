@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { parseHtml, Element } from 'libxmljs2';
-import { IdleKind } from '../typing';
+import { IdleKind } from '../../typing';
 import { switchWikiLink } from './links/wiki';
 
 const formatTable = (element: Element): Element => {
@@ -55,7 +55,7 @@ export const extractExternalLinks = (htmlString: string) => {
   return links;
 };
 
-export const getMemberTable = async (idle: IdleKind): Promise<string[]> => {
+export const memberTable = async (idle: IdleKind): Promise<string[]> => {
   const baseUrl = 'https://ja.wikipedia.org';
   const url = baseUrl + switchWikiLink(idle);
   const homeResponse = await axios.get(url);

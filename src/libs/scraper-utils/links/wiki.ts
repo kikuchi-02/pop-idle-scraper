@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { parseHtml, Element } from 'libxmljs2';
-import { Page } from 'puppeteer';
-import { BlogLink, IdleKind } from '../../typing';
+import { BlogLink, IdleKind } from '../../../typing';
 
 export const switchWikiLink = (idle: IdleKind): string => {
   switch (idle) {
@@ -18,7 +17,6 @@ export const switchWikiLink = (idle: IdleKind): string => {
       throw Error(`not impletemnetd type ${idle}`);
   }
 };
-
 
 const parseTable = (membersTable: Element): string[][] => {
   const members: string[][] = [];
