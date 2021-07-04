@@ -25,10 +25,16 @@ import { launch } from 'puppeteer';
 import { todaysMagazines } from './magazine';
 import { TextLintEngine } from 'textlint';
 import { join } from 'path';
+
+import { createConnection, getConnection } from 'typeorm';
+import { User } from './entity/User';
+import { dbConfig } from './conf';
+
 (async () => {
   const router = express.Router();
   const textLintEngine = new TextLintEngine();
   // const cluster = await createPuppeteerCluster();
+  const connection = await createConnection(dbConfig);
 
   router.get('*', (req, res, next) => {
     console.log('request', req.path);
@@ -40,6 +46,18 @@ import { join } from 'path';
     //   res.send();
     // }
     next();
+  });
+
+  router.get('/login', async (req, res) => {
+    console.log('hello');
+    const result = await connection
+      // .manager.find(User)
+      .createQueryBuilder()
+      .select('count(*)')
+      .from(User, 'user')
+      .getRawOne();
+    console.log('result', result);
+    res.send('hello');
   });
 
   router.get('/twitter', async (req, res) => {
