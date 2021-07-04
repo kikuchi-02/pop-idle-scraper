@@ -22,11 +22,11 @@ const magazineText = async (): Promise<string> => {
 };
 
 const lineBroadCastMagazine = async () => {
-  if (!ENV_SETTINGS.LINE_CHANNEL_ACCESS_TOKEN) {
+  if (!ENV_SETTINGS.LINE.CHANNEL_ACCESS_TOKEN) {
     return;
   }
   const clientConfig: ClientConfig = {
-    channelAccessToken: ENV_SETTINGS.LINE_CHANNEL_ACCESS_TOKEN,
+    channelAccessToken: ENV_SETTINGS.LINE.CHANNEL_ACCESS_TOKEN,
   };
 
   const client = new Client(clientConfig);
@@ -41,12 +41,12 @@ const lineBroadCastMagazine = async () => {
 };
 
 const discordMagazine = async () => {
-  if (!ENV_SETTINGS.DISCORD_URL) {
+  if (!ENV_SETTINGS.DISCORD.URL) {
     return;
   }
   const magazines = await magazineText();
 
-  return axios.post(ENV_SETTINGS.DISCORD_URL, {
+  return axios.post(ENV_SETTINGS.DISCORD.URL, {
     content: magazines,
   });
 };

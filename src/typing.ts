@@ -36,30 +36,33 @@ export interface Cache {
   hinatazaka?: ScrapedResult[];
 }
 
-export class Settings {
-  TWITTER_API_KEY: string | undefined = undefined;
-  TWITTER_API_SECRET_KEY: string | undefined = undefined;
-  TWITTER_BEARER_TOKEN: string | undefined = undefined;
-  TWITTER_ACCESS_TOKEN: string | undefined = undefined;
-  TWITTER_ACCESS_TOKEN_SECRET: string | undefined = undefined;
-  LINE_CHANNEL_ACCESS_TOKEN: string | undefined = undefined;
-  DISCORD_URL: string | undefined = undefined;
-  REDIS_HOST: string | undefined = undefined;
-  REDIS_PORT: number | undefined = undefined;
-  REDIS_PASSWORD: string | undefined = undefined;
-  JWT_SECRET: string | undefined = undefined;
-
-  constructor(data: any) {
-    Reflect.ownKeys(this).forEach((key) => {
-      let v = data[key];
-      if (v !== undefined && v !== null) {
-        if (key === 'REDIS_PORT') {
-          v = parseInt(v, 10);
-        }
-        Object.assign(this, { [key]: v });
-      }
-    });
-  }
+export interface Settings {
+  TWITTER: {
+    API_KEY: string;
+    API_SECRET: string;
+    BEARER_TOKEN: string;
+    ACCESS_TOKEN: string;
+    ACCESS_TOKEN_SECRET: string;
+  };
+  LINE: {
+    CHANNEL_ACCESS_TOKEN: string;
+  };
+  DISCORD: {
+    URL: string;
+  };
+  REDIS: {
+    HOST: string;
+    PORT: number;
+  };
+  SALT_ROUND: number;
+  DATABASE: {
+    NAME: string;
+    HOST: string;
+    PORT: number;
+    USERNAME: string;
+    PASSWORD: string;
+  };
+  JWT_SECRET: string;
 }
 
 export interface Tweet {

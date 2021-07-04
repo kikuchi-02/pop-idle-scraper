@@ -1,5 +1,5 @@
 import { Server, Data } from 'ws';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 
 const server = new Server({ port: 8081 });
 

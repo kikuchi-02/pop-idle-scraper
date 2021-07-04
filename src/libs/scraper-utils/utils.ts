@@ -1,5 +1,7 @@
 import { Page } from 'puppeteer';
 
+declare var navigator;
+
 export const formatDate = (_date: string | number): string => {
   const date = new Date(_date);
   const str =
