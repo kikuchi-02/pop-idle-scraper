@@ -18,13 +18,13 @@ export const switchTwitterAccount = (idle: IdleKind) => {
 export const searchTweets = async (
   account: string
 ): Promise<ScrapedResult | undefined> => {
-  if (!ENV_SETTINGS.TWITTER_BEARER_TOKEN) {
+  if (!ENV_SETTINGS.TWITTER.BEARER_TOKEN) {
     return { siteTitle: account };
   }
   let twitterClient;
   try {
     twitterClient = new Twitter({
-      bearer_token: ENV_SETTINGS.TWITTER_BEARER_TOKEN,
+      bearer_token: ENV_SETTINGS.TWITTER.BEARER_TOKEN,
     });
   } catch (e) {
     console.error('error around twitter keys', e);
