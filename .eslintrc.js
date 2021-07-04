@@ -12,5 +12,11 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     'require-jsdoc': 0,
+    'new-cap': [
+      'error',
+      {
+        capIsNew: false,
+      },
+    ],
   },
 };
