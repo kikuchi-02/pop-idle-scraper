@@ -27,18 +27,6 @@ app.get('*', (req, res, next) => {
   next();
 });
 
-app.get('/login', async (req, res) => {
-  // console.log('hello');
-  // const result = await connection
-  //   // .manager.find(User)
-  //   .createQueryBuilder()
-  //   .select('count(*)')
-  //   .from(User, 'user')
-  //   .getRawOne();
-  // console.log('result', result);
-  res.send('hello');
-});
-
 const routeV1 = express.Router();
 
 routeV1.get('/twitter', twitterController.getTwitter);

@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class models1619872797647 implements MigrationInterface {
-    name = 'models1619872797647'
+export class AddUser1625376559717 implements MigrationInterface {
+    name = 'AddUser1625376559717'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "idle_group" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "start" date, "end" date, CONSTRAINT "PK_ab05e59b43ed5f8449e4fb240d7" PRIMARY KEY ("id"))`);
@@ -13,6 +13,7 @@ export class models1619872797647 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "magazine" ("id" SERIAL NOT NULL, "title" character varying NOT NULL, "publish_date" integer NOT NULL, "publish_month" integer NOT NULL, "publish_week" integer NOT NULL, CONSTRAINT "PK_cc5e06a8dfb114bc452138aef3d" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "twitter_account" ("id" SERIAL NOT NULL, "username" character varying NOT NULL, "profileName" character varying NOT NULL, CONSTRAINT "PK_c6df4b1fb4dad7c9e601216b5e3" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "tweet" ("id" SERIAL NOT NULL, "body" text NOT NULL, "date" date NOT NULL, "accountId" integer, CONSTRAINT "PK_6dbf0db81305f2c096871a585f6" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "user" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "idle_group_activity_idle_groups_idle_group" ("idleGroupActivityId" integer NOT NULL, "idleGroupId" integer NOT NULL, CONSTRAINT "PK_5be1f5a340811ccc0816880d936" PRIMARY KEY ("idleGroupActivityId", "idleGroupId"))`);
         await queryRunner.query(`CREATE INDEX "IDX_0b59c3762c7b51c1fcdbecc156" ON "idle_group_activity_idle_groups_idle_group" ("idleGroupActivityId") `);
         await queryRunner.query(`CREATE INDEX "IDX_23c36d3b4e3f8567306ecb76c8" ON "idle_group_activity_idle_groups_idle_group" ("idleGroupId") `);
@@ -32,6 +33,7 @@ export class models1619872797647 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "IDX_23c36d3b4e3f8567306ecb76c8"`);
         await queryRunner.query(`DROP INDEX "IDX_0b59c3762c7b51c1fcdbecc156"`);
         await queryRunner.query(`DROP TABLE "idle_group_activity_idle_groups_idle_group"`);
+        await queryRunner.query(`DROP TABLE "user"`);
         await queryRunner.query(`DROP TABLE "tweet"`);
         await queryRunner.query(`DROP TABLE "twitter_account"`);
         await queryRunner.query(`DROP TABLE "magazine"`);

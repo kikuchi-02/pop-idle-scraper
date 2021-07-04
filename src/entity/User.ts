@@ -1,14 +1,13 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
   Entity,
   PrimaryGeneratedColumn,
-  Column,
-  EventSubscriber,
-  InsertEvent,
-  UpdateEvent,
-  EntitySubscriberInterface,
 } from 'typeorm';
 
-import { hash } from 'bcryptjs';
+import { ENV_SETTINGS } from '../conf';
+import bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -24,20 +23,9 @@ export class User {
   @Column()
   password: string;
 
-  async hashPassword(entity: User): Promise<void> {
-    entity.password = await hash(entity.password, 10);
-  }
-
-  beforeInsert(event: InsertEvent<User>): Promise<void> {
-    return this.hashPassword(event.entity);
-  }
-
-  async beforeUpdate({
-    entity,
-    databaseEntity,
-  }: UpdateEvent<User>): Promise<void> {
-    if (entity.password !== databaseEntity?.password) {
-      await this.hashPassword(entity);
-    }
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword(): Promise<void> {
+    this.password = await bcrypt.hash(this.password, ENV_SETTINGS.SALT_ROUND);
   }
 }
