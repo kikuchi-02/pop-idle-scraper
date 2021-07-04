@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthenticationGuard } from './authentication.guard';
 
 const routes: Routes = [
   {
@@ -24,11 +25,17 @@ const routes: Routes = [
       import('./text-editor/text-editor.module').then(
         (m) => m.TextEditorModule
       ),
+    canActivate: [AuthenticationGuard],
   },
   {
     path: 'subtitle',
     loadChildren: () =>
       import('./subtitle/subtitle.module').then((m) => m.SubtitleModule),
+  },
+  {
+    path: 'login',
+    loadChildren: () =>
+      import('./login/login.module').then((m) => m.LoginModule),
   },
   {
     path: '**',

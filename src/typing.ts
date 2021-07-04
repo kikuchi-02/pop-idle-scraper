@@ -47,6 +47,7 @@ export class Settings {
   REDIS_HOST: string | undefined = undefined;
   REDIS_PORT: number | undefined = undefined;
   REDIS_PASSWORD: string | undefined = undefined;
+  JWT_SECRET: string | undefined = undefined;
 
   constructor(data: any) {
     Reflect.ownKeys(this).forEach((key) => {
