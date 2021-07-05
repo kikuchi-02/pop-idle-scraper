@@ -4,26 +4,38 @@ import { searchTweets, switchTwitterAccount } from '../libs/twitter';
 import { IdleKind, idleKinds, ScrapedResult } from '../typing';
 
 export const getTwitter = async (req: Request, res: Response) => {
-  const kind = req.query.kind;
-  if (!idleKinds.includes(kind as IdleKind)) {
-    res.sendStatus(400).end();
+  const kinds = req.query.kind as IdleKind[];
+  if (!kinds) {
+    res.send(403).send('kind is required');
     return;
   }
-  const account = switchTwitterAccount(kind as IdleKind);
-  const cacher = new Cacher<ScrapedResult>(account);
-  const cache = await cacher.getCache();
-  if (cache) {
-    res.send(JSON.stringify(cache));
+  const invalidKinds = kinds.filter((kind) => !idleKinds.includes(kind));
+  if (invalidKinds.length > 0) {
+    res.send(401).send(`Invalid kinds: ${invalidKinds}`);
     return;
   }
-  const value = await searchTweets(account);
-  if (!value) {
-    res.sendStatus(400).end();
-    return;
-  }
-  const tomorrow = new Date();
-  tomorrow.setHours(tomorrow.getHours() + 1);
-  await cacher.saveCache(value as ScrapedResult, tomorrow);
-  res.send(JSON.stringify(value));
+  const response = await Promise.all(
+    kinds.map(async (kind) => {
+      const result = { kind, value: undefined };
+      const account = switchTwitterAccount(kind as IdleKind);
+      const cacher = new Cacher<ScrapedResult>(account);
+      const cache = await cacher.getCache();
+      if (cache) {
+        result.value = cache;
+        return result;
+      }
+      const value = await searchTweets(account);
+      if (!value) {
+        return result;
+      }
+      const tomorrow = new Date();
+      tomorrow.setHours(tomorrow.getHours() + 1);
+      await cacher.saveCache(value as ScrapedResult, tomorrow);
+      result.value = value;
+      return result;
+    })
+  );
+
+  res.json(response);
   return;
 };

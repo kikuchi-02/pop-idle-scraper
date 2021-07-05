@@ -14,27 +14,38 @@ import {
 } from '../typing';
 
 export const getSite = async (req: Request, res: Response) => {
-  const query = req.query.kind;
-  if (!siteNames.includes(query as SiteName)) {
-    res.sendStatus(400).end();
+  const kinds = req.query.kind as SiteName[];
+  if (!kinds) {
+    res.send(403).send('kind is required');
     return;
   }
-  const cacher = new Cacher<ScrapedResult>(query as string);
-  const cache = await cacher.getCache();
-  if (cache) {
-    res.send(JSON.stringify(cache));
+  const invalidSites = kinds.filter((kind) => !siteNames.includes(kind));
+  if (invalidSites.length > 0) {
+    res.send(401).send(`Invalid kinds: ${invalidSites}`);
     return;
   }
+  const response = await Promise.all(
+    kinds.map(async (kind) => {
+      const result = { kind, value: undefined };
+      const cacher = new Cacher<ScrapedResult>(kind as string);
+      const cache = await cacher.getCache();
+      if (cache) {
+        result.value = cache;
+        return result;
+      }
 
-  const value = await scrape2(query as SiteName);
-  if (!value) {
-    res.sendStatus(400).end();
-    return;
-  }
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  await cacher.saveCache(value as ScrapedResult, tomorrow);
-  res.send(JSON.stringify(value));
+      const value = await scrape2(kinds[0] as SiteName);
+      if (!value) {
+        return result;
+      }
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      await cacher.saveCache(value as ScrapedResult, tomorrow);
+      result.value = value;
+      return result;
+    })
+  );
+  res.json(response);
   return;
 };
 
