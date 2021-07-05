@@ -1,19 +1,19 @@
+import { Color } from '@angular-material-components/color-picker';
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  Renderer2,
   HostBinding,
   HostListener,
   OnDestroy,
+  OnInit,
+  Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { TextEditorService } from '../text-editor.service';
-import { Color } from '@angular-material-components/color-picker';
 import { ThemePalette } from '@angular/material/core';
-import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TextEditorService } from '../text-editor.service';
 
 @Component({
   selector: 'app-balloon',
@@ -86,6 +86,7 @@ export class BalloonComponent implements OnInit, OnDestroy {
 
   backColor(): void {
     document.execCommand('backColor', false, this.backColorCode);
+    this.cd.markForCheck();
   }
 
   format(): void {
@@ -109,6 +110,12 @@ export class BalloonComponent implements OnInit, OnDestroy {
     );
     formatted = formatted.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
     document.execCommand('insertText', false, formatted);
+    this.cd.markForCheck();
+  }
+
+  strike(): void {
+    document.execCommand('strikethrough', false);
+    this.cd.markForCheck();
   }
 
   private hex2rgb(hex: string) {
