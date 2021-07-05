@@ -38,11 +38,7 @@ export class LoginComponent implements OnInit {
     const email = this.form.get('email').value;
     const password = this.form.get('password').value;
     this.authenticationService.login(email, password).subscribe({
-      next: () => {
-        const targetUrl =
-          this.router.getCurrentNavigation()?.extras?.state?.url || 'home';
-        this.router.navigate([targetUrl]);
-      },
+      next: () => {},
       error: (err) => {
         this.loginInvalid = true;
         this.cd.markForCheck();

@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -20,7 +21,9 @@ export class AuthenticationService {
     localStorage.setItem('refresh', t);
   }
 
-  constructor(private http: HttpClient) {}
+  public redirectUrl: string;
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   login(
     email: string,
@@ -35,6 +38,10 @@ export class AuthenticationService {
         tap(({ access, refresh }: { access: string; refresh: string }) => {
           this.access = access;
           this.refresh = refresh;
+          if (this.redirectUrl) {
+            this.router.navigate([this.redirectUrl]);
+            this.redirectUrl = null;
+          }
         })
       );
   }

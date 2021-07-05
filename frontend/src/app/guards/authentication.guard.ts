@@ -16,7 +16,7 @@ import { AuthenticationService } from '../services/authentication.service';
 export class AuthenticationGuard implements CanActivate {
   constructor(
     private router: Router,
-    private authentication: AuthenticationService
+    private authenticationService: AuthenticationService
   ) {}
 
   canActivate(
@@ -27,10 +27,15 @@ export class AuthenticationGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    return this.authentication.tokenRefresh().pipe(
-      map(() => true),
+    this.authenticationService.redirectUrl = state.url;
+
+    return this.authenticationService.tokenRefresh().pipe(
+      map(() => {
+        this.authenticationService.redirectUrl = null;
+        return true;
+      }),
       catchError((e) => {
-        this.router.navigate(['/login'], { state: { url: route.url } });
+        this.router.navigate(['/login']);
         return of(false);
       })
     );

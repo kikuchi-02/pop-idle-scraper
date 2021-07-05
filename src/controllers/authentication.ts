@@ -26,7 +26,6 @@ export const login = async (req: Request, res: Response) => {
   const refreshTokenRepository = getCustomRepository(RefreshTokenRepository);
   const refreshToken = await refreshTokenRepository.createAndSave(user, 24 * 7);
   const refresh = refreshToken.token;
-  console.log({ access, refresh });
   res.status(200).send({
     access,
     refresh,
