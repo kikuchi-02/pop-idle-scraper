@@ -1,5 +1,5 @@
-import { TextLintEngine } from 'textlint';
 import { join } from 'path';
+import { TextLintEngine } from 'textlint';
 
 const textLintEngine = new TextLintEngine();
 

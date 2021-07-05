@@ -62,7 +62,7 @@ export interface Settings {
     USERNAME: string;
     PASSWORD: string;
   };
-  JWT_SECRET: string;
+  SECRET: string;
 }
 
 export interface Tweet {

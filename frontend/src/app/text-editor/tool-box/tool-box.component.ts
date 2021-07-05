@@ -220,13 +220,20 @@ export class ToolBoxComponent implements OnInit {
   constituencyParse(): void {}
 
   textLint(): void {
+    const text = this.getText();
+    if (!text) {
+      return;
+    }
     this.loadingStateChange.emit(true);
     this.textEditorService
-      .textLint(this.getText())
+      .textLint(text)
       .pipe(first())
-      .subscribe(() => {
-        this.loadingStateChange.emit(false);
-      });
+      .subscribe(
+        () => {
+          this.loadingStateChange.emit(false);
+        },
+        (err) => this.loadingStateChange.emit(false)
+      );
   }
 
   scrollTop(): void {

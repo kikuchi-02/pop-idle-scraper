@@ -18,8 +18,8 @@ export class AuthenticationInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<unknown>> {
     const authReq = request.clone({
       headers: request.headers.set(
-        'x-access-token',
-        this.authenticationService.token
+        'Authorization',
+        `Bearer ${this.authenticationService.access}`
       ),
     });
     return next.handle(authReq);

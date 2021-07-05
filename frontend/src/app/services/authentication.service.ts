@@ -7,16 +7,16 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AuthenticationService {
-  get token(): string {
-    return localStorage.getItem('token');
+  get access(): string {
+    return localStorage.getItem('access');
   }
-  set token(t: string) {
-    localStorage.setItem('token', t);
+  set access(t: string) {
+    localStorage.setItem('access', t);
   }
-  get refreshToken(): string {
+  get refresh(): string {
     return localStorage.getItem('refresh');
   }
-  set refreshToken(t: string) {
+  set refresh(t: string) {
     localStorage.setItem('refresh', t);
   }
 
@@ -25,46 +25,39 @@ export class AuthenticationService {
   login(
     email: string,
     password: string
-  ): Observable<{ token: string; refreshToken: string }> {
+  ): Observable<{ access: string; refresh: string }> {
     return this.http
-      .post<{ token: string; refreshToken: string }>('/api/auth/login', {
+      .post<{ access: string; refresh: string }>('/api/auth/login', {
         email,
         password,
       })
       .pipe(
-        tap(
-          ({
-            token,
-            refreshToken,
-          }: {
-            token: string;
-            refreshToken: string;
-          }) => {
-            this.token = token;
-            this.refreshToken = refreshToken;
-          }
-        )
+        tap(({ access, refresh }: { access: string; refresh: string }) => {
+          this.access = access;
+          this.refresh = refresh;
+        })
       );
   }
 
-  refresh(): Observable<{ token: string }> {
-    if (!this.refreshToken) {
+  tokenRefresh(): Observable<{ access: string; refresh: string }> {
+    if (!this.refresh) {
       return throwError({ error: true, message: 'no refresh token' });
     }
 
     return this.http
-      .post<{ token: string }>('/api/auth/refresh', {
-        refreshToken: this.refreshToken,
+      .post<{ access: string }>('/api/auth/refresh', {
+        refresh: this.refresh,
       })
       .pipe(
-        tap(({ token }: { token: string }) => {
-          this.token = token;
+        tap(({ access, refresh }: { access: string; refresh: string }) => {
+          this.access = access;
+          this.refresh = refresh;
         })
       );
   }
 
   logout(): void {
-    this.token = undefined;
-    this.refreshToken = undefined;
+    this.access = undefined;
+    this.refresh = undefined;
   }
 }

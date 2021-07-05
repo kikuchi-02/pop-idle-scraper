@@ -1,13 +1,13 @@
+import bcrypt from 'bcrypt';
 import {
   BeforeInsert,
-  BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { ENV_SETTINGS } from '../conf';
-import bcrypt from 'bcrypt';
+import { RefreshToken } from './RefreshToken';
 
 @Entity()
 export class User {
@@ -24,8 +24,10 @@ export class User {
   password: string;
 
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     this.password = await bcrypt.hash(this.password, ENV_SETTINGS.SALT_ROUND);
   }
+
+  @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 }

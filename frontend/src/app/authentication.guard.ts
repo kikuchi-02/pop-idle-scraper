@@ -27,7 +27,7 @@ export class AuthenticationGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    return this.authentication.refresh().pipe(
+    return this.authentication.tokenRefresh().pipe(
       map(() => true),
       catchError((e) => {
         this.router.navigate(['/login'], { state: { url: route.url } });
