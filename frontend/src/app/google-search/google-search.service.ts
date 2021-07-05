@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MemberLinks, IdleKind } from '../typing';
+import { IdleKind, MemberLinks } from '../typing';
 
 @Injectable({ providedIn: 'root' })
 export class GoogleSearchService {

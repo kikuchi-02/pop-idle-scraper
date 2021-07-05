@@ -1,4 +1,4 @@
-import { readFileSync, writeFile, accessSync, constants } from 'fs';
+import { readFileSync, writeFile } from 'fs';
 import { join } from 'path';
 import { CacheValue } from './typing';
 import { ClientOpts, createClient, RedisClient } from 'redis';
@@ -25,8 +25,8 @@ export class Cacher<T> {
     }
     return new Promise<RedisClient>((resolve, reject) => {
       const options: ClientOpts = {
-        port: ENV_SETTINGS.REDIS_PORT,
-        host: ENV_SETTINGS.REDIS_HOST,
+        port: ENV_SETTINGS.REDIS.PORT,
+        host: ENV_SETTINGS.REDIS.HOST,
       };
 
       const redisClient = createClient(options);
