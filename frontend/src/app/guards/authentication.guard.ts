@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import {
-  CanActivate,
   ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
   RouterStateSnapshot,
   UrlTree,
-  Router,
 } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { AuthenticationService } from './services/authentication.service';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable({
   providedIn: 'root',

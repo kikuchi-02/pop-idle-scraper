@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { Magazine } from '../typing';
-
 import { todaysMagazines } from '../libs/magazine';
+import { Magazine } from '../typing';
 
 export const getMagazines = async (req: Request, res: Response) => {
   const date = req.query.date;

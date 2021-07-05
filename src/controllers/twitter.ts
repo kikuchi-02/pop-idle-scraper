@@ -1,7 +1,7 @@
-import { IdleKind, idleKinds, ScrapedResult } from '../typing';
-import { searchTweets, switchTwitterAccount } from '../libs/twitter';
-import { Cacher } from '../cache';
 import { Request, Response } from 'express';
+import { Cacher } from '../cache';
+import { searchTweets, switchTwitterAccount } from '../libs/twitter';
+import { IdleKind, idleKinds, ScrapedResult } from '../typing';
 
 export const getTwitter = async (req: Request, res: Response) => {
   const kind = req.query.kind;

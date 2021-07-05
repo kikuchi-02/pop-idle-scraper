@@ -1,18 +1,17 @@
-import { Cacher, getCache } from '../cache';
-import {
-  IdleKind,
-  MemberLinks,
-  ScrapedResult,
-  SiteName,
-  idleKinds,
-  siteNames,
-} from '../typing';
 import { Request, Response } from 'express';
-
+import { Cacher, getCache } from '../cache';
+import { scrape2 } from '../libs/scraper';
 import { getBlogLinks2 } from '../libs/scraper-utils/links/blog';
 import { getWikiLinks } from '../libs/scraper-utils/links/wiki';
 import { memberTable } from '../libs/scraper-utils/wiki';
-import { scrape2 } from '../libs/scraper';
+import {
+  IdleKind,
+  idleKinds,
+  MemberLinks,
+  ScrapedResult,
+  SiteName,
+  siteNames,
+} from '../typing';
 
 export const getSite = async (req: Request, res: Response) => {
   const query = req.query.kind;
