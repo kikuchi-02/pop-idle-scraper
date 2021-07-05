@@ -1,12 +1,10 @@
-import 'reflect-metadata';
-
 import compression from 'compression';
-import { createConnection } from 'typeorm';
-import { dbConfig } from './conf';
 import express from 'express';
+import 'reflect-metadata';
+import { createConnection } from 'typeorm';
 import { setRoutes } from './router';
 
-createConnection(dbConfig)
+createConnection()
   .then((connection) => {
     const app = express();
 

@@ -1,16 +1,14 @@
+import { Express, Router } from 'express';
 import * as authController from './controllers/authentication';
 import * as magazineController from './controllers/magazine';
 import * as scraperController from './controllers/scrape';
 import * as textlintController from './controllers/textlint';
 import * as twitterController from './controllers/twitter';
-
-import { Express, Router } from 'express';
-
 import { verifyToken } from './middleware/authentication';
 
 export const setRoutes = (app: Express) => {
-  app.get('*', (req, res, next) => {
-    console.log('request', req.path);
+  app.use('*', (req, res, next) => {
+    console.log('request', req.method, req.baseUrl);
 
     // TODO
     // const cacher = new Cacher<ScrapedResult>(req.originalUrl);

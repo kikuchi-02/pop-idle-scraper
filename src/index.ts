@@ -1,18 +1,11 @@
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
-import { dbConfig } from './conf';
 import { User } from './entity/User';
 import { RefreshTokenRepository } from './repositories/refreshToken';
 
 // import * as uuid from 'uuid';
 
-Object.assign(dbConfig, {
-  // synchronize: true,
-  // migrationsRun: false,
-  // dropSchema: true,
-});
-
-createConnection(dbConfig)
+createConnection()
   .then(async (connection) => {
     // console.log('Inserting a new user into the database...');
     const user = new User();
@@ -22,7 +15,7 @@ createConnection(dbConfig)
     // // await connection.manager.save(user);
     const userRepository = connection.getRepository(User);
     await userRepository.save(user);
-    // console.log("Saved a new user with id: " + user.id);
+    console.log('Saved a new user with id: ' + user.id);
 
     // // console.log("Loading users from the database...");
     // const users = await userRepository.findOne(99);
@@ -38,7 +31,7 @@ createConnection(dbConfig)
       RefreshTokenRepository
     );
     // const uid = uuid.v4();
-    // const newToken = await tokenRepository.findByToken(uid);
+    // const newToken = await tokenRepository.findByToken('test');
     // console.log({ newToken });
 
     // const newUser = await userRepository.findOne();
