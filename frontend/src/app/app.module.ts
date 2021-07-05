@@ -8,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { UtilService } from './services/util.service';
 import { SharedModule } from './shared/shared.module';
+import { httpInterceptorProviders } from './interceptors';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,7 +20,7 @@ import { SharedModule } from './shared/shared.module';
     BrowserAnimationsModule,
     SharedModule,
   ],
-  providers: [UtilService],
+  providers: [UtilService, httpInterceptorProviders],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

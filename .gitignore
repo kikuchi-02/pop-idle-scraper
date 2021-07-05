@@ -3,6 +3,6 @@
 package-lock.json
 node_modules
 scraped/*
-envs.yaml
+env.json
 cache/*
 build
