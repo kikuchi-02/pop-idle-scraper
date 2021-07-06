@@ -25,6 +25,9 @@ export class Script {
   @Column()
   innerHtml: string;
 
-  @ManyToOne((type) => User, (user) => user.scripts, { nullable: false })
+  @ManyToOne((type) => User, (user) => user.scripts, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   author: User;
 }
