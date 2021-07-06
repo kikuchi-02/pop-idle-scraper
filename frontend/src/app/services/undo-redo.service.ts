@@ -3,9 +3,13 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class UndoRedoService {
-  undoStack: string[] = [];
-  redoStack: string[] = [];
+export class UndoRedoService<T> {
+  private undoStack: T[] = [];
+  private redoStack: T[] = [];
+
+  // same sa current state
+  private undoPool: T;
+  private redoPool: T;
 
   get ableToUndo(): boolean {
     return this.undoStack.length > 0;
@@ -16,23 +20,40 @@ export class UndoRedoService {
 
   constructor() {}
 
-  register(str: string) {
-    this.undoStack.push(str);
+  register(val: T) {
+    this.pushUndo(val);
   }
 
-  undo(): string {
-    if (this.undoStack.length === 0) {
-      return undefined;
-    }
+  undo(): T {
     const stack = this.undoStack.pop();
-    this.redoStack.push(JSON.parse(JSON.stringify(stack)));
+    this.pushRedo(stack);
+    this.undoPool = stack;
     return stack;
   }
-  redo(): string {
-    if (this.redoStack.length === 0) {
-      return undefined;
-    }
+  redo(): T {
     const stack = this.redoStack.pop();
+    this.redoPool = stack;
+    this.pushUndo(stack);
     return stack;
+  }
+
+  private pushUndo(val: T): void {
+    if (this.undoPool) {
+      if (this.undoPool === val) {
+        return;
+      }
+      this.undoStack.push(this.undoPool);
+    }
+    this.undoPool = val;
+  }
+
+  private pushRedo(val: T): void {
+    if (this.redoPool) {
+      if (this.redoPool === val) {
+        return;
+      }
+      this.redoStack.push(this.redoPool);
+    }
+    this.redoPool = val;
   }
 }

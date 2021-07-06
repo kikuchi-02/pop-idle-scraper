@@ -20,6 +20,23 @@
         copy to clipboard
       </button>
     </div>
+    <div class="tool__item">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="editableDirective?.undo()"
+      >
+        undo
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="editableDirective?.redo()"
+      >
+        redo
+      </button>
+    </div>
+
     <div class="tool__item--fixed-right" *ngIf="script.id">
       <button mat-raised-button color="primary" (click)="deleteScript()">
         delete
