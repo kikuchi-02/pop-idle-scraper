@@ -85,3 +85,18 @@ export interface ConstituencyResult {
   objI: number;
   objToken: string;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export class Script {
+  id: number;
+  title = '';
+  innerHtml = '';
+  created: Date;
+  updated: Date;
+  author: User;
+}

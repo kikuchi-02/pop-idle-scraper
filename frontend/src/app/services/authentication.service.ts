@@ -41,6 +41,8 @@ export class AuthenticationService {
           if (this.redirectUrl) {
             this.router.navigate([this.redirectUrl]);
             this.redirectUrl = null;
+          } else {
+            this.router.navigate(['/']);
           }
         })
       );

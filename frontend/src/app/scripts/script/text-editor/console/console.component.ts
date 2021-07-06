@@ -9,7 +9,7 @@ import {
 import { DomSanitizer } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { TextEditorService, TextLintMessages } from '../text-editor.service';
+import { ScriptService, TextLintMessages } from '../../script.service';
 
 @Component({
   selector: 'app-console',
@@ -23,12 +23,12 @@ export class ConsoleComponent implements OnInit, OnDestroy {
   textLintErrors: string[];
 
   constructor(
-    private textEditorService: TextEditorService,
-    private cd: ChangeDetectorRef,
+    private scriptService: ScriptService,
     private sanitizer: DomSanitizer,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private cd: ChangeDetectorRef
   ) {
-    this.textEditorService.lintResult$
+    this.scriptService.lintResult$
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((result) => {
         const formatted = this.formatTextLintResult(result);

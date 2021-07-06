@@ -1,5 +1,6 @@
 import {
   Directive,
+  DoCheck,
   ElementRef,
   forwardRef,
   HostBinding,
@@ -20,14 +21,28 @@ import { DomSanitizer } from '@angular/platform-browser';
     },
   ],
 })
-export class EditableDirective implements ControlValueAccessor {
+export class EditableDirective implements ControlValueAccessor, DoCheck {
   @HostBinding('attr.contenteditable') contentEditable = true;
+
+  private previousInnerHtml: string;
 
   constructor(
     public elementRef: ElementRef,
     private renderer: Renderer2,
     private sanitizer: DomSanitizer
   ) {}
+
+  ngDoCheck(): void {
+    const innerHtml = this.elementRef.nativeElement.innerHTML;
+    if (
+      this.previousInnerHtml === undefined ||
+      this.previousInnerHtml !== innerHtml
+    ) {
+      // TODO redo undo
+      console.log(this.elementRef.nativeElement.innerHTML);
+      this.previousInnerHtml = innerHtml;
+    }
+  }
 
   private onTouched = () => {};
 

@@ -1,0 +1,19 @@
+<div class="wrapper">
+  <a [routerLink]="'new'">new script</a>
+  <button (click)="deleteScripts()">Delete</button>
+
+  <ul>
+    <li *ngFor="let script of scripts">
+      <input
+        type="checkbox"
+        (change)="checkScript($event, script.id)"
+        [value]="deleteScriptIds.includes(script.id)"
+      />
+      <a [routerLink]="script.id">
+        {{ script.title }}
+        ({{ script.author?.name }})
+      </a>
+      created: {{ script.created }} updated: {{ script.updated }}
+    </li>
+  </ul>
+</div>

@@ -21,7 +21,7 @@ export const getSite = async (req: Request, res: Response) => {
   }
   const invalidSites = kinds.filter((kind) => !siteNames.includes(kind));
   if (invalidSites.length > 0) {
-    res.send(401).send(`Invalid kinds: ${invalidSites}`);
+    res.send(403).send(`Invalid kinds: ${invalidSites}`);
     return;
   }
   const response = await Promise.all(

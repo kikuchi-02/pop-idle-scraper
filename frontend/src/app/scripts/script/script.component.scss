@@ -1,3 +1,21 @@
+.tool {
+  display: flex;
+
+  &__item {
+    margin-right: 20px;
+
+    &--fixed-right {
+      margin-left: auto;
+    }
+  }
+}
+
+form {
+  display: flex;
+  .form__item {
+    margin-right: 20px;
+  }
+}
 $toolbar-height: 100px;
 
 .wrapper {

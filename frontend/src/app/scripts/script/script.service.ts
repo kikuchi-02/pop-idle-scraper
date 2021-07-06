@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Observable, ReplaySubject } from 'rxjs';
-
-import { ConstituencyResult } from '../typing';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, ReplaySubject } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
+import { Script } from 'src/app/typing';
+import { ConstituencyResult } from '../../typing';
 
 declare const kuromoji;
 
@@ -43,7 +43,7 @@ export interface KuromojiToken {
 @Injectable({
   providedIn: 'root',
 })
-export class TextEditorService {
+export class ScriptService {
   private tokenizer$ = new ReplaySubject<any>(1);
 
   private lintResultSubject$ = new ReplaySubject<TextLintMessages>(1);
@@ -113,5 +113,27 @@ export class TextEditorService {
     result += content.substring(start);
 
     return result;
+  }
+
+  getScript(id: number): Observable<Script> {
+    return this.http.get<Script>(`api/v1/scripts/${id}`);
+  }
+
+  putScript(script: Script): Observable<Script> {
+    return this.http.put<Script>(`api/v1/scripts/${script.id}`, {
+      title: script.title,
+      innerHtml: script.innerHtml,
+    });
+  }
+
+  postScript(script: Script): Observable<Script> {
+    return this.http.post<Script>(`api/v1/scripts`, {
+      title: script.title,
+      innerHtml: script.innerHtml,
+    });
+  }
+
+  deleteScript(scriptId: number): Observable<void> {
+    return this.http.delete<void>(`api/v1/scripts/${scriptId}`);
   }
 }

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TextEditorComponent } from './text-editor.component';
+import { ScriptListComponent } from './script-list.component';
 
-describe('TextEditorComponent', () => {
-  let component: TextEditorComponent;
-  let fixture: ComponentFixture<TextEditorComponent>;
+describe('ScriptListComponent', () => {
+  let component: ScriptListComponent;
+  let fixture: ComponentFixture<ScriptListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TextEditorComponent ]
+      declarations: [ ScriptListComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TextEditorComponent);
+    fixture = TestBed.createComponent(ScriptListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

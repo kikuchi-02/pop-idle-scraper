@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TextEditorService } from './text-editor.service';
+import { ScriptListService } from './script-list.service';
 
-describe('TextEditorService', () => {
-  let service: TextEditorService;
+describe('ScriptListService', () => {
+  let service: ScriptListService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TextEditorService);
+    service = TestBed.inject(ScriptListService);
   });
 
   it('should be created', () => {

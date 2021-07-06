@@ -4,14 +4,15 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnDestroy,
   OnInit,
   Output,
   Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { from, Observable, of } from 'rxjs';
-import { first, map, mergeMap, tap } from 'rxjs/operators';
-import { TextEditorService } from '../text-editor.service';
+import { from, of, Subject } from 'rxjs';
+import { map, mergeMap, takeUntil } from 'rxjs/operators';
+import { ScriptService } from '../../script.service';
 
 @Component({
   selector: 'app-tool-box',
@@ -19,7 +20,7 @@ import { TextEditorService } from '../text-editor.service';
   styleUrls: ['./tool-box.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ToolBoxComponent implements OnInit {
+export class ToolBoxComponent implements OnInit, OnDestroy {
   highlightValue = new FormControl('');
   underlineValue = new FormControl('');
 
@@ -35,10 +36,12 @@ export class ToolBoxComponent implements OnInit {
   private toolBoxHighlightKey = 'tool-box-highlight-key';
   private toolBoxUnderlineKey = 'tool-box-underline-key';
 
+  private unsubscriber$ = new Subject<void>();
+
   constructor(
     private renderer: Renderer2,
     private cd: ChangeDetectorRef,
-    private textEditorService: TextEditorService
+    private scriptService: ScriptService
   ) {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
@@ -51,6 +54,9 @@ export class ToolBoxComponent implements OnInit {
   }
 
   ngOnInit(): void {}
+  ngOnDestroy(): void {
+    this.unsubscriber$.next();
+  }
 
   highlight(word: string): void {
     if (!word) {
@@ -104,7 +110,7 @@ export class ToolBoxComponent implements OnInit {
     this.valueChange.emit(this.value);
   }
 
-  underlineSentence(word: string) {
+  underlineSentence(word: string): void {
     if (!word) {
       return;
     }
@@ -114,7 +120,7 @@ export class ToolBoxComponent implements OnInit {
     const className = 'text--underlined';
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
-    this.textEditorService
+    this.scriptService
       .tokenize(word)
       .pipe(
         mergeMap((tokens) => {
@@ -164,7 +170,8 @@ export class ToolBoxComponent implements OnInit {
               })
             )
           );
-        })
+        }),
+        takeUntil(this.unsubscriber$)
       )
       .subscribe(() => {
         this.value = elm.innerHTML;
@@ -210,7 +217,7 @@ export class ToolBoxComponent implements OnInit {
     const textContent = [...elm.childNodes]
       .map((node) => {
         const content = node.textContent;
-        return this.textEditorService.splitTextByNewline(content);
+        return this.scriptService.splitTextByNewline(content);
       })
       .join('\n');
     const splitted = textContent.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
@@ -225,9 +232,9 @@ export class ToolBoxComponent implements OnInit {
       return;
     }
     this.loadingStateChange.emit(true);
-    this.textEditorService
+    this.scriptService
       .textLint(text)
-      .pipe(first())
+      .pipe(takeUntil(this.unsubscriber$))
       .subscribe(
         () => {
           this.loadingStateChange.emit(false);
@@ -267,7 +274,7 @@ export class ToolBoxComponent implements OnInit {
     sentence: string,
     baseFormWord: string
   ): Promise<string> {
-    return this.textEditorService
+    return this.scriptService
       .tokenize(sentence)
       .pipe(
         map(

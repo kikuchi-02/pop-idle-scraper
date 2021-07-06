@@ -11,7 +11,7 @@ export const login = async (req: Request, res: Response) => {
   const password = req.body.password;
 
   const userRepository = getCustomRepository(UserRepository);
-  const user = await userRepository.findByEmail(email);
+  const user = await userRepository.findByEmailWithPassword(email);
   if (!user) {
     res.status(401).send('Invalid email');
     return;

@@ -13,7 +13,7 @@ import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { TextEditorService } from '../text-editor.service';
+import { ScriptService } from '../../script.service';
 
 @Component({
   selector: 'app-balloon',
@@ -37,7 +37,7 @@ export class BalloonComponent implements OnInit, OnDestroy {
   constructor(
     private renderer: Renderer2,
     private cd: ChangeDetectorRef,
-    private textEditorService: TextEditorService
+    private scriptService: ScriptService
   ) {
     const colorHex = localStorage.getItem(this.backColorHexKey);
     this.backColorCode = colorHex ? `#${colorHex}` : `#000000`;
@@ -105,7 +105,7 @@ export class BalloonComponent implements OnInit, OnDestroy {
     this.selection.removeAllRanges();
     this.selection.addRange(newRange);
 
-    let formatted = this.textEditorService.splitTextByNewline(
+    let formatted = this.scriptService.splitTextByNewline(
       this.selection.toString()
     );
     formatted = formatted.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
