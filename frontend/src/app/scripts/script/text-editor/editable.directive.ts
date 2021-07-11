@@ -11,9 +11,14 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { auditTime, takeUntil } from 'rxjs/operators';
 import { UndoRedoService } from 'src/app/services/undo-redo.service';
+
+interface EditableWebSocketMessage {
+  innerHtml: string;
+}
 
 @Directive({
   selector: '[appEditable]',
@@ -33,25 +38,50 @@ export class EditableDirective
   private registerer$ = new Subject<string>();
   private unsubscriber$ = new Subject<void>();
 
+  private previousInnerHtml: string;
+  private id: string;
+
+  get wsMessageType(): string {
+    return `editable-directive-script-${this.id}`;
+  }
+
   constructor(
     public elementRef: ElementRef,
     private renderer: Renderer2,
     private sanitizer: DomSanitizer,
-    private undoRedoService: UndoRedoService<string>
+    private undoRedoService: UndoRedoService<string>,
+    // private wsService: WsService<EditableWebSocketMessage>,
+    private route: ActivatedRoute
   ) {
+    const params = this.route.snapshot.paramMap;
+    this.id = params.get('id');
+
     this.registerer$
       .pipe(auditTime(300), takeUntil(this.unsubscriber$))
       .subscribe((innerHtml) => {
         this.undoRedoService.register(innerHtml);
       });
+
+    // this.wsService
+    //   .messageReceiver(this.wsMessageType)
+    //   .pipe(takeUntil(this.unsubscriber$))
+    //   .subscribe((msg) => {
+    //     this.elementRef.nativeElement.innerHTML = msg.innerHtml;
+    //   });
   }
 
   ngDoCheck(): void {
     const innerHtml = this.elementRef.nativeElement.innerHTML;
-    this.registerer$.next(innerHtml);
+    if (
+      this.previousInnerHtml === undefined ||
+      this.previousInnerHtml !== innerHtml
+    ) {
+      this.onChangeInnerHtml(innerHtml);
+      this.previousInnerHtml = innerHtml;
+    }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.unsubscriber$.next();
   }
 
@@ -108,13 +138,13 @@ export class EditableDirective
     document.execCommand('insertText', false, text);
   }
 
-  undo() {
+  undo(): void {
     if (this.undoRedoService.ableToUndo) {
       const innerHtml = this.undoRedoService.undo();
       this.elementRef.nativeElement.innerHTML = innerHtml;
     }
   }
-  redo() {
+  redo(): void {
     if (this.undoRedoService.ableToRedo) {
       const innerHtml = this.undoRedoService.redo();
       this.elementRef.nativeElement.innerHTML = innerHtml;
@@ -122,7 +152,7 @@ export class EditableDirective
   }
 
   @HostListener('keydown', ['$event'])
-  keyDown(event: KeyboardEvent) {
+  keyDown(event: KeyboardEvent): void {
     if (event.ctrlKey && event.keyCode === 90) {
       if (event.shiftKey) {
         this.undo();
@@ -130,5 +160,11 @@ export class EditableDirective
         this.redo();
       }
     }
+  }
+
+  private onChangeInnerHtml(innerHtml: string): void {
+    this.registerer$.next(innerHtml);
+
+    // this.wsService.sendMessage(this.wsMessageType, { innerHtml });
   }
 }

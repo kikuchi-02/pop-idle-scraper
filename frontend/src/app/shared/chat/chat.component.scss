@@ -1,4 +1,19 @@
-@import '../../../styles.scss';
-.chat_Wrapper {
-  @include wrapper;
+.wrapper {
+  .chat-messages {
+    min-height: 300px;
+    max-height: 800px;
+
+    &__body {
+      display: flex;
+    }
+    &__text {
+      flex-grow: 80%;
+    }
+    &__author {
+      flex-grow: 10%;
+    }
+    &__created {
+      flex-grow: 10%;
+    }
+  }
 }

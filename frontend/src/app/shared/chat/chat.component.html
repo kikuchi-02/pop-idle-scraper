@@ -1,9 +1,15 @@
-<div class="chat_Wrapper">
-  <p>chat works!</p>
-  <a routerLink="/home">home</a>
+<div class="wrapper">
+  <div class="chat-messages">
+    <div *ngFor="let message of messages" class="chat-messages__body">
+      <div class="chat-messages__text">{{ message.body }}</div>
+      <div class="chat-messages__author">{{ message.author.name }}</div>
+      <div class="chat-messages__created">{{ message.created }}</div>
+    </div>
+  </div>
 
-  <button (click)="save()" disabled="true">save</button>
-  <p>{{ text }}</p>
-
-  <textarea (ngModelChange)="change($event)" [ngModel]="text"></textarea>
+  <form #form [formGroup]="chatForm" (ngSubmit)="save()">
+    <textarea formControlName="body"></textarea>
+    <!-- <input formControlName="body" /> -->
+    <button (submit)="save()">submit</button>
+  </form>
 </div>

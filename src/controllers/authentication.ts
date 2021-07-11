@@ -26,9 +26,12 @@ export const login = async (req: Request, res: Response) => {
   const refreshTokenRepository = getCustomRepository(RefreshTokenRepository);
   const refreshToken = await refreshTokenRepository.createAndSave(user, 24 * 7);
   const refresh = refreshToken.token;
+
+  delete user.password;
   res.status(200).send({
     access,
     refresh,
+    user,
   });
 };
 
@@ -58,5 +61,5 @@ export const refresh = async (req: Request, res: Response) => {
   });
   await refreshTokenRepository.delete(refreshToken);
   const newRefresh = await refreshTokenRepository.createAndSave(user, 24 * 7);
-  res.status(200).send({ access: newAccess, refresh: newRefresh.token });
+  res.status(200).send({ access: newAccess, refresh: newRefresh.token, user });
 };
