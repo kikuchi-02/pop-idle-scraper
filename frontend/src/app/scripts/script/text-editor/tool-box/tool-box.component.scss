@@ -5,20 +5,13 @@
 
   .row {
     display: flex;
+    align-items: center;
+    &__item {
+      margin-right: 20px;
+    }
   }
 
   .highlight {
-    display: flex;
-    margin-right: 20px;
-  }
-  .underline {
-    display: flex;
-  }
-
-  .scroller {
-    margin-left: auto;
-    button {
-      font-weight: bold;
-    }
+    margin-left: 5px;
   }
 }

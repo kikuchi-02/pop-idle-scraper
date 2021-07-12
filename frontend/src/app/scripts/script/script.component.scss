@@ -3,10 +3,6 @@
 
   &__item {
     margin-right: 20px;
-
-    &--fixed-right {
-      margin-left: auto;
-    }
   }
 }
 
@@ -16,7 +12,6 @@ form {
     margin-right: 20px;
   }
 }
-$toolbar-height: 100px;
 
 .wrapper {
   margin: 10px;
@@ -26,13 +21,6 @@ $toolbar-height: 100px;
   position: sticky;
   top: 0;
   z-index: 10;
-
-  ::ng-deep app-tool-box {
-    .wrapper {
-      height: $toolbar-height;
-      box-sizing: border-box;
-    }
-  }
 }
 
 .editor {
@@ -111,7 +99,6 @@ $toolbar-height: 100px;
     flex-basis: 20%;
     height: 100%;
     position: sticky;
-    top: $toolbar-height;
   }
 }
 .loading-modal {
@@ -122,4 +109,10 @@ $toolbar-height: 100px;
   font-size: 150px;
   color: red;
   opacity: 0.7;
+}
+
+.scroller {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
 }

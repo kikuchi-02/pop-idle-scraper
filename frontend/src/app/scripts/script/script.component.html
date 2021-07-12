@@ -14,32 +14,28 @@
         <button mat-raised-button color="primary" (click)="save()">save</button>
       </div>
     </form>
+    <div class="tool__item">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="deleteScript()"
+        [disabled]="!script.id"
+      >
+        delete
+      </button>
+    </div>
 
     <div class="tool__item">
-      <button mat-raised-button color="primary" (click)="copy2Clipboard()">
+      <button mat-button color="primary" (click)="copy2Clipboard()">
         copy to clipboard
       </button>
     </div>
     <div class="tool__item">
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="editableDirective?.undo()"
-      >
+      <button mat-button color="primary" (click)="editableDirective?.undo()">
         undo
       </button>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="editableDirective?.redo()"
-      >
+      <button mat-button color="primary" (click)="editableDirective?.redo()">
         redo
-      </button>
-    </div>
-
-    <div class="tool__item--fixed-right" *ngIf="script.id">
-      <button mat-raised-button color="primary" (click)="deleteScript()">
-        delete
       </button>
     </div>
   </div>
@@ -63,10 +59,14 @@
       [(ngModel)]="script.innerHtml"
     ></div>
 
-    <div class="console__wrapper">
+    <div class="console__wrapper" [style.top.px]="consolePositionTop">
       <app-console></app-console>
     </div>
   </div>
   <app-balloon></app-balloon>
   <div class="loading-modal" *ngIf="loading">loading</div>
+</div>
+
+<div class="scroller">
+  <button mat-raised-button color="primary" (click)="scrollTop()">↑</button>
 </div>

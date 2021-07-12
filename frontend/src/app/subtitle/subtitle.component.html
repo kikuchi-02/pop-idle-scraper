@@ -1,5 +1,7 @@
 <div class="subtitle_Wrapper">
   <button
+    mat-stroked-button
+    color="primary"
     class="subtitle_MainButton"
     type="button"
     (click)="generateSubtitle()"
@@ -7,9 +9,30 @@
     generate subtitle
   </button>
   <div class="subtitle_Layout_Buttons">
-    <button (click)="applyLayout('left')" [class.clicked]="layout==='left'">input</button>
-    <button (click)="applyLayout('right')" [class.clicked]="layout==='right'">output</button>
-    <button (click)="applyLayout('both')" [class.clicked]="layout==='both'">both</button>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="applyLayout('left')"
+      [disabled]="layout === 'left'"
+    >
+      input
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="applyLayout('right')"
+      [disabled]="layout === 'right'"
+    >
+      output
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="applyLayout('both')"
+      [disabled]="layout === 'both'"
+    >
+      both
+    </button>
   </div>
   <div class="subtitle_Inner">
     <div class="subtitle_Labels">

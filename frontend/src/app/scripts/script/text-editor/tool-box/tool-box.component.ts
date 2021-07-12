@@ -23,6 +23,8 @@ import { ScriptService } from '../../script.service';
 export class ToolBoxComponent implements OnInit, OnDestroy {
   highlightValue = new FormControl('');
   underlineValue = new FormControl('');
+  keywordValues = new FormControl();
+  keys = ['考える', '思う'];
 
   @Input() value: string;
   @Output() valueChange = new EventEmitter<string>();
@@ -224,7 +226,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
     this.setText.emit(splitted);
   }
-  constituencyParse(): void {}
 
   textLint(): void {
     const text = this.getText();
@@ -243,8 +244,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       );
   }
 
-  scrollTop(): void {
-    window.scrollTo(0, 0);
+  highlightBulk(): void {
+    // TODO
   }
 
   private getText(): string {

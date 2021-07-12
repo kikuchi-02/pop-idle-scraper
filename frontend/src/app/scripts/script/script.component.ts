@@ -25,7 +25,7 @@ import { EditableDirective } from './text-editor/editable.directive';
 })
 export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   initialScript: Script;
-  script: Script;
+  script = new Script();
   blurred = false;
   focused = false;
 
@@ -39,6 +39,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
 
+  consolePositionTop = 0;
+
   private unsubscriber$ = new Subject<void>();
 
   constructor(
@@ -51,7 +53,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
     if (id === 'new') {
-      this.script = new Script();
       this.initialScript = new Script();
       this.cd.markForCheck();
     } else {
@@ -79,6 +80,10 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       'mouseup',
       (event) => this.balloonComponent.selectionChange(event)
     );
+
+    this.consolePositionTop = document
+      .querySelector('.tool-box__wrapper')
+      .getBoundingClientRect().height;
   }
 
   canDeactivate(): boolean {
@@ -150,5 +155,9 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           this.router.navigate(['../'], { relativeTo: this.route });
         });
     }
+  }
+
+  scrollTop(): void {
+    window.scrollTo(0, 0);
   }
 }

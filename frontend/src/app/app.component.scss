@@ -1,18 +1,29 @@
 h1 {
   text-align: center;
+  a {
+    color: #fff;
+  }
 }
 
 header {
-  max-width: 1000px;
-  width: 100%;
-  margin: 30px auto;
-  padding: 0 30px;
+  .toolbar-inner {
+    max-width: 1000px;
+    width: 100%;
+    margin: 30px auto;
+    padding: 0 30px;
 
-  .app-links {
-    display: inline-flex;
+    &__links {
+      display: flex;
 
-    &_link {
-      padding-right: 5px;
+      &-link {
+        padding-right: 5px;
+
+        a {
+          color: #fff;
+          font-weight: normal;
+        }
+      }
     }
   }
+  margin-bottom: 30px;
 }

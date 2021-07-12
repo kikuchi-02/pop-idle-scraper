@@ -1,32 +1,72 @@
 <div class="wrapper">
   <div class="row">
-    <div class="highlight">
+    <div class="row__item highlight">
       <form (ngSubmit)="highlight(highlightValue.value)">
-        <input [formControl]="highlightValue" placeholder="hight light value" />
+        <mat-form-field>
+          <mat-label>Hight light</mat-label>
+          <input matInput [formControl]="highlightValue" />
+          <button
+            mat-button
+            *ngIf="highlightValue.value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="highlightValue.reset()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
       </form>
-      <button (click)="removeOldHighlighted()">remove highlight</button>
     </div>
-    <div class="underline">
+    <div class="row__item underline">
       <form (ngSubmit)="underlineSentence(underlineValue.value)">
-        <input
-          [formControl]="underlineValue"
-          placeholder="underline by base form"
-        />
+        <mat-form-field>
+          <mat-label>Underline by base form</mat-label>
+          <input matInput [formControl]="underlineValue" />
+          <button
+            mat-button
+            *ngIf="underlineValue.value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="underlineValue.reset()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
       </form>
-      <button (click)="removeAllUnderlinedSentences()">remove underline</button>
     </div>
-    <div class="scroller">
-      <button (click)="scrollTop()">↑</button>
+    <div class="row__item">
+      <mat-form-field>
+        <mat-label>Keywords</mat-label>
+        <mat-select [formControl]="keywordValues" multiple>
+          <mat-select-trigger>
+            <span class="keywords">{{ keywordValues.value?.length }}</span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let key of keys">{{ key }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-button color="primary" (click)="highlightBulk()">
+        bulk highlight
+      </button>
     </div>
+    <mat-slide-toggle
+      class="row__item"
+      color="primary"
+      [checked]="true"
+      (toggleChange)="toggleSubtitleButton.emit()"
+    >
+      subtitle line
+    </mat-slide-toggle>
   </div>
   <div class="row">
-    <button (click)="reformat()">reformat</button>
-    <button (click)="textLint()">textLint</button>
-    <button (click)="constituencyParse()" [disabled]="true">
-      constituencyParse
+    <button mat-button color="primary" (click)="reformat()">reformat</button>
+    <button mat-button color="primary" (click)="textLint()">textLint</button>
+    <button mat-button color="primary" (click)="removeOldHighlighted()">
+      remove highlight
     </button>
-  </div>
-  <div class="row">
-    <button (click)="toggleSubtitleButton.emit()">toggle subtitleLine</button>
+    <button mat-button color="primary" (click)="removeAllUnderlinedSentences()">
+      remove underline
+    </button>
   </div>
 </div>
