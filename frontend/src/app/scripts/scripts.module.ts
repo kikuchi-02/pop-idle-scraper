@@ -9,7 +9,10 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { SharedModule } from '../shared/shared.module';
 import { ScriptListComponent } from './script-list/script-list.component';
@@ -41,6 +44,9 @@ import { ScriptsRoutingModule } from './scripts-routing.module';
     MatButtonModule,
     MatTabsModule,
     SharedModule,
+    MatSlideToggleModule,
+    MatIconModule,
+    MatSelectModule,
   ],
   providers: [{ provide: MAT_COLOR_FORMATS, useValue: NGX_MAT_COLOR_FORMATS }],
 })

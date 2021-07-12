@@ -99,4 +99,20 @@ export class Script {
   created: Date;
   updated: Date;
   author: User;
+
+  constructor(data: Partial<Script> = {}) {
+    Object.assign(this, data);
+  }
+
+  clone(): Script {
+    const clone = Object.assign(
+      Object.create(Object.getPrototypeOf(this)),
+      this
+    );
+    return clone as Script;
+  }
+
+  isEqual(anotherScript: Script): boolean {
+    return JSON.stringify(this) === JSON.stringify(anotherScript);
+  }
 }

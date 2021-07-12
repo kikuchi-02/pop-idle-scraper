@@ -24,7 +24,8 @@ import { EditableDirective } from './text-editor/editable.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
-  script = new Script();
+  initialScript: Script;
+  script: Script;
   blurred = false;
   focused = false;
 
@@ -49,12 +50,17 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
-    if (id !== 'new') {
+    if (id === 'new') {
+      this.script = new Script();
+      this.initialScript = new Script();
+      this.cd.markForCheck();
+    } else {
       this.scriptService
         .getScript(parseInt(id, 10))
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
+          this.initialScript = this.script.clone();
           this.titleFormControl.setValue(this.script.title);
           this.cd.markForCheck();
         });
@@ -75,13 +81,21 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  canDeactivate(): boolean {
+    if (this.script.isEqual(this.initialScript)) {
+      return true;
+    }
+    return window.confirm(
+      'Are you sure you want to leave this page before you save this script'
+    );
+  }
+
   setTextContent(text: string): void {
     this.editableDirective.clearContent();
     this.editableDirective.insertTextContent(text);
   }
 
   save(): void {
-    this.script.innerHtml = this.script.innerHtml;
     this.script.title = this.titleFormControl.value;
     if (!this.script.innerHtml || !this.script.title) {
       return;
@@ -93,6 +107,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
+          this.initialScript = script;
           this.cd.markForCheck();
         });
     } else {
@@ -101,6 +116,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
+          this.initialScript = script;
+
           this.cd.markForCheck();
           this.router.navigate([`../${script.id}`], { relativeTo: this.route });
         });
@@ -125,11 +142,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteScript(): void {
-    this.scriptService
-      .deleteScript(this.script.id)
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe(() => {
-        this.router.navigate(['../'], { relativeTo: this.route });
-      });
+    if (window.confirm('Are you sure you want to delete')) {
+      this.scriptService
+        .deleteScript(this.script.id)
+        .pipe(takeUntil(this.unsubscriber$))
+        .subscribe(() => {
+          this.router.navigate(['../'], { relativeTo: this.route });
+        });
+    }
   }
 }

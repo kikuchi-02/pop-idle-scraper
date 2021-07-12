@@ -116,21 +116,27 @@ export class ScriptService {
   }
 
   getScript(id: number): Observable<Script> {
-    return this.http.get<Script>(`api/v1/scripts/${id}`);
+    return this.http
+      .get<Partial<Script>>(`api/v1/scripts/${id}`)
+      .pipe(map((script) => new Script(script)));
   }
 
   putScript(script: Script): Observable<Script> {
-    return this.http.put<Script>(`api/v1/scripts/${script.id}`, {
-      title: script.title,
-      innerHtml: script.innerHtml,
-    });
+    return this.http
+      .put<Partial<Script>>(`api/v1/scripts/${script.id}`, {
+        title: script.title,
+        innerHtml: script.innerHtml,
+      })
+      .pipe(map((newScript) => new Script(newScript)));
   }
 
   postScript(script: Script): Observable<Script> {
-    return this.http.post<Script>(`api/v1/scripts`, {
-      title: script.title,
-      innerHtml: script.innerHtml,
-    });
+    return this.http
+      .post<Partial<Script>>(`api/v1/scripts`, {
+        title: script.title,
+        innerHtml: script.innerHtml,
+      })
+      .pipe(map((newScript) => new Script(newScript)));
   }
 
   deleteScript(scriptId: number): Observable<void> {
