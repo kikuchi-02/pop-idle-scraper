@@ -139,14 +139,14 @@ export class EditableDirective
   }
 
   undo(): void {
-    if (this.undoRedoService.ableToUndo) {
-      const innerHtml = this.undoRedoService.undo();
+    const innerHtml = this.undoRedoService.undo();
+    if (innerHtml !== undefined) {
       this.elementRef.nativeElement.innerHTML = innerHtml;
     }
   }
   redo(): void {
-    if (this.undoRedoService.ableToRedo) {
-      const innerHtml = this.undoRedoService.redo();
+    const innerHtml = this.undoRedoService.redo();
+    if (innerHtml !== undefined) {
       this.elementRef.nativeElement.innerHTML = innerHtml;
     }
   }
