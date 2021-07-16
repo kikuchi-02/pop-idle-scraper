@@ -10,7 +10,7 @@ import { IdleKind, Magazine, Member } from './../typing';
 export class UtilService {
   constructor(private http: HttpClient) {}
 
-  getMemberTable(idle: IdleKind): Observable<string[]> {
+  getMemberTable(idle: IdleKind): Observable<object[][]> {
     return this.http.get<Member[]>(`api/v1/member-table?kind=${idle}`).pipe(
       catchError((err) => {
         console.error(err);

@@ -3,7 +3,7 @@ import { Cacher, getCache } from '../cache';
 import { scrape2 } from '../libs/scraper';
 import { getBlogLinks2 } from '../libs/scraper-utils/links/blog';
 import { getWikiLinks } from '../libs/scraper-utils/links/wiki';
-import { memberTable } from '../libs/scraper-utils/wiki';
+import { wikiScrape } from '../libs/scraper-utils/wiki';
 import {
   IdleKind,
   idleKinds,
@@ -55,21 +55,21 @@ export const getMemberTable = async (req: Request, res: Response) => {
     res.sendStatus(400).end();
     return;
   }
-  const cacher = new Cacher<string[]>(`${kind}-member-table`);
+  const cacher = new Cacher<object[][]>(`${kind}-wiki-member-table`);
   const cache = await cacher.getCache();
   if (cache) {
     res.send(JSON.stringify(cache));
     return;
   }
-  const tables: string[] = await memberTable(kind as IdleKind);
-  if (!tables) {
+  const result: object[][] = await wikiScrape(kind as IdleKind);
+  if (!result) {
     res.sendStatus(400).end();
     return;
   }
-  const tommorow = new Date();
-  tommorow.setDate(tommorow.getDate() + 10);
-  await cacher.saveCache(tables, tommorow);
-  res.send(JSON.stringify(tables));
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 10);
+  await cacher.saveCache(result, tomorrow);
+  res.send(JSON.stringify(result));
   return;
 };
 

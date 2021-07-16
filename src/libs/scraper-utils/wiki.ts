@@ -1,6 +1,6 @@
 import axios from 'axios';
-
-import { parseHtml, Element } from 'libxmljs2';
+import cheerio from 'cheerio';
+import { Element, parseHtml } from 'libxmljs2';
 import { IdleKind } from '../../typing';
 import { switchWikiLink } from './links/wiki';
 
@@ -88,4 +88,56 @@ export const memberTable = async (idle: IdleKind): Promise<string[]> => {
     );
   }
   return tables;
+};
+
+export const wikiScrape = async (idle: IdleKind): Promise<object[][]> => {
+  const baseUrl = 'https://ja.wikipedia.org';
+  const url = baseUrl + switchWikiLink(idle);
+  const homeResponse = await axios.get(url);
+  if (homeResponse.status !== 200) {
+    return Promise.reject(Error(`status ${homeResponse.status}`));
+  }
+
+  const htmlString = homeResponse.data;
+
+  const $ = cheerio.load(htmlString);
+  const h2 = $('#content')
+    .find('h2')
+    .toArray()
+    .find((header) => $(header).text().startsWith('メンバー'));
+  const tables = $(h2).nextAll('table').toArray().slice(0, 2);
+  const parsed = tables.map((table) => {
+    const columns = $(table)
+      .find('tr > th')
+      .toArray()
+      .map((th) => $(th).text().trim());
+
+    const rows = $(table)
+      .find('tbody > tr')
+      .toArray()
+      .map((tr) => $(tr).find('td').toArray())
+      .filter((row) => row.length === columns.length)
+      .map((tr) => {
+        const link = $(tr[0]).find('a').attr('href');
+        const row = tr.map((td) => {
+          return $(td).text().trim();
+        });
+        const result = columns.reduce((acc, column, i) => {
+          if (/^(\d{4}\/\d{2}\/\d{2}).*$/.test(row[i])) {
+            acc[column] = new Date(
+              row[i].replace(/^(\d{4}\/\d{2}\/\d{2}).*$/, (match, p) => p)
+            );
+          } else {
+            acc[column] = row[i];
+          }
+          return acc;
+        }, {});
+        if (link) {
+          result['link'] = baseUrl + link;
+        }
+        return result;
+      });
+    return rows;
+  });
+  return parsed;
 };
