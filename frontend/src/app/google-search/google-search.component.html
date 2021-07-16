@@ -76,6 +76,7 @@
     >
       <div class="google_search-candidates-container-label">
         <mat-checkbox
+          color="primary"
           (change)="changed($event.checked, member)"
           [checked]="isChecked(member)"
         >
@@ -86,7 +87,10 @@
       </div>
       <ul class="google_search-candidates-container-links">
         <li *ngFor="let link of member.links; index as i">
-          <mat-checkbox [checked]="member.checks[i]"></mat-checkbox>
+          <mat-checkbox
+            color="primary"
+            [checked]="member.checks[i]"
+          ></mat-checkbox>
           <span class="google_search-candidates-container-links-link">
             <a [href]="link" target="_blank">{{ link }}</a>
           </span>
@@ -107,6 +111,7 @@
           <ng-container *ngFor="let blog of nogizakaLinks">
             <div>
               <mat-checkbox
+                color="primary"
                 (change)="changed($event.checked, blog)"
                 [checked]="isChecked(blog)"
               >
@@ -128,6 +133,7 @@
             <ng-container *ngFor="let blog of sakurazakaLinks">
               <div>
                 <mat-checkbox
+                  color="primary"
                   (change)="changed($event.checked, blog)"
                   [checked]="isChecked(blog)"
                 >
@@ -150,6 +156,7 @@
             <ng-container *ngFor="let blog of hinatazakaLinks">
               <div>
                 <mat-checkbox
+                  color="primary"
                   (change)="changed($event.checked, blog)"
                   [checked]="isChecked(blog)"
                 >

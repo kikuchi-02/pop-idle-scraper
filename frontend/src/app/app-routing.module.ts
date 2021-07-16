@@ -1,26 +1,40 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ChatComponent } from './chat/chat.component';
-import { EditorComponent } from './editor/editor.component';
-import { GoogleSearchComponent } from './google-search/google-search.component';
-import { HomeComponent } from './home/home.component';
-import { MarkdownComponent } from './markdown/markdown.component';
-import { MemberComponent } from './member/member.component';
-import { SubtitleComponent } from './subtitle/subtitle.component';
-import { TextEditorComponent } from './text-editor/text-editor.component';
+import { AuthenticationGuard } from './guards/authentication.guard';
 
 const routes: Routes = [
   {
     path: 'members',
-    component: MemberComponent,
+    loadChildren: () =>
+      import('./member/member.module').then((m) => m.MemberModule),
   },
-  { path: 'home', component: HomeComponent },
-  { path: 'chat', component: ChatComponent },
-  { path: 'google-search', component: GoogleSearchComponent },
-  { path: 'markdown', component: MarkdownComponent },
-  { path: 'editor', component: EditorComponent },
-  { path: 'text-editor', component: TextEditorComponent },
-  { path: 'subtitle', component: SubtitleComponent },
+  {
+    path: 'home',
+    loadChildren: () => import('./home/home.module').then((m) => m.HomeModule),
+  },
+  {
+    path: 'google-search',
+    loadChildren: () =>
+      import('./google-search/google-search.module').then(
+        (m) => m.GoogleSearchModule
+      ),
+  },
+  {
+    path: 'subtitle',
+    loadChildren: () =>
+      import('./subtitle/subtitle.module').then((m) => m.SubtitleModule),
+  },
+  {
+    path: 'login',
+    loadChildren: () =>
+      import('./login/login.module').then((m) => m.LoginModule),
+  },
+  {
+    path: 'scripts',
+    loadChildren: () =>
+      import('./scripts/scripts.module').then((m) => m.ScriptsModule),
+    canActivate: [AuthenticationGuard],
+  },
   {
     path: '**',
     redirectTo: 'home',

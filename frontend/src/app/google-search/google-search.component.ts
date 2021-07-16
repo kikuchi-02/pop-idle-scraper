@@ -5,11 +5,11 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { GoogleSearchService } from './google-search.service';
 import { MemberLinks } from '../typing';
-import { FormControl, FormGroup } from '@angular/forms';
+import { GoogleSearchService } from './google-search.service';
 
 interface MemberLinkChecks extends MemberLinks {
   checks: boolean[];
@@ -66,24 +66,19 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
       });
 
     this.googleSearchService
-      .getLinks('nogizaka')
+      .getLinks(['nogizaka', 'sakurazaka', 'hinatazaka'])
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((nogizaka) => {
-        this.nogizakaLinks = nogizaka;
-        this.cd.markForCheck();
-      });
-    this.googleSearchService
-      .getLinks('sakurazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((sakurazaka) => {
-        this.sakurazakaLinks = sakurazaka;
-        this.cd.markForCheck();
-      });
-    this.googleSearchService
-      .getLinks('hinatazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((hinatazaka) => {
-        this.hinatazakaLinks = hinatazaka;
+      .subscribe((result) => {
+        result.forEach((item) => {
+          switch (item.kind) {
+            case 'nogizaka':
+              this.nogizakaLinks = item.value;
+            case 'sakurazaka':
+              this.sakurazakaLinks = item.value;
+            case 'hinatazaka':
+              this.hinatazakaLinks = item.value;
+          }
+        });
         this.cd.markForCheck();
       });
   }

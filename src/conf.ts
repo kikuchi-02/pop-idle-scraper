@@ -1,15 +1,10 @@
-import { join } from 'path';
 import { readFileSync } from 'fs';
-import * as yaml from 'js-yaml';
+import { join } from 'path';
 import { Settings } from './typing';
 
 export const ENV_SETTINGS = (() => {
-  let data;
-  try {
-    data = yaml.load(readFileSync(join(process.cwd(), 'envs.yaml'), 'utf-8'));
-  } catch (e) {
-    console.error(e);
-  }
-  const settings = new Settings(data || process.env);
+  const settingsStr = readFileSync(join(process.cwd(), 'env.json'), 'utf-8');
+
+  const settings = JSON.parse(settingsStr) as Settings;
   return settings;
 })();

@@ -1,14 +1,16 @@
-import { Server, Data } from 'ws';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
+import { Data, Server } from 'ws';
 
-const server = new Server({ port: 8081 });
+const wss = new Server({ port: 8081 });
 
-server.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: WebSocket) => {
   ws.on('message', (message: Data) => {
     console.log('Received: ' + message);
 
-    server.clients.forEach((client: WebSocket) => {
-      client.send(message);
+    wss.clients.forEach((client: WebSocket) => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
     });
   });
 

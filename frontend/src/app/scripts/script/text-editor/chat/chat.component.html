@@ -1,0 +1,45 @@
+<div class="wrapper">
+  <ng-container *ngIf="initialized$ | async; else loadingTmp">
+    <div class="chat-messages" #chatMessage>
+      <ng-container *ngFor="let message of messages">
+        <ng-container
+          *ngTemplateOutlet="messageTemplate; context: { message: message }"
+        ></ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <form #form [formGroup]="chatForm" class="chat-form" (ngSubmit)="submit()">
+    <textarea
+      class="chat-form__textarea"
+      formControlName="body"
+      [disabled]="disabled"
+    ></textarea>
+    <button class="chat-form__submit" type="submit" [disabled]="disabled">
+      submit
+    </button>
+  </form>
+</div>
+
+<ng-template #messageTemplate let-message="message">
+  <div class="chat-messages__body">
+    <div class="chat-messages__text">
+      <p class="chat-messages__text-p">{{ message.body }}</p>
+    </div>
+    <div class="chat-messages__sub">
+      <span class="chat-messages__sub-author">{{ message.author.name }}</span>
+      <span class="chat-messages__sub-created">{{
+        message.created | date: 'short'
+      }}</span>
+    </div>
+  </div>
+  <div class="chat-messages__replay" *ngIf="!!message.children?.length">
+    <ng-container *ngFor="let child of message.children">
+      <ng-container
+        *ngTemplateOutlet="messageTemplate; context: { message: child }"
+      ></ng-container>
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template #loadingTmp>loading</ng-template>

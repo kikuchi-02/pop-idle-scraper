@@ -1,0 +1,32 @@
+<div class="wrapper">
+  <a [routerLink]="'new'" mat-stroked-button color="primary">new script</a>
+  <button mat-stroked-button color="primary" (click)="deleteScripts()">
+    Bulk Delete
+  </button>
+
+  <ul class="list">
+    <li *ngFor="let script of scripts" class="list-detail">
+      <input
+        class="list-detail__checkbox"
+        type="checkbox"
+        (change)="checkScript($event, script.id)"
+        [value]="deleteScriptIds.includes(script.id)"
+      />
+      <div class="list-detail__body">
+        <a [routerLink]="script.id" class="list-detail__body-main">
+          {{ script.title }}
+        </a>
+        <span class="list-detail__body-main-author"
+          >author: {{ script.author?.name }}</span
+        >
+        <div>
+          <span class="list-detail__body-sub-date"
+            >created: {{ script.created | date }}</span
+          ><span class="list-detail__body-sub-date"
+            >updated: {{ script.updated | date }}</span
+          >
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

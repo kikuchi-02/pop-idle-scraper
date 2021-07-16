@@ -1,46 +1,75 @@
 <div class="member_Wrapper">
   <app-idle-switcher [value]="idleSwitchState"></app-idle-switcher>
 
-  <ng-container *ngIf="idleSwitchState.nogizakaCheck">
-    <h2>乃木坂46</h2>
-    <!-- <ul>
-      <li *ngFor="let member of nogizakaMembers" class="member-detail">
-        <ng-container *ngIf="!!member.link; else noLink">
-          <a [href]="member.link" target="_blank">{{ member.name }}</a>
-        </ng-container>
-        <ng-template #noLink>{{ member.name }}</ng-template>
-      </li>
-    </ul> -->
-    <ng-container *ngFor="let table of nogizakaTables">
-      <div [innerHtml]="table"></div>
+  <section class="table-section">
+    <ng-container *ngIf="idleSwitchState.nogizakaCheck">
+      <h2>乃木坂46</h2>
+      <ng-container *ngFor="let table of nogizakaTables">
+        <ng-container
+          *ngTemplateOutlet="tableTemplate; context: table"
+        ></ng-container>
+      </ng-container>
     </ng-container>
-  </ng-container>
-  <ng-container *ngIf="idleSwitchState.sakurazakaCheck">
-    <h2>櫻坂46</h2>
-    <!-- <ul>
-      <li *ngFor="let member of sakurazakaMembers" class="member-detail">
-        <ng-container *ngIf="!!member.link; else noLink">
-          <a [href]="member.link" target="_blank">{{ member.name }}</a>
-        </ng-container>
-        <ng-template #noLink>{{ member.name }}</ng-template>
-      </li>
-    </ul> -->
-    <ng-container *ngFor="let table of sakurazakaTables">
-      <div [innerHtml]="table"></div>
+  </section>
+
+  <section class="table-section">
+    <ng-container *ngIf="idleSwitchState.sakurazakaCheck">
+      <h2>櫻坂46</h2>
+      <ng-container *ngFor="let table of sakurazakaTables">
+        <ng-container
+          *ngTemplateOutlet="tableTemplate; context: table"
+        ></ng-container>
+      </ng-container>
     </ng-container>
-  </ng-container>
-  <ng-container *ngIf="idleSwitchState.hinatazakaCheck">
-    <h2>日向坂46</h2>
-    <!-- <ul>
-      <li *ngFor="let member of hinatazakaMembers" class="member-detail">
-        <ng-container *ngIf="!!member.link; else noLink">
-          <a [href]="member.link" target="_blank">{{ member.name }}</a>
-        </ng-container>
-        <ng-template #noLink>{{ member.name }}</ng-template>
-      </li>
-    </ul> -->
-    <ng-container *ngFor="let table of hinatazakaTables">
-      <div [innerHtml]="table"></div>
+  </section>
+
+  <section class="table-section">
+    <ng-container *ngIf="idleSwitchState.hinatazakaCheck">
+      <h2>日向坂46</h2>
+      <ng-container *ngFor="let table of hinatazakaTables">
+        <ng-container
+          *ngTemplateOutlet="tableTemplate; context: table"
+        ></ng-container>
+      </ng-container>
     </ng-container>
-  </ng-container>
+  </section>
 </div>
+
+<ng-template #tableTemplate let-rows="rows" let-columns="columns">
+  <table>
+    <thead>
+      <tr>
+        <th
+          *ngFor="let col of columns; index as i"
+          [style.width]="setWidth(i, columns.length)"
+        >
+          {{ col }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td
+          *ngFor="let col of columns; index as i"
+          [style.width]="setWidth(i, columns.length)"
+        >
+          <ng-container [ngSwitch]="col">
+            <ng-container *ngSwitchCase="'link'">
+              <a
+                class="table-column__link-anchor"
+                *ngFor="let link of row[col]"
+                [href]="link.link"
+                target="_blank"
+                >{{ link.host }}</a
+              >
+            </ng-container>
+
+            <ng-container *ngSwitchDefault>
+              {{ row[col] }}
+            </ng-container>
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
