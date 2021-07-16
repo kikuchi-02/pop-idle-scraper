@@ -2734,9 +2734,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// import { environment } from 'src/environments/environment';
-// const WS_ENDPOINT = environment.wsEndpoint;
-const WS_ENDPOINT = 'ws://localhost:8081';
 class WsService {
     constructor() {
         this.messageSubject$ = new rxjs__WEBPACK_IMPORTED_MODULE_0__["Subject"]();
@@ -2766,6 +2763,7 @@ class WsService {
         this.socket$.complete();
     }
     getNewWebSocket() {
+        let WS_ENDPOINT = `ws://${window.location.host}/__ws`;
         return Object(rxjs_webSocket__WEBPACK_IMPORTED_MODULE_2__["webSocket"])({ url: WS_ENDPOINT });
     }
     reconnect(observable) {
