@@ -39,15 +39,29 @@
   <table>
     <thead>
       <tr>
-        <th *ngFor="let col of columns">{{ col }}</th>
+        <th
+          *ngFor="let col of columns; index as i"
+          [style.width]="setWidth(i, columns.length)"
+        >
+          {{ col }}
+        </th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let row of rows">
-        <td *ngFor="let col of columns">
+        <td
+          *ngFor="let col of columns; index as i"
+          [style.width]="setWidth(i, columns.length)"
+        >
           <ng-container [ngSwitch]="col">
             <ng-container *ngSwitchCase="'link'">
-              <a [href]="row[col]" target="_blank">wiki</a>
+              <a
+                class="table-column__link-anchor"
+                *ngFor="let link of row[col]"
+                [href]="link.link"
+                target="_blank"
+                >{{ link.host }}</a
+              >
             </ng-container>
 
             <ng-container *ngSwitchDefault>

@@ -5,6 +5,8 @@
 
 .table-section {
   ::ng-deep table {
+    width: 100%;
+
     border-collapse: collapse;
     border-spacing: 0;
     th,
@@ -18,5 +20,11 @@
       background-color: #eee;
     }
     margin-bottom: 30px;
+
+    .table-column {
+      &__link-anchor {
+        display: block;
+      }
+    }
   }
 }
