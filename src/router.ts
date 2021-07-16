@@ -1,7 +1,9 @@
 import { Express, Router } from 'express';
 import * as authController from './controllers/authentication';
 import * as magazineController from './controllers/magazine';
+import * as messageController from './controllers/message';
 import * as scraperController from './controllers/scrape';
+import * as scriptController from './controllers/script';
 import * as textlintController from './controllers/textlint';
 import * as twitterController from './controllers/twitter';
 import { verifyToken } from './middleware/authentication';
@@ -30,6 +32,17 @@ export const setRoutes = (app: Express) => {
   routeV1.get('/member-table', scraperController.getMemberTable);
   routeV1.get('/member-links', scraperController.getMemberLinks);
   routeV1.get('/magazines', magazineController.getMagazines);
+
+  routeV1.get('/scripts', verifyToken, scriptController.readScripts);
+  routeV1.get('/scripts/:id', verifyToken, scriptController.readScript);
+  routeV1.put('/scripts/:id', verifyToken, scriptController.updateScript);
+  routeV1.post('/scripts', verifyToken, scriptController.createScript);
+  routeV1.delete('/scripts', verifyToken, scriptController.deleteScripts);
+  routeV1.delete('/scripts/:id', verifyToken, scriptController.deleteScript);
+
+  routeV1.get('/messages', verifyToken, messageController.readMessage);
+  routeV1.post('/messages', verifyToken, messageController.createMessage);
+
   routeV1.post('/textlint', verifyToken, textlintController.postTextLint);
 
   app.use('/api/v1', routeV1);

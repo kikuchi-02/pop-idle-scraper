@@ -1,0 +1,79 @@
+<div class="wrapper">
+  <div class="row">
+    <div class="row__item highlight">
+      <form (ngSubmit)="highlight(highlightValue.value)">
+        <mat-form-field>
+          <mat-label>Hight light</mat-label>
+          <input matInput [formControl]="highlightValue" />
+          <button
+            type="reset"
+            mat-button
+            *ngIf="highlightValue.value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="highlightValue.reset()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </form>
+    </div>
+    <div class="row__item underline">
+      <form (ngSubmit)="underlineSentenceByWord(underlineValue.value)">
+        <mat-form-field>
+          <mat-label>Underline by base form</mat-label>
+          <input matInput [formControl]="underlineValue" />
+          <button
+            type="reset"
+            mat-button
+            *ngIf="underlineValue.value"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="underlineValue.reset()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </form>
+    </div>
+    <div class="row__item">
+      <mat-form-field>
+        <mat-label>Keywords</mat-label>
+        <mat-select [formControl]="keywordValues" multiple>
+          <mat-select-trigger>
+            <span class="keywords">{{ keywordValues.value?.length }}</span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let key of keys" [value]="key">{{
+            key
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-button color="primary" (click)="bulkUnderline()">
+        bulk underline
+      </button>
+    </div>
+    <mat-slide-toggle
+      class="row__item"
+      color="primary"
+      [checked]="true"
+      (toggleChange)="toggleSubtitleButton.emit()"
+    >
+      subtitle line
+    </mat-slide-toggle>
+  </div>
+  <div class="row">
+    <button mat-button color="primary" (click)="reformat()">reformat</button>
+    <button mat-button color="primary" (click)="textLint()">textLint</button>
+    <button mat-button color="primary" (click)="removeOldHighlighted()">
+      remove highlight
+    </button>
+    <button mat-button color="primary" (click)="removeAllUnderlinedSentences()">
+      remove underline
+    </button>
+    <button mat-button color="primary" (click)="removeStrike()">
+      remove strike
+    </button>
+  </div>
+</div>

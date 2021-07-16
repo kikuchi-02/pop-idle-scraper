@@ -1,23 +1,39 @@
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable, Subject, timer } from 'rxjs';
+import {
+  catchError,
+  delayWhen,
+  filter,
+  map,
+  retryWhen,
+  tap,
+} from 'rxjs/operators';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { catchError, delayWhen, retryWhen, tap } from 'rxjs/operators';
 // import { environment } from 'src/environments/environment';
 
 // const WS_ENDPOINT = environment.wsEndpoint;
 const WS_ENDPOINT = 'ws://localhost:8081';
 
+interface WebSocketMessage<T> {
+  type: string;
+  message: T;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class WsService<T> {
-  private socket$: WebSocketSubject<any>;
-  private messageSubject$ = new Subject<T>();
+  private socket$: WebSocketSubject<WebSocketMessage<T>>;
+  private messageSubject$ = new Subject<WebSocketMessage<T>>();
+  private reconnectTries = 5;
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  public message$: Observable<T> = this.messageSubject$.asObservable();
+  private message$: Observable<
+    WebSocketMessage<T>
+  > = this.messageSubject$.asObservable();
 
-  constructor() {}
+  constructor() {
+    this.connect();
+  }
 
   connect(): void {
     if (!this.socket$ || this.socket$.closed) {
@@ -32,18 +48,32 @@ export class WsService<T> {
     }
   }
 
-  sendMessage(msg: T) {
-    this.socket$.next(msg);
+  sendMessage(type: string, message: T): void {
+    const body: WebSocketMessage<T> = {
+      type,
+      message,
+    };
+    this.socket$.next(body);
   }
-  close() {
+
+  messageReceiver(type: string): Observable<T> {
+    return this.message$.pipe(
+      filter((msg) => msg.type === type),
+      map((msg) => msg.message)
+    );
+  }
+
+  close(): void {
     this.socket$.complete();
   }
 
-  private getNewWebSocket() {
+  private getNewWebSocket(): WebSocketSubject<WebSocketMessage<T>> {
     return webSocket({ url: WS_ENDPOINT });
   }
 
-  private reconnect(observable: Observable<any>): Observable<any> {
+  private reconnect(
+    observable: WebSocketSubject<WebSocketMessage<T>>
+  ): Observable<any> {
     return observable.pipe(
       retryWhen((errors) =>
         errors.pipe(

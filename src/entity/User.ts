@@ -7,7 +7,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ENV_SETTINGS } from '../conf';
+import { Message } from './Message';
 import { RefreshToken } from './RefreshToken';
+import { Script } from './Script';
 
 @Entity()
 export class User {
@@ -20,7 +22,7 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @BeforeInsert()
@@ -30,4 +32,10 @@ export class User {
 
   @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
+
+  @OneToMany((type) => Script, (script) => script.author)
+  scripts: Script[];
+
+  @OneToMany((type) => Message, (message) => message.author)
+  messages: Message[];
 }

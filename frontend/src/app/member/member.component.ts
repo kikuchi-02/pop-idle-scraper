@@ -7,8 +7,13 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { IdleSwitchState, Member } from '../typing';
-import { UtilService } from '../services/util.service';
+import { IdleSwitchState } from '../typing';
+import { MemberService } from './member.service';
+
+interface TableContent {
+  columns: string[];
+  rows: any[];
+}
 
 @Component({
   selector: 'app-member',
@@ -23,58 +28,30 @@ export class MemberComponent implements OnInit, OnDestroy {
     hinatazakaCheck: true,
   };
 
-  nogizakaMembers: Member[];
-  sakurazakaMembers: Member[];
-  hinatazakaMembers: Member[];
-
-  nogizakaTables: string[];
-  sakurazakaTables: string[];
-  hinatazakaTables: string[];
+  nogizakaTables: TableContent[];
+  sakurazakaTables: TableContent[];
+  hinatazakaTables: TableContent[];
 
   private unsubscriber$: Subject<void> = new Subject<void>();
 
-  constructor(private utilService: UtilService, private cd: ChangeDetectorRef) {
-    // this.utilService
-    //   .getMembers('nogizaka')
-    //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((members) => {
-    //     this.nogizakaMembers = members;
-    //   });
-    // this.utilService
-    //   .getMembers('sakurazaka')
-    //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((members) => {
-    //     this.sakurazakaMembers = members;
-    //   });
-
-    // this.utilService
-    //   .getMembers('hinatazaka')
-    //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((members) => {
-    //     this.hinatazakaMembers = members;
-    //   });
-
-    this.utilService
-      .getMemberTable('nogizaka')
+  constructor(
+    private memberService: MemberService,
+    private cd: ChangeDetectorRef
+  ) {
+    this.memberService
+      .getMemberTable(['nogizaka', 'sakurazaka', 'hinatazaka'])
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((tables) => {
-        this.nogizakaTables = tables;
-        this.cd.markForCheck();
-      });
-
-    this.utilService
-      .getMemberTable('sakurazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((tables) => {
-        this.sakurazakaTables = tables;
-        this.cd.markForCheck();
-      });
-
-    this.utilService
-      .getMemberTable('hinatazaka')
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((tables) => {
-        this.hinatazakaTables = tables;
+      .subscribe((result) => {
+        result.forEach((item) => {
+          switch (item.kind) {
+            case 'nogizaka':
+              this.nogizakaTables = item.tables;
+            case 'sakurazaka':
+              this.sakurazakaTables = item.tables;
+            case 'hinatazaka':
+              this.hinatazakaTables = item.tables;
+          }
+        });
         this.cd.markForCheck();
       });
   }
@@ -83,5 +60,13 @@ export class MemberComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.unsubscriber$.next();
+  }
+
+  setWidth(index: number, length: number): string {
+    const baseWidth = 120;
+    if (index === length - 1) {
+      return `calc(100% - ${baseWidth * length - 1}px)`;
+    }
+    return `${baseWidth}px`;
   }
 }

@@ -85,3 +85,44 @@ export interface ConstituencyResult {
   objI: number;
   objToken: string;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export class Script {
+  id: number;
+  title = '';
+  innerHtml = '';
+  created: Date;
+  updated: Date;
+  author: User;
+
+  constructor(data: Partial<Script> = {}) {
+    Object.assign(this, data);
+  }
+
+  clone(): Script {
+    const clone = Object.assign(
+      Object.create(Object.getPrototypeOf(this)),
+      this
+    );
+    return clone as Script;
+  }
+
+  isEqual(anotherScript: Script): boolean {
+    return JSON.stringify(this) === JSON.stringify(anotherScript);
+  }
+}
+
+export interface Message {
+  id?: number;
+  scriptId: number;
+  // TODO
+  children?: Message[];
+  body: string;
+  author: User;
+  created: Date;
+}

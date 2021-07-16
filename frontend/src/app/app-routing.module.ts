@@ -20,14 +20,6 @@ const routes: Routes = [
       ),
   },
   {
-    path: 'text-editor',
-    loadChildren: () =>
-      import('./text-editor/text-editor.module').then(
-        (m) => m.TextEditorModule
-      ),
-    canActivate: [AuthenticationGuard],
-  },
-  {
     path: 'subtitle',
     loadChildren: () =>
       import('./subtitle/subtitle.module').then((m) => m.SubtitleModule),
@@ -36,6 +28,12 @@ const routes: Routes = [
     path: 'login',
     loadChildren: () =>
       import('./login/login.module').then((m) => m.LoginModule),
+  },
+  {
+    path: 'scripts',
+    loadChildren: () =>
+      import('./scripts/scripts.module').then((m) => m.ScriptsModule),
+    canActivate: [AuthenticationGuard],
   },
   {
     path: '**',

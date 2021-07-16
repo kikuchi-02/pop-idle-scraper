@@ -11,7 +11,7 @@ export const login = async (req: Request, res: Response) => {
   const password = req.body.password;
 
   const userRepository = getCustomRepository(UserRepository);
-  const user = await userRepository.findByEmail(email);
+  const user = await userRepository.findByEmailWithPassword(email);
   if (!user) {
     res.status(401).send('Invalid email');
     return;
@@ -26,9 +26,12 @@ export const login = async (req: Request, res: Response) => {
   const refreshTokenRepository = getCustomRepository(RefreshTokenRepository);
   const refreshToken = await refreshTokenRepository.createAndSave(user, 24 * 7);
   const refresh = refreshToken.token;
+
+  delete user.password;
   res.status(200).send({
     access,
     refresh,
+    user,
   });
 };
 
@@ -58,5 +61,5 @@ export const refresh = async (req: Request, res: Response) => {
   });
   await refreshTokenRepository.delete(refreshToken);
   const newRefresh = await refreshTokenRepository.createAndSave(user, 24 * 7);
-  res.status(200).send({ access: newAccess, refresh: newRefresh.token });
+  res.status(200).send({ access: newAccess, refresh: newRefresh.token, user });
 };

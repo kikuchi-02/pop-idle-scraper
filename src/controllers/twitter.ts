@@ -11,7 +11,7 @@ export const getTwitter = async (req: Request, res: Response) => {
   }
   const invalidKinds = kinds.filter((kind) => !idleKinds.includes(kind));
   if (invalidKinds.length > 0) {
-    res.send(401).send(`Invalid kinds: ${invalidKinds}`);
+    res.send(403).send(`Invalid kinds: ${invalidKinds}`);
     return;
   }
   const response = await Promise.all(

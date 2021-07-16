@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start:prod": "env TZ=Asia/Tokyo ts-node -T src/server.ts",
-    "start": "env TZ=Asia/Tokyo ts-node-dev --respawn src/server.ts",
+    "start": "env TZ=Asia/Tokyo ts-node-dev --respawn --files src/server.ts",
     "db-start": "ts-node-dev --respawn src/index.ts",
-    "ws-server": "env TZ=Asia/Tokyo ts-node src/ws-server.ts",
+    "ws-server": "env TZ=Asia/Tokyo ts-node-dev --respawn --files src/ws-server.ts",
     "build": "tsc",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "makemigrations": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate -n",
-    "migrate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run"
+    "migrate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run",
+    "migrate:revert": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:revert"
   },
   "keywords": [],
   "author": "",

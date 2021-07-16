@@ -3,36 +3,31 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class UndoRedoService {
-  undoStack: string[] = [];
-  redoStack: string[] = [];
-
-  get ableToUndo(): boolean {
-    return this.undoStack.length > 0;
-  }
-  get ableToRedo(): boolean {
-    return this.redoStack.length > 0;
-  }
+export class UndoRedoService<T> {
+  private undoStack: T[] = [];
+  private redoStack: T[] = [];
 
   constructor() {}
 
-  register(str: string) {
-    this.undoStack.push(str);
+  register(val: T) {
+    this.undoStack.push(val);
   }
 
-  undo(): string {
-    if (this.undoStack.length === 0) {
+  undo(): T {
+    const undoLength = this.undoStack.length;
+    if (undoLength < 2) {
       return undefined;
     }
     const stack = this.undoStack.pop();
-    this.redoStack.push(JSON.parse(JSON.stringify(stack)));
-    return stack;
+    this.redoStack.push(stack);
+    return this.undoStack[undoLength - 1 - 1];
   }
-  redo(): string {
-    if (this.redoStack.length === 0) {
+  redo(): T {
+    if (this.redoStack.length < 1) {
       return undefined;
     }
     const stack = this.redoStack.pop();
+    this.undoStack.push(stack);
     return stack;
   }
 }

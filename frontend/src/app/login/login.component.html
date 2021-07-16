@@ -2,7 +2,7 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <h2>Log In</h2>
     <mat-error *ngIf="loginInvalid">
-      The username and password were not recognized
+      The email and password were not recognized
     </mat-error>
     <mat-form-field>
       <input matInput placeholder="Email" formControlName="email" required />

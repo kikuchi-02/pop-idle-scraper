@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ChatComponent } from './chat/chat.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { IdleSwitcherComponent } from './idle-switcher/idle-switcher.component';
 import { MagazineComponent } from './magazine/magazine.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule],
-  declarations: [IdleSwitcherComponent, MagazineComponent, ChatComponent],
-  exports: [IdleSwitcherComponent, MagazineComponent, ChatComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatCheckboxModule],
+  declarations: [IdleSwitcherComponent, MagazineComponent],
+  exports: [IdleSwitcherComponent, MagazineComponent],
 })
 export class SharedModule {}
