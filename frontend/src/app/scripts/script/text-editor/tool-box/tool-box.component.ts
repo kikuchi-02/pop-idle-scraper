@@ -10,7 +10,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { from, of, Subject } from 'rxjs';
+import { forkJoin, from, of, Subject } from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
 
@@ -101,27 +101,24 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     this.value = elm.innerHTML;
     this.valueChange.emit(this.value);
   }
+
   removeOldHighlighted(): void {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
-    elm.querySelectorAll('mark').forEach((highlighted) => {
-      highlighted.replaceWith(...highlighted.childNodes);
-    });
+
+    this.removeStyles(elm, ['highlight']);
 
     this.value = elm.innerHTML;
     this.valueChange.emit(this.value);
   }
 
-  underlineSentence(word: string): void {
+  underlineSentenceByWord(word: string): void {
     if (!word) {
       return;
     }
 
     this.loadingStateChange.emit(true);
 
-    const className = 'text--underlined';
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
     this.scriptService
       .tokenize(word)
       .pipe(
@@ -131,67 +128,69 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
             alert(`「${word}」の表層系が見つかりません。`);
             return of(undefined);
           }
-          localStorage.setItem(this.toolBoxUnderlineKey, word);
-          return from(
-            Promise.all(
-              [...elm.childNodes].map((child) => {
-                if (
-                  child.nodeType === 'SPAN' &&
-                  child.className === className
-                ) {
-                  return Promise.resolve();
-                }
-                return this.includeWordForBaseForm(
-                  child.textContent,
-                  baseFormWord
-                ).then((surfaceForm) => {
-                  if (!surfaceForm) {
-                    return;
-                  }
-                  const underlineSpan = this.renderer.createElement('span');
-                  this.renderer.addClass(underlineSpan, className);
-                  this.renderer.addClass(
-                    underlineSpan,
-                    'text__tooltip-relative'
-                  );
-                  const tooltip = this.renderer.createElement('span');
-                  this.renderer.addClass(tooltip, 'text__tooltip-absolute');
-                  this.renderer.appendChild(
-                    tooltip,
-                    this.renderer.createText(surfaceForm)
-                  );
-                  this.renderer.appendChild(underlineSpan, tooltip);
-
-                  if (child.childNodes.length > 0) {
-                    child.childNodes.forEach((grandchild) => {
-                      this.renderer.appendChild(underlineSpan, grandchild);
-                    });
-                  }
-                  this.renderer.appendChild(child, underlineSpan);
-                });
-              })
-            )
-          );
+          localStorage.setItem(this.toolBoxUnderlineKey, baseFormWord);
+          return from(this.underlineSentence([baseFormWord]));
         }),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe(() => {
-        this.value = elm.innerHTML;
-        this.valueChange.emit(this.value);
-        this.loadingStateChange.emit(false);
-      });
+      .subscribe(
+        (innerHtml) => {
+          if (innerHtml) {
+            this.value = innerHtml;
+            this.valueChange.emit(this.value);
+          }
+          this.loadingStateChange.emit(false);
+        },
+        (error) => {
+          this.loadingStateChange.emit(false);
+        }
+      );
+  }
+
+  bulkUnderline(): void {
+    const words = this.keywordValues.value;
+    forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
+      .pipe(
+        map((tokensArray) => {
+          const baseForms: string[] = tokensArray
+            .map((tokens) => tokens[0].basic_form)
+            .filter((baseForm) => baseForm !== '*');
+          return baseForms;
+        }),
+        mergeMap((baseForms) => {
+          return from(this.underlineSentence(baseForms));
+        }),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe(
+        (innerHtml) => {
+          if (innerHtml) {
+            this.value = innerHtml;
+            this.valueChange.emit(this.value);
+          }
+          this.loadingStateChange.emit(false);
+        },
+        (error) => {
+          this.loadingStateChange.emit(false);
+        }
+      );
   }
 
   removeAllUnderlinedSentences(): void {
-    const className = 'text--underlined';
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
-    elm.querySelectorAll(`.text__tooltip-absolute`).forEach((child) => {
-      child.remove();
-    });
-    elm.querySelectorAll(`.${className}`).forEach((child) => {
-      child.replaceWith(...child.childNodes);
-    });
+
+    this.removeStyles(elm, ['underline']);
+
+    this.value = elm.innerHTML;
+    this.valueChange.emit(this.value);
+  }
+
+  removeStrike(): void {
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+
+    this.removeStyles(elm, ['strike']);
 
     this.value = elm.innerHTML;
     this.valueChange.emit(this.value);
@@ -205,6 +204,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     }
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
+
+    this.removeStyles(elm);
 
     // const textContent = [...elm.childNodes]
     //   .map((node) => node.textContent)
@@ -244,10 +245,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       );
   }
 
-  highlightBulk(): void {
-    // TODO
-  }
-
   private getText(): string {
     const elm = this.renderer.createElement('div');
     elm.innerHTML = this.value;
@@ -271,19 +268,75 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async includeWordForBaseForm(
-    sentence: string,
-    baseFormWord: string
-  ): Promise<string> {
-    return this.scriptService
-      .tokenize(sentence)
-      .pipe(
-        map(
-          (tokens): string =>
-            tokens.find((token) => token.basic_form === baseFormWord)
-              ?.surface_form
-        )
-      )
-      .toPromise();
+  private underlineSentence(baseFormWords: string[]): Promise<string> {
+    const className = 'text--underlined';
+    const elm = this.renderer.createElement('div');
+    elm.innerHTML = this.value;
+
+    return Promise.all(
+      [...elm.childNodes].map((child) => {
+        if (child.nodeType === 'SPAN' && child.className === className) {
+          return Promise.resolve();
+        }
+        return this.scriptService
+          .tokenize(child.textContent)
+          .pipe(
+            map(
+              (tokens): string =>
+                tokens.find((token) => baseFormWords.includes(token.basic_form))
+                  ?.surface_form
+            )
+          )
+          .toPromise()
+          .then((surfaceForm) => {
+            if (!surfaceForm) {
+              return;
+            }
+            const underlineSpan = this.renderer.createElement('span');
+            this.renderer.addClass(underlineSpan, className);
+            this.renderer.addClass(underlineSpan, 'text__tooltip-relative');
+            const tooltip = this.renderer.createElement('span');
+            this.renderer.addClass(tooltip, 'text__tooltip-absolute');
+            this.renderer.appendChild(
+              tooltip,
+              this.renderer.createText(surfaceForm)
+            );
+            this.renderer.appendChild(underlineSpan, tooltip);
+
+            if (child.childNodes.length > 0) {
+              child.childNodes.forEach((grandchild) => {
+                this.renderer.appendChild(underlineSpan, grandchild);
+              });
+            }
+            this.renderer.appendChild(child, underlineSpan);
+          });
+      })
+    ).then(() => elm.innerHTML);
+  }
+
+  private removeStyles(elm, types?: ('highlight' | 'underline' | 'strike')[]) {
+    if (!types) {
+      types = ['highlight', 'underline', 'strike'];
+    }
+    types.forEach((value) => {
+      switch (value) {
+        case 'highlight':
+          elm.querySelectorAll('mark').forEach((highlighted) => {
+            highlighted.replaceWith(...highlighted.childNodes);
+          });
+        case 'underline':
+          const className = 'text--underlined';
+          elm.querySelectorAll(`.text__tooltip-absolute`).forEach((child) => {
+            child.remove();
+          });
+          elm.querySelectorAll(`.${className}`).forEach((child) => {
+            child.replaceWith(...child.childNodes);
+          });
+        case 'strike':
+          elm.querySelectorAll('strike').forEach((child) => {
+            child.replaceWith(...child.childNodes);
+          });
+      }
+    });
   }
 }

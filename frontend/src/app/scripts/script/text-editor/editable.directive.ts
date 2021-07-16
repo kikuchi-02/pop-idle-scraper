@@ -13,7 +13,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
-import { auditTime, takeUntil } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { UndoRedoService } from 'src/app/services/undo-redo.service';
 
 interface EditableWebSocketMessage {
@@ -57,7 +57,11 @@ export class EditableDirective
     this.id = params.get('id');
 
     this.registerer$
-      .pipe(auditTime(300), takeUntil(this.unsubscriber$))
+      .pipe(
+        auditTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.unsubscriber$)
+      )
       .subscribe((innerHtml) => {
         this.undoRedoService.register(innerHtml);
       });
@@ -71,14 +75,7 @@ export class EditableDirective
   }
 
   ngDoCheck(): void {
-    const innerHtml = this.elementRef.nativeElement.innerHTML;
-    if (
-      this.previousInnerHtml === undefined ||
-      this.previousInnerHtml !== innerHtml
-    ) {
-      this.onChangeInnerHtml(innerHtml);
-      this.previousInnerHtml = innerHtml;
-    }
+    this.onChangeInnerHtml();
   }
 
   ngOnDestroy(): void {
@@ -106,6 +103,7 @@ export class EditableDirective
         this.sanitizer.bypassSecurityTrustHtml(value)
       )
     );
+    this.onChangeInnerHtml();
   }
 
   @HostListener('input')
@@ -162,8 +160,15 @@ export class EditableDirective
     }
   }
 
-  private onChangeInnerHtml(innerHtml: string): void {
-    this.registerer$.next(innerHtml);
+  private onChangeInnerHtml(): void {
+    const innerHtml = this.elementRef.nativeElement.innerHTML;
+    if (
+      this.previousInnerHtml === undefined ||
+      this.previousInnerHtml !== innerHtml
+    ) {
+      this.previousInnerHtml = innerHtml;
+      this.registerer$.next(innerHtml);
+    }
 
     // this.wsService.sendMessage(this.wsMessageType, { innerHtml });
   }

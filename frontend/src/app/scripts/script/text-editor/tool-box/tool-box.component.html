@@ -6,6 +6,7 @@
           <mat-label>Hight light</mat-label>
           <input matInput [formControl]="highlightValue" />
           <button
+            type="reset"
             mat-button
             *ngIf="highlightValue.value"
             matSuffix
@@ -19,11 +20,12 @@
       </form>
     </div>
     <div class="row__item underline">
-      <form (ngSubmit)="underlineSentence(underlineValue.value)">
+      <form (ngSubmit)="underlineSentenceByWord(underlineValue.value)">
         <mat-form-field>
           <mat-label>Underline by base form</mat-label>
           <input matInput [formControl]="underlineValue" />
           <button
+            type="reset"
             mat-button
             *ngIf="underlineValue.value"
             matSuffix
@@ -43,11 +45,13 @@
           <mat-select-trigger>
             <span class="keywords">{{ keywordValues.value?.length }}</span>
           </mat-select-trigger>
-          <mat-option *ngFor="let key of keys">{{ key }}</mat-option>
+          <mat-option *ngFor="let key of keys" [value]="key">{{
+            key
+          }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-button color="primary" (click)="highlightBulk()">
-        bulk highlight
+      <button mat-button color="primary" (click)="bulkUnderline()">
+        bulk underline
       </button>
     </div>
     <mat-slide-toggle
@@ -67,6 +71,9 @@
     </button>
     <button mat-button color="primary" (click)="removeAllUnderlinedSentences()">
       remove underline
+    </button>
+    <button mat-button color="primary" (click)="removeStrike()">
+      remove strike
     </button>
   </div>
 </div>
