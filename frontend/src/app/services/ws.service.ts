@@ -9,10 +9,8 @@ import {
   tap,
 } from 'rxjs/operators';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-// import { environment } from 'src/environments/environment';
 
 // const WS_ENDPOINT = environment.wsEndpoint;
-const WS_ENDPOINT = 'ws://localhost:8081';
 
 interface WebSocketMessage<T> {
   type: string;
@@ -68,6 +66,7 @@ export class WsService<T> {
   }
 
   private getNewWebSocket(): WebSocketSubject<WebSocketMessage<T>> {
+    let WS_ENDPOINT = `ws://${window.location.host}/__ws`;
     return webSocket({ url: WS_ENDPOINT });
   }
 
