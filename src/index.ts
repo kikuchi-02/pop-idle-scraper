@@ -1,7 +1,18 @@
+import { createInterface } from 'readline';
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import { User } from './entity/User';
-import { RefreshTokenRepository } from './repositories/refreshToken';
+
+const readline = createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const question = async (message: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    readline.question(message + '\n', (answer) => resolve(answer));
+  });
+};
 
 // import * as uuid from 'uuid';
 
@@ -9,9 +20,12 @@ createConnection()
   .then(async (connection) => {
     // console.log('Inserting a new user into the database...');
     const user = new User();
-    user.name = 'Timber';
-    user.email = 'test@example.com';
-    user.password = 'password';
+    // user.name = 'Timber';
+    // user.email = 'test@example.com';
+    // user.password = 'password';
+    user.name = await question('name?');
+    user.email = await question('email?');
+    user.password = await question('password?');
     // // await connection.manager.save(user);
     const userRepository = connection.getRepository(User);
     await userRepository.save(user);
@@ -27,9 +41,9 @@ createConnection()
     // token.user = users;
     // // await connection.manager.save(token);
 
-    const tokenRepository = connection.getCustomRepository(
-      RefreshTokenRepository
-    );
+    // const tokenRepository = connection.getCustomRepository(
+    //   RefreshTokenRepository
+    // );
     // const uid = uuid.v4();
     // const newToken = await tokenRepository.findByToken('test');
     // console.log({ newToken });
