@@ -1,6 +1,7 @@
 import { Express, Router } from 'express';
 import * as authController from './controllers/authentication';
 import * as magazineController from './controllers/magazine';
+import * as messageController from './controllers/message';
 import * as scraperController from './controllers/scrape';
 import * as scriptController from './controllers/script';
 import * as textlintController from './controllers/textlint';
@@ -38,6 +39,9 @@ export const setRoutes = (app: Express) => {
   routeV1.post('/scripts', verifyToken, scriptController.createScript);
   routeV1.delete('/scripts', verifyToken, scriptController.deleteScripts);
   routeV1.delete('/scripts/:id', verifyToken, scriptController.deleteScript);
+
+  routeV1.get('/messages', verifyToken, messageController.readMessage);
+  routeV1.post('/messages', verifyToken, messageController.createMessage);
 
   routeV1.post('/textlint', verifyToken, textlintController.postTextLint);
 

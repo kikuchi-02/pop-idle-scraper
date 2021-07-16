@@ -116,3 +116,13 @@ export class Script {
     return JSON.stringify(this) === JSON.stringify(anotherScript);
   }
 }
+
+export interface Message {
+  id?: number;
+  scriptId: number;
+  // TODO
+  children?: Message[];
+  body: string;
+  author: User;
+  created: Date;
+}

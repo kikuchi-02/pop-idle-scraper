@@ -20,6 +20,9 @@ export class ScriptRepository extends Repository<Script> {
   findById(id: number) {
     return this.findOne(id, { relations: ['author'] });
   }
+  findByIdOrFail(id: number) {
+    return this.findOneOrFail(id, { relations: ['author'] });
+  }
 
   async updateOrFail(params: ScriptParams) {
     const script = await this.findOneOrFail(params.id);

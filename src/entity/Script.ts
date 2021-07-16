@@ -3,9 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Message } from './Message';
 import { User } from './User';
 
 @Entity()
@@ -30,4 +32,7 @@ export class Script {
     onDelete: 'CASCADE',
   })
   author: User;
+
+  @OneToMany((type) => Message, (message) => message.script)
+  messages: Message[];
 }

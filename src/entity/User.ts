@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ENV_SETTINGS } from '../conf';
+import { Message } from './Message';
 import { RefreshToken } from './RefreshToken';
 import { Script } from './Script';
 
@@ -34,4 +35,7 @@ export class User {
 
   @OneToMany((type) => Script, (script) => script.author)
   scripts: Script[];
+
+  @OneToMany((type) => Message, (message) => message.author)
+  messages: Message[];
 }

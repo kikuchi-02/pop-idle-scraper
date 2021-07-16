@@ -18,6 +18,7 @@ import { SharedModule } from '../shared/shared.module';
 import { ScriptListComponent } from './script-list/script-list.component';
 import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';
+import { ChatComponent } from './script/text-editor/chat/chat.component';
 import { ConsoleComponent } from './script/text-editor/console/console.component';
 import { EditableDirective } from './script/text-editor/editable.directive';
 import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.component';
@@ -31,6 +32,7 @@ import { ScriptsRoutingModule } from './scripts-routing.module';
     EditableDirective,
     ScriptComponent,
     ScriptListComponent,
+    ChatComponent,
   ],
   imports: [
     CommonModule,

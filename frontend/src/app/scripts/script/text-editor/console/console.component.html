@@ -1,5 +1,6 @@
 <div class="wrapper">
   <mat-tab-group mat-stretch-tabs>
+    <mat-tab label="chat"><app-chat></app-chat></mat-tab>
     <mat-tab label="textlint">
       <div class="textlint-result">
         <button
@@ -33,6 +34,5 @@
         </div>
       </div>
     </mat-tab>
-    <mat-tab label="chat" [disabled]="true"><app-chat></app-chat></mat-tab>
   </mat-tab-group>
 </div>
