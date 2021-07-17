@@ -2729,7 +2729,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rxjs */ "qCKp");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs/operators */ "kU1M");
 /* harmony import */ var rxjs_webSocket__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs/webSocket */ "3uOa");
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ "fXoL");
+/* harmony import */ var src_environments_environment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/environments/environment */ "AytR");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ "fXoL");
+
 
 
 
@@ -2763,7 +2765,13 @@ class WsService {
         this.socket$.complete();
     }
     getNewWebSocket() {
-        let WS_ENDPOINT = `ws://${window.location.host}/__ws`;
+        let WS_ENDPOINT;
+        if (src_environments_environment__WEBPACK_IMPORTED_MODULE_3__["environment"].production) {
+            WS_ENDPOINT = `wss://${window.location.host}/__ws`;
+        }
+        else {
+            WS_ENDPOINT = `ws://${window.location.host}/__ws`;
+        }
         return Object(rxjs_webSocket__WEBPACK_IMPORTED_MODULE_2__["webSocket"])({ url: WS_ENDPOINT });
     }
     reconnect(observable) {
@@ -2773,7 +2781,7 @@ class WsService {
     }
 }
 WsService.ɵfac = function WsService_Factory(t) { return new (t || WsService)(); };
-WsService.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdefineInjectable"]({ token: WsService, factory: WsService.ɵfac, providedIn: 'root' });
+WsService.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵdefineInjectable"]({ token: WsService, factory: WsService.ɵfac, providedIn: 'root' });
 
 
 /***/ }),
@@ -8945,10 +8953,6 @@ class _MatTabGroupBase extends _MatTabGroupMixinBase {
             const isFirstRun = this._selectedIndex == null;
             if (!isFirstRun) {
                 this.selectedTabChange.emit(this._createChangeEvent(indexToSelect));
-                // Preserve the height so page doesn't scroll up during tab change.
-                // Fixes https://stackblitz.com/edit/mat-tabs-scroll-page-top-on-tab-change
-                const wrapper = this._tabBodyWrapper.nativeElement;
-                wrapper.style.minHeight = wrapper.clientHeight + 'px';
             }
             // Changing these values after change detection has run
             // since the checked content may contain references to them.
@@ -8956,9 +8960,6 @@ class _MatTabGroupBase extends _MatTabGroupMixinBase {
                 this._tabs.forEach((tab, index) => tab.isActive = index === indexToSelect);
                 if (!isFirstRun) {
                     this.selectedIndexChange.emit(indexToSelect);
-                    // Clear the min-height, this was needed during tab change to avoid
-                    // unnecessary scrolling.
-                    this._tabBodyWrapper.nativeElement.style.minHeight = '';
                 }
             });
         }

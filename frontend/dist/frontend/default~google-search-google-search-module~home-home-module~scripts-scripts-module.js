@@ -3028,9 +3028,8 @@ class MatDateSelectionModel {
      * @param source Object that triggered the selection change.
      */
     updateSelection(value, source) {
-        const oldValue = this.selection;
         this.selection = value;
-        this._selectionChanged.next({ selection: value, source, oldValue });
+        this._selectionChanged.next({ selection: value, source });
     }
     ngOnDestroy() {
         this._selectionChanged.complete();
@@ -6198,17 +6197,6 @@ class MatStartDate extends _MatDateRangeInputBase {
     _getValueFromModel(modelValue) {
         return modelValue.start;
     }
-    _shouldHandleChangeEvent(change) {
-        var _a;
-        if (!super._shouldHandleChangeEvent(change)) {
-            return false;
-        }
-        else {
-            return !((_a = change.oldValue) === null || _a === void 0 ? void 0 : _a.start) ? !!change.selection.start :
-                !change.selection.start ||
-                    !!this._dateAdapter.compareDate(change.oldValue.start, change.selection.start);
-        }
-    }
     _assignValueToModel(value) {
         if (this._model) {
             const range = new DateRange(value, this._model.selection.end);
@@ -6327,17 +6315,6 @@ class MatEndDate extends _MatDateRangeInputBase {
     _getValueFromModel(modelValue) {
         return modelValue.end;
     }
-    _shouldHandleChangeEvent(change) {
-        var _a;
-        if (!super._shouldHandleChangeEvent(change)) {
-            return false;
-        }
-        else {
-            return !((_a = change.oldValue) === null || _a === void 0 ? void 0 : _a.end) ? !!change.selection.end :
-                !change.selection.end ||
-                    !!this._dateAdapter.compareDate(change.oldValue.end, change.selection.end);
-        }
-    }
     _assignValueToModel(value) {
         if (this._model) {
             const range = new DateRange(this._model.selection.start, value);
@@ -6448,11 +6425,6 @@ class MatDateRangeInput {
         this.stateChanges = new rxjs__WEBPACK_IMPORTED_MODULE_9__["Subject"]();
         if (!_dateAdapter && (typeof ngDevMode === 'undefined' || ngDevMode)) {
             throw createMissingDateImplError('DateAdapter');
-        }
-        // The datepicker module can be used both with MDC and non-MDC form fields. We have
-        // to conditionally add the MDC input class so that the range picker looks correctly.
-        if (_formField === null || _formField === void 0 ? void 0 : _formField._elementRef.nativeElement.classList.contains('mat-mdc-form-field')) {
-            _elementRef.nativeElement.classList.add('mat-mdc-input-element');
         }
         // TODO(crisbeto): remove `as any` after #18206 lands.
         this.ngControl = control;
@@ -6636,18 +6608,12 @@ class MatDateRangeInput {
     }
     /** Whether the separate text should be hidden. */
     _shouldHideSeparator() {
-        return (!this._formField || (this._formField.getLabelId() &&
-            !this._formField._shouldLabelFloat())) && this.empty;
+        return (!this._formField || this._formField._hideControlPlaceholder()) && this.empty;
     }
     /** Gets the value for the `aria-labelledby` attribute of the inputs. */
     _getAriaLabelledby() {
         const formField = this._formField;
         return formField && formField._hasFloatingLabel() ? formField._labelId : null;
-    }
-    /** Updates the focused state of the range input. */
-    _updateFocus(origin) {
-        this.focused = origin !== null;
-        this.stateChanges.next();
     }
     /** Re-runs the validators on the start/end inputs. */
     _revalidate() {
@@ -6685,7 +6651,7 @@ MatDateRangeInput.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵdefine
         ]), _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵNgOnChangesFeature"]], ngContentSelectors: _c6, decls: 9, vars: 4, consts: [["cdkMonitorSubtreeFocus", "", 1, "mat-date-range-input-container", 3, "cdkFocusChange"], [1, "mat-date-range-input-start-wrapper"], ["aria-hidden", "true", 1, "mat-date-range-input-mirror"], [1, "mat-date-range-input-separator"], [1, "mat-date-range-input-end-wrapper"]], template: function MatDateRangeInput_Template(rf, ctx) { if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵprojectionDef"](_c5);
         _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵelementStart"](0, "div", 0);
-        _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵlistener"]("cdkFocusChange", function MatDateRangeInput_Template_div_cdkFocusChange_0_listener($event) { return ctx._updateFocus($event); });
+        _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵlistener"]("cdkFocusChange", function MatDateRangeInput_Template_div_cdkFocusChange_0_listener($event) { return ctx.focused = $event !== null; });
         _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵelementStart"](1, "div", 1);
         _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵprojection"](2);
         _angular_core__WEBPACK_IMPORTED_MODULE_4__["ɵɵelementStart"](3, "span", 2);
@@ -6731,7 +6697,7 @@ MatDateRangeInput.propDecorators = {
         type: _angular_core__WEBPACK_IMPORTED_MODULE_4__["Component"],
         args: [{
                 selector: 'mat-date-range-input',
-                template: "<div\n  class=\"mat-date-range-input-container\"\n  cdkMonitorSubtreeFocus\n  (cdkFocusChange)=\"_updateFocus($event)\">\n  <div class=\"mat-date-range-input-start-wrapper\">\n    <ng-content select=\"input[matStartDate]\"></ng-content>\n    <span\n      class=\"mat-date-range-input-mirror\"\n      aria-hidden=\"true\">{{_getInputMirrorValue()}}</span>\n  </div>\n\n  <span\n    class=\"mat-date-range-input-separator\"\n    [class.mat-date-range-input-separator-hidden]=\"_shouldHideSeparator()\">{{separator}}</span>\n\n  <div class=\"mat-date-range-input-end-wrapper\">\n    <ng-content select=\"input[matEndDate]\"></ng-content>\n  </div>\n</div>\n\n",
+                template: "<div\n  class=\"mat-date-range-input-container\"\n  cdkMonitorSubtreeFocus\n  (cdkFocusChange)=\"focused = $event !== null\">\n  <div class=\"mat-date-range-input-start-wrapper\">\n    <ng-content select=\"input[matStartDate]\"></ng-content>\n    <span\n      class=\"mat-date-range-input-mirror\"\n      aria-hidden=\"true\">{{_getInputMirrorValue()}}</span>\n  </div>\n\n  <span\n    class=\"mat-date-range-input-separator\"\n    [class.mat-date-range-input-separator-hidden]=\"_shouldHideSeparator()\">{{separator}}</span>\n\n  <div class=\"mat-date-range-input-end-wrapper\">\n    <ng-content select=\"input[matEndDate]\"></ng-content>\n  </div>\n</div>\n\n",
                 exportAs: 'matDateRangeInput',
                 host: {
                     'class': 'mat-date-range-input',

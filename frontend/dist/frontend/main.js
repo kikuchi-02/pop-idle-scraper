@@ -7,7 +7,7 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/kikuchi/selfTaught/pop-idle-feed/frontend/src/main.ts */"zUnb");
+module.exports = __webpack_require__(/*! /home/kikuchi/selfTaught/pop-idle-scraper/frontend/src/main.ts */"zUnb");
 
 
 /***/ }),
