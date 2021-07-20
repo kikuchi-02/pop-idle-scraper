@@ -15,15 +15,17 @@ type Layout = typeof layouts[number];
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubtitleComponent implements OnInit {
+  public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
+
   inputArea = '';
   outputArea = '';
 
   layout: Layout = 'both';
 
-  private subtitleLocalStorageKey = 'subtitleLocalStorageKey';
-
   constructor(private cd: ChangeDetectorRef) {
-    const input = localStorage.getItem(this.subtitleLocalStorageKey);
+    const input = localStorage.getItem(
+      SubtitleComponent.subtitleLocalStorageKey
+    );
     if (input) {
       this.inputArea = input;
       this.outputArea = this.formatSubtitle(input);
@@ -35,7 +37,7 @@ export class SubtitleComponent implements OnInit {
 
   generateSubtitle(): void {
     const input = this.inputArea;
-    localStorage.setItem(this.subtitleLocalStorageKey, input);
+    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     const output = this.formatSubtitle(input);
     this.outputArea = output;
     this.cd.markForCheck();
