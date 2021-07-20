@@ -12,6 +12,7 @@ import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
 import { BalloonComponent } from './text-editor/balloon/balloon.component';
@@ -159,5 +160,18 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   scrollTop(): void {
     window.scrollTo(0, 0);
+  }
+
+  navigateSubtitle(): void {
+    const div = this.renderer.createElement('div');
+    div.innerHTML = this.script.innerHtml;
+
+    const textContent = [...div.childNodes]
+      .map((node) => node.textContent)
+      .join('\n');
+
+    const subtitleKey = SubtitleComponent.subtitleLocalStorageKey;
+    localStorage.setItem(subtitleKey, textContent);
+    this.router.navigate(['/subtitle']);
   }
 }
