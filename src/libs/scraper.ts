@@ -1,19 +1,18 @@
-import { LaunchOptions, Page } from 'puppeteer';
-import { Cluster } from 'puppeteer-cluster';
+import { Page } from 'puppeteer';
 import { ScrapedResult, SiteName } from '../typing';
 import {
-  nogizakaKoshiki,
-  sakurazakaKoshiki,
-  hinatazakaKoshiki,
-  nogizakaBlog,
   hinatazakaBlog,
-  sakurazakaBlog,
-  nogizakaKoshiki2,
-  nogizakaBlog2,
-  sakurazakaKoshiki2,
-  sakurazakaBlog2,
-  hinatazakaKoshiki2,
   hinatazakaBlog2,
+  hinatazakaKoshiki,
+  hinatazakaKoshiki2,
+  nogizakaBlog,
+  nogizakaBlog2,
+  nogizakaKoshiki,
+  nogizakaKoshiki2,
+  sakurazakaBlog,
+  sakurazakaBlog2,
+  sakurazakaKoshiki,
+  sakurazakaKoshiki2,
 } from './scraper-utils/sites';
 import { formatDate } from './scraper-utils/utils';
 
@@ -91,17 +90,4 @@ export const scrape2 = async (site: SiteName): Promise<ScrapedResult> => {
   });
   console.log(`end ${site}`);
   return scrapedResult;
-};
-
-export const createPuppeteerCluster = async () => {
-  const cluster = await Cluster.launch({
-    concurrency: Cluster.CONCURRENCY_CONTEXT,
-    maxConcurrency: 5,
-    puppeteerOptions: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ja-JA,ja'],
-    } as LaunchOptions,
-  });
-
-  await cluster.task(scrape);
-  return cluster;
 };
