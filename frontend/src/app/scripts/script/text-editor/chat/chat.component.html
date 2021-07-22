@@ -10,11 +10,7 @@
   </ng-container>
 
   <form #form [formGroup]="chatForm" class="chat-form" (ngSubmit)="submit()">
-    <textarea
-      class="chat-form__textarea"
-      formControlName="body"
-      [disabled]="disabled"
-    ></textarea>
+    <textarea class="chat-form__textarea" formControlName="body"></textarea>
     <button class="chat-form__submit" type="submit" [disabled]="disabled">
       submit
     </button>

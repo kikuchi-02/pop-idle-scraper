@@ -95,7 +95,7 @@ export interface User {
 export class Script {
   id: number;
   title = '';
-  innerHtml = '';
+  innerHtml = '<div></div>';
   created: Date;
   updated: Date;
   author: User;
