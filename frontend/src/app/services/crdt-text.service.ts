@@ -18,11 +18,10 @@ export class CrdtTextService {
   constructor(private appService: AppService) {}
 
   createText(label: string, currentState: string): string {
-    this.previousState = currentState;
     this.ytext = this.appService.ydoc.getText(label);
     this.undoManager = new UndoManager(this.ytext);
     const txt = this.ytext.toString();
-    this.previousState = txt;
+    this.previousState = txt || currentState;
     return txt;
   }
 
@@ -91,6 +90,7 @@ export class CrdtTextService {
       return;
     }
     if (this.previousState === undefined || this.previousState !== current) {
+      console.log({ txt: current }, 'text on change');
       const diffs = diffChars(this.previousState || '', current);
       let index = 0;
       for (const diff of diffs) {
