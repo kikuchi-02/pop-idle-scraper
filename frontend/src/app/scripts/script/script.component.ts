@@ -10,8 +10,8 @@ import {
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { fromEvent, Subject } from 'rxjs';
+import { first, takeUntil } from 'rxjs/operators';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
@@ -26,7 +26,7 @@ import { EditableDirective } from './text-editor/editable.directive';
 })
 export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   initialScript: Script;
-  script = new Script();
+  script: Script;
   blurred = false;
   focused = false;
 
@@ -42,6 +42,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   consolePositionTop = 0;
 
+  private initialized$ = new Subject<void>();
   private unsubscriber$ = new Subject<void>();
 
   constructor(
@@ -54,8 +55,10 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
     if (id === 'new') {
+      this.script = new Script();
       this.initialScript = new Script();
       this.cd.markForCheck();
+      this.initialized$.next();
     } else {
       this.scriptService
         .getScript(parseInt(id, 10))
@@ -65,6 +68,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           this.initialScript = this.script.clone();
           this.titleFormControl.setValue(this.script.title);
           this.cd.markForCheck();
+          this.initialized$.next();
         });
     }
   }
@@ -76,15 +80,21 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.renderer.listen(
-      this.editableDirective.elementRef.nativeElement,
-      'mouseup',
-      (event) => this.balloonComponent.selectionChange(event)
-    );
+    this.initialized$
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(async () => {
+        this.cd.detectChanges();
 
-    this.consolePositionTop = document
-      .querySelector('.tool-box__wrapper')
-      .getBoundingClientRect().height;
+        fromEvent(this.editableDirective.elementRef.nativeElement, 'mouseup')
+          .pipe(takeUntil(this.unsubscriber$))
+          .subscribe((event: MouseEvent) => {
+            this.balloonComponent.selectionChange(event);
+          });
+
+        this.consolePositionTop = document
+          .querySelector('.tool-box__wrapper')
+          .getBoundingClientRect().height;
+      });
   }
 
   canDeactivate(): boolean {

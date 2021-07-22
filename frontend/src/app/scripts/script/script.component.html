@@ -1,4 +1,4 @@
-<div class="wrapper">
+<div class="wrapper" *ngIf="!!script">
   <div class="tool">
     <form class="tool__item">
       <div class="form__item">
@@ -69,8 +69,8 @@
     </div>
   </div>
   <app-balloon></app-balloon>
-  <div class="loading-modal" *ngIf="loading">loading</div>
 </div>
+<div class="loading-modal" *ngIf="loading">loading</div>
 
 <div class="scroller">
   <button mat-raised-button color="primary" (click)="scrollTop()">↑</button>

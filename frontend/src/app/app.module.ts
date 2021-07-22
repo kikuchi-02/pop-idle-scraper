@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { httpInterceptorProviders } from './interceptors';
+import { AppService } from './services/app.service';
 import { UtilService } from './services/util.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -21,7 +22,7 @@ import { SharedModule } from './shared/shared.module';
     SharedModule,
     MatToolbarModule,
   ],
-  providers: [UtilService, httpInterceptorProviders],
+  providers: [UtilService, httpInterceptorProviders, AppService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -5,21 +5,21 @@ import {
   forwardRef,
   HostBinding,
   HostListener,
+  NgZone,
+  OnChanges,
   OnDestroy,
   Renderer2,
   SecurityContext,
+  SimpleChanges,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
-import { auditTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { UndoRedoService } from 'src/app/services/undo-redo.service';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { filter, first, takeUntil } from 'rxjs/operators';
+import { CrdtTextService } from 'src/app/services/crdt-text.service';
 
-interface EditableWebSocketMessage {
-  innerHtml: string;
-}
-
+// tslint:disable-next-line: no-conflicting-lifecycle
 @Directive({
   selector: '[appEditable]',
   providers: [
@@ -28,18 +28,18 @@ interface EditableWebSocketMessage {
       useExisting: forwardRef(() => EditableDirective),
       multi: true,
     },
-    UndoRedoService,
+    CrdtTextService,
   ],
 })
 export class EditableDirective
-  implements ControlValueAccessor, DoCheck, OnDestroy {
+  implements ControlValueAccessor, DoCheck, OnDestroy, OnChanges {
   @HostBinding('attr.contenteditable') contentEditable = true;
 
-  private registerer$ = new Subject<string>();
   private unsubscriber$ = new Subject<void>();
 
-  private previousInnerHtml: string;
   private id: string;
+  private initialized$ = new BehaviorSubject<boolean>(false);
+  private changed$ = new Subject<string>();
 
   get wsMessageType(): string {
     return `editable-directive-script-${this.id}`;
@@ -49,33 +49,92 @@ export class EditableDirective
     public elementRef: ElementRef,
     private renderer: Renderer2,
     private sanitizer: DomSanitizer,
-    private undoRedoService: UndoRedoService<string>,
-    // private wsService: WsService<EditableWebSocketMessage>,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private crdtTextService: CrdtTextService,
+    private ngZone: NgZone
   ) {
     const params = this.route.snapshot.paramMap;
     this.id = params.get('id');
 
-    this.registerer$
+    this.initialized$
       .pipe(
-        auditTime(300),
-        distinctUntilChanged(),
+        filter((v) => v),
+        first(),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe((innerHtml) => {
-        this.undoRedoService.register(innerHtml);
+      .subscribe(() => {
+        const nativeElement = this.elementRef.nativeElement;
+        const innerHtml = nativeElement.innerHTML;
+        const ytxt = this.crdtTextService.createText(
+          `script-${this.id}`,
+          innerHtml
+        );
+        nativeElement.innerHTML = ytxt || innerHtml;
+        console.log('after view init ', nativeElement.innerHTML, ytxt);
+        // this.cd.detectChanges();
+        this.onChangeInnerHtml();
+        this.crdtTextService.registerObserver((txt, delta) => {
+          console.log({ txt }, 'observe');
+          if (txt === nativeElement.innerHTML) {
+            return;
+          }
+          const current = this.crdtTextService.applyDeltaToCurrent(delta, {
+            txt: nativeElement.innerHTML,
+            selectionStart: nativeElement.selectionStart,
+            selectionEnd: nativeElement.selectionEnd,
+          });
+          nativeElement.innerHTML = current.txt;
+          // this.onChangeInnerHtml();
+
+          if (
+            current.selectionStart !== undefined &&
+            current.selectionEnd !== undefined
+          ) {
+            this.ngZone.onStable
+              .pipe(first(), takeUntil(this.unsubscriber$))
+              .subscribe(() => {
+                nativeElement.setSelectionRange(
+                  current.selectionStart,
+                  current.selectionEnd
+                );
+              });
+          }
+        });
       });
 
-    // this.wsService
-    //   .messageReceiver(this.wsMessageType)
-    //   .pipe(takeUntil(this.unsubscriber$))
-    //   .subscribe((msg) => {
-    //     this.elementRef.nativeElement.innerHTML = msg.innerHtml;
+    // this.changed$
+    //   .pipe(
+    //     distinctUntilChanged(),
+    //     debounceTime(100),
+    //     takeUntil(this.unsubscriber$)
+    //   )
+    //   .subscribe((value) => {
+    //     console.log('debouce changed', value);
+    //     this.crdtTextService.onTextChange(value);
     //   });
   }
 
   ngDoCheck(): void {
-    this.onChangeInnerHtml();
+    this.ngZone.onStable
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        const txt = this.elementRef.nativeElement.innerHTML;
+        console.log({ txt }, 'do check');
+        this.onChangeInnerHtml();
+      });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log({ txt: changes }, 'onchange');
+  }
+
+  private cInnner: undefined;
+  @HostBinding('innerHTML') set v(v) {
+    console.log({ txt: v }, 'set');
+    this.cInnner = v;
+  }
+  get v() {
+    return this.cInnner;
   }
 
   ngOnDestroy(): void {
@@ -95,6 +154,9 @@ export class EditableDirective
   }
 
   writeValue(value: string): void {
+    if (value === null) {
+      return;
+    }
     this.renderer.setProperty(
       this.elementRef.nativeElement,
       'innerHTML',
@@ -103,12 +165,12 @@ export class EditableDirective
         this.sanitizer.bypassSecurityTrustHtml(value)
       )
     );
-    this.onChangeInnerHtml();
-  }
-
-  @HostListener('input')
-  onInput(): void {
-    this.onChange(this.elementRef.nativeElement.innerHTML);
+    if (this.initialized$.getValue()) {
+      console.log({ txt: value }, 'write');
+      this.onChangeInnerHtml();
+    } else {
+      this.initialized$.next(true);
+    }
   }
 
   @HostListener('paste', ['$event'])
@@ -137,16 +199,10 @@ export class EditableDirective
   }
 
   undo(): void {
-    const innerHtml = this.undoRedoService.undo();
-    if (innerHtml !== undefined) {
-      this.elementRef.nativeElement.innerHTML = innerHtml;
-    }
+    this.crdtTextService.undo();
   }
   redo(): void {
-    const innerHtml = this.undoRedoService.redo();
-    if (innerHtml !== undefined) {
-      this.elementRef.nativeElement.innerHTML = innerHtml;
-    }
+    this.crdtTextService.redo();
   }
 
   @HostListener('keydown', ['$event'])
@@ -161,15 +217,15 @@ export class EditableDirective
   }
 
   private onChangeInnerHtml(): void {
-    const innerHtml = this.elementRef.nativeElement.innerHTML;
-    if (
-      this.previousInnerHtml === undefined ||
-      this.previousInnerHtml !== innerHtml
-    ) {
-      this.previousInnerHtml = innerHtml;
-      this.registerer$.next(innerHtml);
-    }
-
-    // this.wsService.sendMessage(this.wsMessageType, { innerHtml });
+    const innerHtml2 = this.elementRef.nativeElement.innerHTML;
+    console.log({ txt: innerHtml2 }, 'on changeInner');
+    setTimeout(() => {
+      const innerHtml = this.elementRef.nativeElement.innerHTML;
+      console.log({ txt: innerHtml }, 'afterl kon changeINner');
+      // console.log('on change', innerHtml);
+      // this.crdtTextService.onTextChange(innerHtml);
+      this.crdtTextService.onTextChange(innerHtml);
+      // this.changed$.next(innerHtml);
+    }, 0);
   }
 }
