@@ -31,12 +31,8 @@
       </button>
     </div>
     <div class="tool__item">
-      <button mat-button color="primary" (click)="editableDirective?.undo()">
-        undo
-      </button>
-      <button mat-button color="primary" (click)="editableDirective?.redo()">
-        redo
-      </button>
+      <button mat-button color="primary" (click)="undo()">undo</button>
+      <button mat-button color="primary" (click)="redo()">redo</button>
     </div>
     <div class="tool__item">
       <button mat-raised-button color="primary" (click)="navigateSubtitle()">
@@ -46,8 +42,6 @@
   </div>
   <div class="tool-box__wrapper">
     <app-tool-box
-      [(value)]="script.innerHtml"
-      (setText)="setTextContent($event)"
       (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
       (loadingStateChange)="loading = $event"
     ></app-tool-box>
@@ -57,12 +51,12 @@
     <div class="editor__subtitle" *ngIf="showSubtitleLine">
       <div class="editor__subtitle-line"></div>
     </div>
-    <div
-      appEditable
+
+    <quill-editor
       class="editor__main"
-      placeholder="input text here"
-      [(ngModel)]="script.innerHtml"
-    ></div>
+      (onEditorCreated)="onEditorCreated($event)"
+      (onContentChanged)="onContentChanged($event)"
+    ></quill-editor>
 
     <div class="console__wrapper" [style.top.px]="consolePositionTop">
       <app-console></app-console>

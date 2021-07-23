@@ -10,19 +10,23 @@ import {
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
+import { ContentChange, QuillEditorComponent } from 'ngx-quill';
+import { Quill } from 'quill';
+import { fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
 import { BalloonComponent } from './text-editor/balloon/balloon.component';
 import { EditableDirective } from './text-editor/editable.directive';
+import { EditorService } from './text-editor/editor.service';
 
 @Component({
   selector: 'app-script',
   templateUrl: './script.component.html',
   styleUrls: ['./script.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [EditorService],
 })
 export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   initialScript: Script;
@@ -39,10 +43,11 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   editableDirective: EditableDirective;
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
+  @ViewChild(QuillEditorComponent) editor: QuillEditorComponent;
 
   consolePositionTop = 0;
 
-  private initialized$ = new Subject<void>();
+  private initialized$ = new ReplaySubject<void>(1);
   private unsubscriber$ = new Subject<void>();
 
   constructor(
@@ -50,7 +55,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private cd: ChangeDetectorRef,
     private scriptService: ScriptService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private editorService: EditorService
   ) {
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
@@ -73,6 +79,21 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  onEditorCreated(editor: Quill): void {
+    this.initialized$
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        const content = editor.getContents();
+        content.ops = this.script.deltaOps;
+        editor.setContents(content);
+        this.editorService.initialize(`script-${this.script.id}`, editor);
+      });
+  }
+
+  onContentChanged(event: ContentChange): void {
+    this.editorService.onContentChanged(event);
+  }
+
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
@@ -85,12 +106,11 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(async () => {
         this.cd.detectChanges();
 
-        fromEvent(this.editableDirective.elementRef.nativeElement, 'mouseup')
+        fromEvent(this.editor.elementRef.nativeElement, 'mouseup')
           .pipe(takeUntil(this.unsubscriber$))
           .subscribe((event: MouseEvent) => {
             this.balloonComponent.selectionChange(event);
           });
-
         this.consolePositionTop = document
           .querySelector('.tool-box__wrapper')
           .getBoundingClientRect().height;
@@ -106,14 +126,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  setTextContent(text: string): void {
-    this.editableDirective.clearContent();
-    this.editableDirective.insertTextContent(text);
-  }
-
   save(): void {
     this.script.title = this.titleFormControl.value;
-    if (!this.script.innerHtml || !this.script.title) {
+    this.script.deltaOps = this.editorService.getDelta();
+    if (this.script.deltaOps.length === 0 || !this.script.title) {
+      return;
+    }
+    if (this.script.isEqual(this.initialScript)) {
       return;
     }
 
@@ -142,14 +161,10 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   copy2Clipboard(): void {
     const div = this.renderer.createElement('div');
-    div.innerHTML = this.script.innerHtml;
-
-    const textContent = [...div.childNodes]
-      .map((node) => node.textContent)
-      .join('\n');
+    div.innerHTML = this.script.deltaOps.map((delta) => delta.insert).join('');
 
     const elm = document.createElement('textarea');
-    elm.value = textContent;
+    elm.value = this.editorService.getText();
     document.body.appendChild(elm);
     elm.select();
     elm.setSelectionRange(0, 9999);
@@ -174,14 +189,19 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   navigateSubtitle(): void {
     const div = this.renderer.createElement('div');
-    div.innerHTML = this.script.innerHtml;
+    div.innerHTML = this.script.deltaOps.map((delta) => delta.insert).join('');
 
-    const textContent = [...div.childNodes]
-      .map((node) => node.textContent)
-      .join('\n');
+    const textContent = this.editorService.getText();
 
     const subtitleKey = SubtitleComponent.subtitleLocalStorageKey;
     localStorage.setItem(subtitleKey, textContent);
     this.router.navigate(['/subtitle']);
+  }
+
+  undo(): void {
+    this.editorService.undo();
+  }
+  redo(): void {
+    this.editorService.redo();
   }
 }

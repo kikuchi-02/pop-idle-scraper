@@ -14,6 +14,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
+import { QuillModule } from 'ngx-quill';
+import Quill from 'quill';
+import QuillCursors from 'quill-cursors';
 import { SharedModule } from '../shared/shared.module';
 import { ScriptListComponent } from './script-list/script-list.component';
 import { ScriptComponent } from './script/script.component';
@@ -23,6 +26,8 @@ import { ConsoleComponent } from './script/text-editor/console/console.component
 import { EditableDirective } from './script/text-editor/editable.directive';
 import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.component';
 import { ScriptsRoutingModule } from './scripts-routing.module';
+
+Quill.register('modules/cursors', QuillCursors);
 
 @NgModule({
   declarations: [
@@ -49,6 +54,11 @@ import { ScriptsRoutingModule } from './scripts-routing.module';
     MatSlideToggleModule,
     MatIconModule,
     MatSelectModule,
+    QuillModule.forRoot({
+      modules: {
+        cursors: true,
+      },
+    }),
   ],
   providers: [{ provide: MAT_COLOR_FORMATS, useValue: NGX_MAT_COLOR_FORMATS }],
 })

@@ -1,11 +1,11 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { Script } from '../entity/Script';
+import { DeltaOperation, Script } from '../entity/Script';
 import { User } from '../entity/User';
 
 export interface ScriptParams {
   id?: number;
   title: string;
-  innerHtml: string;
+  deltaOps: DeltaOperation[];
   author: User;
 }
 
@@ -27,7 +27,7 @@ export class ScriptRepository extends Repository<Script> {
   async updateOrFail(params: ScriptParams) {
     const script = await this.findOneOrFail(params.id);
     script.title = params.title;
-    script.innerHtml = params.innerHtml;
+    script.deltaOps = params.deltaOps;
     script.author = params.author;
     return this.manager.save(script);
   }
@@ -35,7 +35,7 @@ export class ScriptRepository extends Repository<Script> {
   createAndSave(params: ScriptParams) {
     const script = new Script();
     script.title = params.title;
-    script.innerHtml = params.innerHtml;
+    script.deltaOps = params.deltaOps;
     script.author = params.author;
     return this.manager.save(script);
   }

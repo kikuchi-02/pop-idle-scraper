@@ -41,30 +41,23 @@ form {
 
   ::ng-deep &__main {
     min-height: 600px;
-    flex-basis: 80%;
+    width: 70%;
     border: 1px solid #000;
     white-space: pre-line;
 
-    &:empty:before {
-      content: attr(placeholder);
-      pointer-events: none;
-      display: block; /* For Firefox */
-      opacity: 50%;
+    .ql-editor {
+      counter-reset: line;
+      padding-left: 0;
     }
 
-    outline: 0px solid transparent;
-    padding: 10px 16px;
-    counter-reset: line;
-
-    div {
-      &:before {
-        counter-increment: line;
-        content: counter(line);
-        display: inline-block;
-        border-right: 1px solid #ddd;
-        margin-right: 0.5em;
-        color: #888;
-      }
+    .ql-editor p:before {
+      counter-increment: line;
+      content: counter(line);
+      display: inline-block;
+      border-right: 1px solid #ddd;
+      padding: 0 0.5em;
+      margin-right: 0.5em;
+      color: #888;
     }
 
     .text {
@@ -96,7 +89,7 @@ form {
   }
 
   .console__wrapper {
-    flex-basis: 20%;
+    width: 30%;
     height: 100%;
     position: sticky;
   }

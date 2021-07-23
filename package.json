@@ -11,9 +11,9 @@
     "ws-server": "env TZ=Asia/Tokyo ts-node-dev --respawn --files src/ws-server.ts",
     "build": "tsc",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
-    "makemigrations": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate -n",
-    "migrate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run",
-    "migrate:revert": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:revert"
+    "makemigrations": "./node_modules/.bin/ts-node -T ./node_modules/.bin/typeorm migration:generate -n",
+    "migrate": "./node_modules/.bin/ts-node -T ./node_modules/.bin/typeorm migration:run",
+    "migrate:revert": "./node_modules/.bin/ts-node -T ./node_modules/.bin/typeorm migration:revert"
   },
   "keywords": [],
   "author": "",

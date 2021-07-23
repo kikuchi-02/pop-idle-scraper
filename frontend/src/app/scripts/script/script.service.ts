@@ -125,7 +125,7 @@ export class ScriptService {
     return this.http
       .put<Partial<Script>>(`api/v1/scripts/${script.id}`, {
         title: script.title,
-        innerHtml: script.innerHtml,
+        deltaOps: script.deltaOps,
       })
       .pipe(map((newScript) => new Script(newScript)));
   }
@@ -134,7 +134,7 @@ export class ScriptService {
     return this.http
       .post<Partial<Script>>(`api/v1/scripts`, {
         title: script.title,
-        innerHtml: script.innerHtml,
+        deltaOps: script.deltaOps,
       })
       .pipe(map((newScript) => new Script(newScript)));
   }

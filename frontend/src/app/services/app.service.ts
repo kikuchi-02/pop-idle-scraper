@@ -8,7 +8,7 @@ import { Doc } from 'yjs';
 })
 export class AppService {
   public ydoc = new Doc();
-  private wsProvider: WebsocketProvider;
+  public wsProvider: WebsocketProvider;
 
   constructor() {
     this.wsProvider = new WebsocketProvider(
