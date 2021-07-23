@@ -27,7 +27,7 @@
 
     <div class="tool__item">
       <button mat-button color="primary" (click)="copy2Clipboard()">
-        copy to clipboard
+        copy
       </button>
     </div>
     <div class="tool__item">
@@ -38,6 +38,10 @@
       <button mat-raised-button color="primary" (click)="navigateSubtitle()">
         subtitle
       </button>
+    </div>
+    <div class="tool__item tool__item--right" *ngIf="script.updated">
+      <p>last update:</p>
+      <p>{{ script.updated | date: 'short' }}</p>
     </div>
   </div>
   <div class="tool-box__wrapper">

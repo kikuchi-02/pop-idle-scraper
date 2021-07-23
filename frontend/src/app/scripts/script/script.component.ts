@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ContentChange, QuillEditorComponent } from 'ngx-quill';
 import { Quill } from 'quill';
 import { fromEvent, ReplaySubject, Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { debounceTime, first, mergeMap, takeUntil } from 'rxjs/operators';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
@@ -50,6 +50,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   private initialized$ = new ReplaySubject<void>(1);
   private unsubscriber$ = new Subject<void>();
 
+  private autoSave$ = new Subject<void>();
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -77,6 +79,16 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           this.initialized$.next();
         });
     }
+
+    this.initialized$
+      .pipe(
+        mergeMap(() => this.autoSave$),
+        debounceTime(1000 * 30),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe(() => {
+        this.save();
+      });
   }
 
   onEditorCreated(editor: Quill): void {
@@ -92,6 +104,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onContentChanged(event: ContentChange): void {
     this.editorService.onContentChanged(event);
+    this.autoSave$.next();
   }
 
   ngOnInit(): void {}
@@ -142,7 +155,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
-          this.initialScript = script;
+          this.initialScript = script.clone();
           this.cd.markForCheck();
         });
     } else {
@@ -151,9 +164,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
-          this.initialScript = script;
+          this.initialScript = script.clone();
 
-          this.cd.markForCheck();
           this.router.navigate([`../${script.id}`], { relativeTo: this.route });
         });
     }

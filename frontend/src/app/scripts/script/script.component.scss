@@ -3,6 +3,10 @@
 
   &__item {
     margin-right: 20px;
+
+    &--right {
+      margin-left: auto;
+    }
   }
 }
 
