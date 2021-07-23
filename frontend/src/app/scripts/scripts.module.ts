@@ -23,7 +23,6 @@ import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';
 import { ChatComponent } from './script/text-editor/chat/chat.component';
 import { ConsoleComponent } from './script/text-editor/console/console.component';
-import { EditableDirective } from './script/text-editor/editable.directive';
 import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.component';
 import { ScriptsRoutingModule } from './scripts-routing.module';
 
@@ -34,7 +33,6 @@ Quill.register('modules/cursors', QuillCursors);
     ConsoleComponent,
     ToolBoxComponent,
     BalloonComponent,
-    EditableDirective,
     ScriptComponent,
     ScriptListComponent,
     ChatComponent,
@@ -57,6 +55,27 @@ Quill.register('modules/cursors', QuillCursors);
     QuillModule.forRoot({
       modules: {
         cursors: true,
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+          // ['blockquote', 'code-block'],
+
+          [{ header: 1 }, { header: 2 }], // custom button values
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          // [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
+          // [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+          // [{ direction: 'rtl' }], // text direction
+
+          // [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+          // [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+          // [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+          // [{ font: [] }],
+          // [{ align: [] }],
+
+          // ['clean'], // remove formatting button
+
+          // ['link', 'image', 'video'], // link and image, video
+        ],
       },
     }),
   ],

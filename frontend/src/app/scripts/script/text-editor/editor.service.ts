@@ -21,10 +21,12 @@ export class EditorService {
 
   constructor(private appService: AppService) {}
 
-  initialize(label: string, editor: Quill): void {
+  initialize(scriptId: number, editor: Quill): void {
     this.editor = editor;
+    const contents = this.editor.getContents();
     this.editor.getModule('text-marking');
 
+    const label = `script-${scriptId}`;
     this.ytext = this.appService.ydoc.getText(label);
     this.undoManager = new UndoManager(this.ytext);
 
@@ -34,6 +36,12 @@ export class EditorService {
         editor,
         this.appService.wsProvider.awareness
       );
+      // default
+      if (this.editor.getText() === '\n') {
+        this.editor.setContents(contents);
+      } else if (scriptId === undefined) {
+        this.editor.setContents(contents);
+      }
     }
   }
 
@@ -59,22 +67,18 @@ export class EditorService {
   }
 
   reformat(): void {
-    const contents = this.editor.getContents();
-    const deltaOps = contents.ops;
-    const result = deltaOps.map((op, i) => {
-      if (typeof op.insert === 'string' && op.insert.includes('。')) {
-        if (
-          typeof deltaOps[i + 1]?.insert === 'string' &&
-          !deltaOps[i + 1].insert.startsWith('\n')
-        ) {
-          op.insert = op.insert.replace(/。(?!\n)/m, '。\n');
-        }
+    const txt = this.editor.getText();
+
+    let insertCounter = 0;
+    let targetIndex = txt.indexOf('。');
+    while (targetIndex > -1) {
+      if (txt.charAt(targetIndex + 1) !== '\n') {
+        this.editor.insertText(targetIndex + insertCounter + 1, '\n');
+        insertCounter += 1;
       }
 
-      return op;
-    });
-    contents.ops = result;
-    this.editor.setContents(contents);
+      targetIndex = txt.indexOf('。', targetIndex + 1);
+    }
   }
 
   selectionReformat(): void {
@@ -96,11 +100,11 @@ export class EditorService {
     }
   }
 
-  highlight(word: string): void {
+  highlight(word: string, color = 'yellow'): void {
     const length = word.length;
     let targetIndex = this.editor.getText().indexOf(word);
     while (targetIndex > -1) {
-      this.editor.formatText(targetIndex, length, 'background-color', 'yellow');
+      this.editor.formatText(targetIndex, length, 'background-color', color);
       targetIndex = this.editor.getText().indexOf(word, targetIndex + 1);
     }
   }

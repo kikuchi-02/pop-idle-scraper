@@ -1,3 +1,5 @@
+$tool-box-height: 120px;
+
 .tool {
   display: flex;
 
@@ -22,9 +24,12 @@ form {
 }
 
 .tool-box__wrapper {
+  height: $tool-box-height;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1;
+  box-sizing: border-box;
+  background-color: #fff;
 }
 
 .editor {
@@ -48,6 +53,13 @@ form {
     width: 70%;
     border: 1px solid #000;
     white-space: pre-line;
+
+    .ql-toolbar {
+      position: sticky;
+      top: $tool-box-height;
+      background: #fff;
+      z-index: 1;
+    }
 
     .ql-editor {
       counter-reset: line;
@@ -96,6 +108,7 @@ form {
     width: 30%;
     height: 100%;
     position: sticky;
+    top: $tool-box-height;
   }
 }
 .loading-modal {

@@ -18,7 +18,6 @@ import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
 import { BalloonComponent } from './text-editor/balloon/balloon.component';
-import { EditableDirective } from './text-editor/editable.directive';
 import { EditorService } from './text-editor/editor.service';
 
 @Component({
@@ -39,8 +38,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   titleFormControl = new FormControl('', [Validators.required]);
 
-  @ViewChild(EditableDirective)
-  editableDirective: EditableDirective;
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
   @ViewChild(QuillEditorComponent) editor: QuillEditorComponent;
@@ -98,7 +95,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         const content = editor.getContents();
         content.ops = this.script.deltaOps;
         editor.setContents(content);
-        this.editorService.initialize(`script-${this.script.id}`, editor);
+        this.editorService.initialize(this.script.id, editor);
       });
   }
 
@@ -119,11 +116,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(async () => {
         this.cd.detectChanges();
 
-        fromEvent(this.editor.elementRef.nativeElement, 'mouseup')
-          .pipe(takeUntil(this.unsubscriber$))
-          .subscribe((event: MouseEvent) => {
-            this.balloonComponent.selectionChange(event);
-          });
+        this.registerEditorEventListener();
+
         this.consolePositionTop = document
           .querySelector('.tool-box__wrapper')
           .getBoundingClientRect().height;
@@ -131,6 +125,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   canDeactivate(): boolean {
+    this.script.deltaOps = this.editorService.getDelta();
     if (this.script.isEqual(this.initialScript)) {
       return true;
     }
@@ -210,10 +205,45 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/subtitle']);
   }
 
-  undo(): void {
-    this.editorService.undo();
+  private registerEditorEventListener(): void {
+    fromEvent(this.editor.elementRef.nativeElement, 'mouseup')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((event: MouseEvent) => {
+        this.balloonComponent.selectionChange(event);
+      });
+
+    fromEvent(this.editor.elementRef.nativeElement, 'keydown')
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((event: KeyboardEvent) => {
+        if (event.ctrlKey) {
+          switch (event.key) {
+            case 'z':
+              if (event.shiftKey) {
+                this.editorService.undo();
+              } else {
+                this.editorService.redo();
+              }
+              event.preventDefault();
+              break;
+            case 's':
+              this.autoSave$.next();
+              this.save();
+              event.preventDefault();
+          }
+        }
+      });
   }
-  redo(): void {
-    this.editorService.redo();
-  }
+
+  // @HostListener('paste', ['$event'])
+  // preventFormattedPast(event: ClipboardEvent): void {
+  //   event.preventDefault();
+  //   const { clipboardData } = event;
+  //   const text =
+  //     clipboardData.getData('text/plain') || clipboardData.getData('text');
+  //   // const html = clipboardData.getData('html');
+  //   // const delta = this.editor.quillEditor.clipboard.convert(html);
+  //   this.editor.quillEditor.clipboard.dangerouslyPasteHTML(text);
+  //   // debugger;
+  //   // document.execCommand('insertText', false, text);
+  // }
 }
