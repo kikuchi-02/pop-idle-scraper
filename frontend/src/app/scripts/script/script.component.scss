@@ -127,3 +127,9 @@ form {
   bottom: 10px;
   left: 10px;
 }
+
+.svg__icon {
+  &:hover {
+    color: #3f51b5;
+  }
+}

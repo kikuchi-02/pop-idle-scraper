@@ -11,32 +11,31 @@
         </mat-form-field>
       </div>
       <div class="form__item">
-        <button mat-raised-button color="primary" (click)="save()">save</button>
+        <div (click)="save()"><mat-icon class="svg__icon">save</mat-icon></div>
       </div>
     </form>
     <div class="tool__item">
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="deleteScript()"
-        [disabled]="!script.id"
-      >
-        delete
-      </button>
+      <div (click)="deleteScript()" [disabled]="!script.id">
+        <mat-icon class="svg__icon">inventory_2</mat-icon>
+      </div>
     </div>
 
     <div class="tool__item">
-      <button mat-button color="primary" (click)="copy2Clipboard()">
-        copy
-      </button>
+      <div (click)="copy2Clipboard()">
+        <mat-icon class="svg__icon">content_copy</mat-icon>
+      </div>
     </div>
     <div class="tool__item">
-      <button mat-button color="primary" (click)="undo()">undo</button>
-      <button mat-button color="primary" (click)="redo()">redo</button>
+      <div (click)="undo()">
+        <mat-icon class="svg__icon">undo</mat-icon>
+      </div>
+    </div>
+    <div class="tool__item">
+      <div (click)="redo()"><mat-icon class="svg__icon">redo</mat-icon></div>
     </div>
     <div class="tool__item">
       <button mat-raised-button color="primary" (click)="navigateSubtitle()">
-        subtitle
+        To subtitle
       </button>
     </div>
     <div class="tool__item tool__item--right" *ngIf="script.updated">

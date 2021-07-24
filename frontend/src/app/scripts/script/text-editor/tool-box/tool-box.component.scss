@@ -16,12 +16,13 @@
       }
 
       &-remove {
-        margin-left: 50px;
-
         .svg__icon {
           margin-right: 20px;
         }
       }
+    }
+    &__label {
+      margin-right: 20px;
     }
   }
 
@@ -32,6 +33,6 @@
 
 .svg__icon {
   &:hover {
-    color: #54b303;
+    color: #3f51b5;
   }
 }
