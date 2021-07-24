@@ -12,6 +12,7 @@ import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, map, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
+import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
 
 @Component({
@@ -22,9 +23,12 @@ import { EditorService } from '../editor.service';
 })
 export class ToolBoxComponent implements OnInit, OnDestroy {
   highlightValue = new FormControl('');
-  underlineValue = new FormControl('');
-  keywordValues = new FormControl();
+  baseFormValue = new FormControl('');
   keys = ['考える', '思う'];
+  keywordValues = new FormControl(this.keys);
+
+  conjunctions = CONJUNCTIONS;
+  conjunctionValues = new FormControl(this.conjunctions);
 
   colorCtr = new FormControl();
   color: ThemePalette = 'primary';
@@ -34,7 +38,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   @Output() loadingStateChange = new EventEmitter<boolean>();
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
-  private toolBoxUnderlineKey = 'tool-box-underline-key';
+  private toolBoxBaseFormKey = 'tool-box-base-form-key';
   private toolBoxColorCodeKey = 'tool-box-color-code-key';
 
   private unsubscriber$ = new Subject<void>();
@@ -47,9 +51,9 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     if (highlightValue) {
       this.highlightValue.setValue(highlightValue);
     }
-    const underlineValue = localStorage.getItem(this.toolBoxUnderlineKey);
-    if (underlineValue) {
-      this.underlineValue.setValue(underlineValue);
+    const baseFormValue = localStorage.getItem(this.toolBoxBaseFormKey);
+    if (baseFormValue) {
+      this.baseFormValue.setValue(baseFormValue);
     }
 
     const colorHex = localStorage.getItem(this.toolBoxColorCodeKey);
@@ -71,19 +75,21 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     this.unsubscriber$.next();
   }
 
-  highlight(word: string): void {
+  highlight(): void {
+    const word = this.highlightValue.value;
     if (!word) {
       return;
     }
     localStorage.setItem(this.toolBoxHighlightKey, word);
-    this.editorService.highlight(word);
+    this.editorService.highlight([word]);
   }
 
   removeOldHighlighted(): void {
     this.editorService.removeHighlight();
   }
 
-  underlineSentenceByWord(word: string): void {
+  highlightBaseForm(): void {
+    const word = this.baseFormValue.value;
     if (!word) {
       return;
     }
@@ -99,7 +105,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
             alert(`「${word}」の表層系が見つかりません。`);
             return undefined;
           }
-          localStorage.setItem(this.toolBoxUnderlineKey, baseFormWord);
+          localStorage.setItem(this.toolBoxBaseFormKey, baseFormWord);
           return [baseFormWord];
         }),
         catchError((e) => of([])),
@@ -107,7 +113,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       )
       .subscribe((baseForms) => {
         if (baseForms) {
-          this.editorService.underline(baseForms);
+          this.editorService.highlight(baseForms, 'orange');
         }
         this.loadingStateChange.emit(false);
       });
@@ -115,6 +121,9 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   bulkUnderline(): void {
     const words = this.keywordValues.value;
+    if (words.length === 0) {
+      return;
+    }
 
     this.loadingStateChange.emit(true);
 
@@ -135,6 +144,14 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         }
         this.loadingStateChange.emit(false);
       });
+  }
+
+  highlightConjunctions(): void {
+    const words = this.conjunctionValues.value;
+    if (words.length === 0) {
+      return;
+    }
+    this.editorService.highlight(words, 'green');
   }
 
   removeAllUnderlinedSentences(): void {
