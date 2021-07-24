@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ContentChange } from 'ngx-quill';
+import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, Quill } from 'quill';
 import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
@@ -12,8 +12,10 @@ export class EditorService {
   private binding: QuillBinding;
 
   private editor: Quill;
+  private selectionRange: Range;
 
-  private color: string;
+  private textColor: string;
+  private backgroundColor: string;
 
   public get wsConnected(): boolean {
     return this.appService.wsProvider.wsconnected;
@@ -100,19 +102,21 @@ export class EditorService {
     }
   }
 
-  highlight(word: string, color = 'yellow'): void {
-    const length = word.length;
-    let targetIndex = this.editor.getText().indexOf(word);
-    while (targetIndex > -1) {
-      this.editor.formatText(targetIndex, length, 'background-color', color);
-      targetIndex = this.editor.getText().indexOf(word, targetIndex + 1);
-    }
+  highlight(words: string[], color = 'yellow'): void {
+    words.forEach((word) => {
+      const length = word.length;
+      let targetIndex = this.editor.getText().indexOf(word);
+      while (targetIndex > -1) {
+        this.editor.formatText(targetIndex, length, 'background-color', color);
+        targetIndex = this.editor.getText().indexOf(word, targetIndex + 1);
+      }
+    });
   }
 
   removeHighlight(): void {
     const contents = this.editor.getContents();
     contents.ops = contents.ops.map((op) => {
-      if (op.attributes?.background === 'yellow') {
+      if (op.attributes?.background) {
         delete op.attributes.background;
       }
       return op;
@@ -121,21 +125,14 @@ export class EditorService {
   }
 
   underline(words: string[]): void {
-    const contents = this.editor.getContents();
-    contents.ops = contents.ops.map((op) => {
-      if (
-        words.some(
-          (word) => typeof op.insert === 'string' && op.insert.includes(word)
-        )
-      ) {
-        if (!op.attributes) {
-          op.attributes = {};
-        }
-        op.attributes.underline = true;
+    words.forEach((word) => {
+      const length = word.length;
+      let targetIndex = this.editor.getText().indexOf(word);
+      while (targetIndex > -1) {
+        this.editor.formatText(targetIndex, length, 'underline', true);
+        targetIndex = this.editor.getText().indexOf(word, targetIndex + 1);
       }
-      return op;
     });
-    this.editor.setContents(contents);
   }
 
   removeUnderline(): void {
@@ -155,33 +152,45 @@ export class EditorService {
     this.editor.setContents(contents);
   }
 
-  onChangeColor(color: string): void {
-    console.log({ color });
-    this.color = color;
+  onChangeTextColor(color: string): void {
+    this.textColor = color;
+  }
+  onChangeBackgroundColor(color: string): void {
+    this.backgroundColor = color;
+  }
+  onSelectionChange(selectionChange: SelectionChange): void {
+    if (selectionChange.range) {
+      this.selectionRange = selectionChange.range;
+    }
+  }
+
+  selectionBold(): void {
+    const selection = this.selectionRange;
+    this.editor.formatText(selection.index, selection.length, 'bold', true);
   }
 
   selectionColorUp(): void {
-    const selection = this.editor.getSelection();
+    const selection = this.selectionRange;
     this.editor.formatText(
       selection.index,
       selection.length,
       'color',
-      this.color
+      this.textColor
     );
   }
 
   selectionBackgroundColorUp(): void {
-    const selection = this.editor.getSelection();
+    const selection = this.selectionRange;
     this.editor.formatText(
       selection.index,
       selection.length,
       'background',
-      this.color
+      this.backgroundColor
     );
   }
 
   selectionStrike(): void {
-    const selection = this.editor.getSelection();
+    const selection = this.selectionRange;
     this.editor.formatText(selection.index, selection.length, 'strike', 'true');
   }
 

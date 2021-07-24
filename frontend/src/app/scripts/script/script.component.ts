@@ -10,7 +10,11 @@ import {
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ContentChange, QuillEditorComponent } from 'ngx-quill';
+import {
+  ContentChange,
+  QuillEditorComponent,
+  SelectionChange,
+} from 'ngx-quill';
 import { Quill } from 'quill';
 import { fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, first, mergeMap, takeUntil } from 'rxjs/operators';
@@ -102,6 +106,10 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   onContentChanged(event: ContentChange): void {
     this.editorService.onContentChanged(event);
     this.autoSave$.next();
+  }
+
+  onSelectionChanged(event: SelectionChange): void {
+    this.editorService.onSelectionChange(event);
   }
 
   ngOnInit(): void {}

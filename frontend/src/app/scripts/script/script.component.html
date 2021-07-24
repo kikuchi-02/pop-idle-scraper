@@ -62,6 +62,7 @@
         class="editor__main"
         (onEditorCreated)="onEditorCreated($event)"
         (onContentChanged)="onContentChanged($event)"
+        (onSelectionChanged)="onSelectionChanged($event)"
       ></quill-editor>
 
       <div class="console__wrapper" [style.top.px]="consolePositionTop">

@@ -17,4 +17,14 @@
       display: none;
     }
   }
+
+  .item {
+    margin-right: 5px;
+  }
+}
+
+.svg__icon {
+  &:hover {
+    color: #54b303;
+  }
 }

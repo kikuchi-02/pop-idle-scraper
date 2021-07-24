@@ -53,6 +53,10 @@ export class BalloonComponent implements OnInit {
     }
   }
 
+  bold(): void {
+    this.editorService.selectionBold();
+  }
+
   colorUp(): void {
     this.editorService.selectionColorUp();
   }

@@ -10,7 +10,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
-import { catchError, map, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
@@ -30,7 +30,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   conjunctions = CONJUNCTIONS;
   conjunctionValues = new FormControl(this.conjunctions);
 
-  colorCtr = new FormControl();
+  textColorCtr = new FormControl();
+  backgroundColorCtr = new FormControl();
   color: ThemePalette = 'primary';
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
@@ -39,7 +40,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
   private toolBoxBaseFormKey = 'tool-box-base-form-key';
-  private toolBoxColorCodeKey = 'tool-box-color-code-key';
+  private toolBoxTextColorCodeKey = 'tool-box-text-color-code-key';
+  private toolBoxBackgroundColorCodeKey = 'tool-box-background-color-code-key';
 
   private unsubscriber$ = new Subject<void>();
 
@@ -56,18 +58,49 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       this.baseFormValue.setValue(baseFormValue);
     }
 
-    const colorHex = localStorage.getItem(this.toolBoxColorCodeKey);
-    const colorCode = colorHex ? `#${colorHex}` : `#000000`;
-    const colorGba = this.hex2rgb(colorCode);
-    this.colorCtr.setValue(new Color(colorGba[0], colorGba[1], colorGba[2]));
-
-    this.colorCtr.valueChanges
-      .pipe(takeUntil(this.unsubscriber$))
+    this.textColorCtr.valueChanges
+      .pipe(
+        filter((v) => v),
+        takeUntil(this.unsubscriber$)
+      )
       .subscribe((value) => {
         const newColorHex = `#${value.toHex()}`;
-        this.editorService.onChangeColor(newColorHex);
-        localStorage.setItem(this.toolBoxColorCodeKey, colorHex);
+        this.editorService.onChangeTextColor(newColorHex);
+        localStorage.setItem(this.toolBoxTextColorCodeKey, newColorHex);
       });
+
+    this.backgroundColorCtr.valueChanges
+      .pipe(
+        filter((v) => v),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((value) => {
+        const newColorHex = `#${value.toHex()}`;
+        this.editorService.onChangeBackgroundColor(newColorHex);
+        localStorage.setItem(this.toolBoxBackgroundColorCodeKey, newColorHex);
+      });
+
+    const textColorHex = localStorage.getItem(this.toolBoxTextColorCodeKey);
+    const textColorCode = textColorHex ? `${textColorHex}` : `#000000`;
+    const textColorGba = this.hex2rgb(textColorCode);
+    this.textColorCtr.setValue(
+      new Color(textColorGba[0], textColorGba[1], textColorGba[2])
+    );
+
+    const backgroundColorHex = localStorage.getItem(
+      this.toolBoxBackgroundColorCodeKey
+    );
+    const backgroundColorCode = backgroundColorHex
+      ? `${backgroundColorHex}`
+      : `#000000`;
+    const backgroundColorGba = this.hex2rgb(backgroundColorCode);
+    this.backgroundColorCtr.setValue(
+      new Color(
+        backgroundColorGba[0],
+        backgroundColorGba[1],
+        backgroundColorGba[2]
+      )
+    );
   }
 
   ngOnInit(): void {}
@@ -75,52 +108,48 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     this.unsubscriber$.next();
   }
 
-  highlight(): void {
+  highlight(words: string[], color?: string): void {
     const word = this.highlightValue.value;
     if (!word) {
       return;
     }
-    localStorage.setItem(this.toolBoxHighlightKey, word);
-    this.editorService.highlight([word]);
+    this.editorService.highlight(words, color);
   }
 
   removeOldHighlighted(): void {
     this.editorService.removeHighlight();
   }
 
-  highlightBaseForm(): void {
-    const word = this.baseFormValue.value;
-    if (!word) {
+  highlightBaseForm(words: string[], color?: string): void {
+    if (words.length === 0) {
       return;
     }
-
     this.loadingStateChange.emit(true);
 
-    this.scriptService
-      .tokenize(word)
+    forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
-        map((tokens) => {
-          const baseFormWord = tokens[0].basic_form;
-          if (baseFormWord === '*') {
-            alert(`「${word}」の表層系が見つかりません。`);
-            return undefined;
+        map((tokensArray) => {
+          const baseForms: string[] = tokensArray.map(
+            (tokens) => tokens[0].basic_form
+          );
+          const noBaseForms = baseForms.filter((baseForm) => baseForm === '*');
+          if (noBaseForms.length > 0) {
+            alert(`以下の語句の表層系が見つかりません。\n${noBaseForms.join}`);
           }
-          localStorage.setItem(this.toolBoxBaseFormKey, baseFormWord);
-          return [baseFormWord];
+          return baseForms.filter((baseForm) => baseForm !== '*');
         }),
         catchError((e) => of([])),
         takeUntil(this.unsubscriber$)
       )
       .subscribe((baseForms) => {
         if (baseForms) {
-          this.editorService.highlight(baseForms, 'orange');
+          this.editorService.highlight(baseForms, color);
         }
         this.loadingStateChange.emit(false);
       });
   }
 
-  bulkUnderline(): void {
-    const words = this.keywordValues.value;
+  bulkUnderline(words: string[]): void {
     if (words.length === 0) {
       return;
     }
@@ -144,14 +173,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         }
         this.loadingStateChange.emit(false);
       });
-  }
-
-  highlightConjunctions(): void {
-    const words = this.conjunctionValues.value;
-    if (words.length === 0) {
-      return;
-    }
-    this.editorService.highlight(words, 'green');
   }
 
   removeAllUnderlinedSentences(): void {

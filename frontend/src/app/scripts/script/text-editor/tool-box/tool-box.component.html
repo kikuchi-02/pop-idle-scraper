@@ -4,7 +4,7 @@
   </mat-expansion-panel-header>
   <div class="row">
     <div class="row__item">
-      <form (ngSubmit)="highlight()">
+      <form (ngSubmit)="highlight(highlightValue.value)">
         <mat-form-field>
           <mat-label>Highlight</mat-label>
           <input matInput [formControl]="highlightValue" />
@@ -23,7 +23,7 @@
       </form>
     </div>
     <div class="row__item">
-      <form (ngSubmit)="highlightBaseForm()">
+      <form (ngSubmit)="highlightBaseForm([baseFormValue.value], 'yellow')">
         <mat-form-field>
           <mat-label>Highlight base form</mat-label>
           <input matInput [formControl]="baseFormValue" />
@@ -55,7 +55,7 @@
           }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <div class="svg__icon" (click)="bulkUnderline()">
+      <div class="svg__icon" (click)="highlight(keywordValues.value, 'orange')">
         <mat-icon>border_color</mat-icon>
       </div>
     </div>
@@ -71,7 +71,10 @@
           }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <div class="svg__icon" (click)="highlightConjunctions()">
+      <div
+        class="svg__icon"
+        (click)="highlight(conjunctionValues.value, 'green')"
+      >
         <mat-icon>border_color</mat-icon>
       </div>
     </div>
@@ -86,14 +89,35 @@
   </div>
   <div class="row">
     <mat-form-field class="row__item">
-      <input matInput [ngxMatColorPicker]="picker" [formControl]="colorCtr" />
-      <ngx-mat-color-toggle matSuffix [for]="picker"></ngx-mat-color-toggle>
+      <mat-label>text color</mat-label>
+      <input
+        matInput
+        [ngxMatColorPicker]="picker1"
+        [formControl]="textColorCtr"
+      />
+      <ngx-mat-color-toggle matSuffix [for]="picker1"></ngx-mat-color-toggle>
       <ngx-mat-color-picker
-        #picker
+        #picker1
         [touchUi]="'false'"
         [color]="color"
       ></ngx-mat-color-picker>
     </mat-form-field>
+    <mat-form-field class="row__item">
+      <mat-label>background color</mat-label>
+      <input
+        matInput
+        [ngxMatColorPicker]="picker2"
+        [formControl]="backgroundColorCtr"
+      />
+      <ngx-mat-color-toggle matSuffix [for]="picker2"></ngx-mat-color-toggle>
+      <ngx-mat-color-picker
+        #picker2
+        [touchUi]="'false'"
+        [color]="color"
+      ></ngx-mat-color-picker>
+    </mat-form-field>
+  </div>
+  <div class="row">
     <button mat-button color="primary" class="row__item" (click)="textLint()">
       textLint
     </button>
@@ -103,7 +127,7 @@
     <div class="row__item row__item-remove">
       <div>remove:</div>
       <div class="svg__icon" (click)="removeOldHighlighted()">
-        <mat-icon>format_color_text</mat-icon>
+        <mat-icon>format_color_fill</mat-icon>
       </div>
 
       <div class="svg__icon" (click)="removeAllUnderlinedSentences()">
