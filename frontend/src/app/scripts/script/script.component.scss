@@ -61,20 +61,20 @@ form {
       z-index: 1;
     }
 
-    .ql-editor {
-      counter-reset: line;
-      padding-left: 0;
-    }
+    // .ql-editor {
+    //   counter-reset: line;
+    //   padding-left: 0;
+    // }
 
-    .ql-editor p:before {
-      counter-increment: line;
-      content: counter(line);
-      display: inline-block;
-      border-right: 1px solid #ddd;
-      padding: 0 0.5em;
-      margin-right: 0.5em;
-      color: #888;
-    }
+    // .ql-editor p:before {
+    //   counter-increment: line;
+    //   content: counter(line);
+    //   display: inline-block;
+    //   border-right: 1px solid #ddd;
+    //   padding: 0 0.5em;
+    //   margin-right: 0.5em;
+    //   color: #888;
+    // }
 
     .text {
       &--highlighted {
@@ -132,4 +132,5 @@ form {
   &:hover {
     color: #3f51b5;
   }
+  cursor: pointer;
 }

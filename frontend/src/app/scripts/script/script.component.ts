@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnDestroy,
   OnInit,
   Renderer2,
@@ -59,7 +60,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private cd: ChangeDetectorRef,
     private scriptService: ScriptService,
     private renderer: Renderer2,
-    private editorService: EditorService
+    private editorService: EditorService,
+    private elementRef: ElementRef
   ) {
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
@@ -168,6 +170,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .subscribe((script) => {
           this.script = script;
           this.initialScript = script.clone();
+          this.cd.markForCheck();
 
           this.router.navigate([`../${script.id}`], { relativeTo: this.route });
         });
@@ -199,7 +202,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   scrollTop(): void {
-    window.scrollTo(0, 0);
+    window.scroll({ top: 0, behavior: 'smooth' });
   }
 
   navigateSubtitle(): void {
@@ -218,6 +221,12 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((event: MouseEvent) => {
         this.balloonComponent.selectionChange(event);
+
+        const commentedElement = (event.target as any).closest('[data-uuid]');
+        if (commentedElement) {
+          const uuid = commentedElement.getAttribute('data-uuid');
+          this.editorService.focusChatMessage(uuid);
+        }
       });
 
     fromEvent(this.editor.elementRef.nativeElement, 'keydown')
@@ -238,6 +247,24 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
               this.save();
               event.preventDefault();
           }
+        }
+      });
+
+    this.editorService.commentFocused$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((uuid) => {
+        const targetElm = this.elementRef.nativeElement.querySelector(
+          `[data-uuid="${uuid}"]`
+        );
+        if (targetElm) {
+          const rect = targetElm.getBoundingClientRect();
+          const offset = 300;
+
+          const y = rect.y + window.scrollY - offset;
+          window.scroll({
+            top: y > offset ? 0 : y,
+            behavior: 'smooth',
+          });
         }
       });
   }

@@ -122,9 +122,12 @@ export class Script {
 export interface Message {
   id?: number;
   scriptId: number;
-  // TODO
   children?: Message[];
+  parentId?: number;
   body: string;
   author: User;
-  created: Date;
+  created?: Date;
+  uuid: string;
+  expanded?: boolean;
+  selectedText?: string;
 }

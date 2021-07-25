@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, Quill } from 'quill';
+import { ReplaySubject, Subject } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
 import { AppService } from '../../../services/app.service';
@@ -20,6 +22,12 @@ export class EditorService {
   public get wsConnected(): boolean {
     return this.appService.wsProvider.wsconnected;
   }
+
+  public commentSubject$ = new Subject<string>();
+  public commentFocused$ = new Subject<string>();
+  public focusChatMessage$ = new Subject<string>();
+
+  public initialized$ = new ReplaySubject<void>(1);
 
   constructor(private appService: AppService) {}
 
@@ -45,11 +53,10 @@ export class EditorService {
         this.editor.setContents(contents);
       }
     }
+    this.initialized$.next();
   }
 
-  onContentChanged(event: ContentChange): void {
-    console.log('changed', event.content);
-  }
+  onContentChanged(event: ContentChange): void {}
 
   getText(): string {
     return this.editor.getText();
@@ -102,7 +109,7 @@ export class EditorService {
     }
   }
 
-  highlight(words: string[], color = 'yellow'): void {
+  highlight(words: string[], color = '#FFAF7A'): void {
     words.forEach((word) => {
       const length = word.length;
       let targetIndex = this.editor.getText().indexOf(word);
@@ -191,7 +198,65 @@ export class EditorService {
 
   selectionStrike(): void {
     const selection = this.selectionRange;
-    this.editor.formatText(selection.index, selection.length, 'strike', 'true');
+    this.editor.formatText(selection.index, selection.length, 'strike', true);
+  }
+
+  selectionComment(): void {
+    const uuid = uuidv4();
+    const selection = this.selectionRange;
+    this.editor.formatText(selection.index, selection.length, 'comment', {
+      uuid,
+      color: '#FCC933',
+    });
+
+    this.commentSubject$.next(uuid);
+  }
+
+  unselectComment(uuid: string): void {
+    const contents = this.editor.getContents();
+    let find = false;
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.comment?.uuid === uuid) {
+        find = true;
+        delete op.attributes.comment;
+        delete op.attributes.background;
+      }
+      return op;
+    });
+    this.editor.setContents(contents);
+  }
+
+  focusChatMessage(uuid: string): void {
+    this.focusChatMessage$.next(uuid);
+  }
+
+  selectionCommentFocused(uuid: string): void {
+    const contents = this.editor.getContents();
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.comment?.uuid === uuid) {
+        op.attributes.comment.color = '#FCC933';
+      }
+      return op;
+    });
+    this.editor.setContents(contents);
+    this.commentFocused$.next(uuid);
+  }
+  selectionCommentUnfocused(uuid: string): void {
+    const contents = this.editor.getContents();
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.comment?.uuid === uuid) {
+        op.attributes.comment.color = '#FEE9B2';
+      }
+      return op;
+    });
+    this.editor.setContents(contents);
+  }
+  selectionCommentText(uuid: string): string {
+    return this.editor
+      .getContents()
+      .ops.filter((delta) => delta.attributes?.comment?.uuid === uuid)
+      .map((delta) => delta.insert)
+      .join();
   }
 
   private checkInitialized(): void {

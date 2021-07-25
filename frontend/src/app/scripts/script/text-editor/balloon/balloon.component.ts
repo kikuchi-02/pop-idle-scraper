@@ -38,7 +38,7 @@ export class BalloonComponent implements OnInit {
     }
 
     const rect = range.getBoundingClientRect();
-    const offset = 30;
+    const offset = 50;
     this.top = rect.top + window.pageYOffset - offset + 'px';
     this.left = rect.left + 'px';
     this.display = 'block';
@@ -63,6 +63,10 @@ export class BalloonComponent implements OnInit {
 
   backColor(): void {
     this.editorService.selectionBackgroundColorUp();
+  }
+
+  comment(): void {
+    this.editorService.selectionComment();
   }
 
   format(): void {

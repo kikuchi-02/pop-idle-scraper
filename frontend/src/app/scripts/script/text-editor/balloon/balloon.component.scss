@@ -7,8 +7,8 @@
   border: 1px solid #000;
   background-color: #fff;
   box-shadow: 0px 0px 10px;
-  padding: 2px;
   height: 20px;
+  padding: 8px 10px;
 
   display: flex;
 
@@ -20,6 +20,7 @@
 
   .item {
     margin-right: 5px;
+    cursor: pointer;
   }
 }
 

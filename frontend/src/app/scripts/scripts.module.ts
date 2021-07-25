@@ -27,6 +27,76 @@ import { ConsoleComponent } from './script/text-editor/console/console.component
 import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.component';
 import { ScriptsRoutingModule } from './scripts-routing.module';
 
+const Inline = Quill.import('blots/inline');
+
+interface CommentBlotAttributes {
+  uuid: string;
+  color: string;
+}
+export class CommentBlot extends Inline {
+  static blotName = 'comment';
+  static tagName = 'span';
+
+  static create(value: CommentBlotAttributes): Node {
+    const node = super.create();
+    node.setAttribute('data-uuid', value.uuid);
+    node.setAttribute('style', `background-color: ${value.color};`);
+    return node;
+  }
+
+  static formats(node: any): CommentBlotAttributes {
+    const styleString = node.getAttribute('style') || '';
+
+    const backgroundColorStyle = styleString.includes(';')
+      ? styleString
+          .split(';')
+          .find((style) => style.startsWith('background-color'))
+      : styleString;
+    const colorCode = backgroundColorStyle
+      ? backgroundColorStyle.split(': ')[1]
+      : '';
+
+    const format = {} as CommentBlotAttributes;
+    const uuid = node.getAttribute('data-uuid');
+    if (uuid) {
+      format.uuid = uuid;
+    }
+    if (colorCode) {
+      format.color = colorCode;
+    }
+
+    return format;
+  }
+
+  format(name, value: CommentBlotAttributes): void {
+    if (name === 'comment') {
+      if (value) {
+        if (value.uuid) {
+          this.domNode.setAttribute('data-uuid', value.uuid);
+        } else {
+          this.domNode.removeAttribute('data-uuid');
+        }
+        if (value.color) {
+          if (['#FCC933', '#FEE9B2'].includes(value.color)) {
+            this.domNode.setAttribute(
+              'style',
+              `background-color: ${value.color};`
+            );
+          } else {
+            this.domNode.removeAttribute('style');
+          }
+        }
+      } else {
+        this.domNode.removeAttribute('data-uuid');
+        this.domNode.removeAttribute('style');
+      }
+    } else {
+      super.format(name, value);
+    }
+  }
+}
+
+Quill.register(CommentBlot);
 Quill.register('modules/cursors', QuillCursors);
 
 @NgModule({

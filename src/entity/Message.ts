@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Script } from './Script';
 import { User } from './User';
 
@@ -19,6 +26,17 @@ export class Message {
   @ManyToOne((type) => User, (user) => user.messages)
   author: User;
 
-  @Column()
+  @CreateDateColumn()
   created: Date;
+
+  @Column('uuid', { nullable: true })
+  uuid: string;
+
+  @ManyToOne((type) => Message, (message) => message.children, {
+    nullable: true,
+  })
+  parent: Message;
+
+  @OneToMany((type) => Message, (message) => message.parent)
+  children: Message[];
 }
