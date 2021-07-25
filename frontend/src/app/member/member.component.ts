@@ -46,10 +46,13 @@ export class MemberComponent implements OnInit, OnDestroy {
           switch (item.kind) {
             case 'nogizaka':
               this.nogizakaTables = item.tables;
+              break;
             case 'sakurazaka':
               this.sakurazakaTables = item.tables;
+              break;
             case 'hinatazaka':
               this.hinatazakaTables = item.tables;
+              break;
           }
         });
         this.cd.markForCheck();

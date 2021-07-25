@@ -1,3 +1,5 @@
+import { DeltaOperation } from 'quill';
+
 export interface Post {
   date?: number;
   title?: string;
@@ -95,7 +97,7 @@ export interface User {
 export class Script {
   id: number;
   title = '';
-  innerHtml = '';
+  deltaOps: DeltaOperation[] = [];
   created: Date;
   updated: Date;
   author: User;
@@ -120,9 +122,12 @@ export class Script {
 export interface Message {
   id?: number;
   scriptId: number;
-  // TODO
   children?: Message[];
+  parentId?: number;
   body: string;
   author: User;
-  created: Date;
+  created?: Date;
+  uuid: string;
+  expanded?: boolean;
+  selectedText?: string;
 }

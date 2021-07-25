@@ -1,18 +1,19 @@
+import { Color } from '@angular-material-components/color-picker';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
-  Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { forkJoin, from, of, Subject } from 'rxjs';
-import { map, mergeMap, takeUntil } from 'rxjs/operators';
+import { ThemePalette } from '@angular/material/core';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
+import { CONJUNCTIONS } from '../constants';
+import { EditorService } from '../editor.service';
 
 @Component({
   selector: 'app-tool-box',
@@ -22,37 +23,84 @@ import { ScriptService } from '../../script.service';
 })
 export class ToolBoxComponent implements OnInit, OnDestroy {
   highlightValue = new FormControl('');
-  underlineValue = new FormControl('');
-  keywordValues = new FormControl();
+  baseFormValue = new FormControl('');
   keys = ['考える', '思う'];
+  keywordValues = new FormControl(this.keys);
 
-  @Input() value: string;
-  @Output() valueChange = new EventEmitter<string>();
+  conjunctions = CONJUNCTIONS;
+  conjunctionValues = new FormControl(this.conjunctions);
 
-  @Output() setText = new EventEmitter<string>();
+  textColorCtr = new FormControl();
+  backgroundColorCtr = new FormControl();
+  color: ThemePalette = 'primary';
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
 
   @Output() loadingStateChange = new EventEmitter<boolean>();
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
-  private toolBoxUnderlineKey = 'tool-box-underline-key';
+  private toolBoxBaseFormKey = 'tool-box-base-form-key';
+  private toolBoxTextColorCodeKey = 'tool-box-text-color-code-key';
+  private toolBoxBackgroundColorCodeKey = 'tool-box-background-color-code-key';
 
   private unsubscriber$ = new Subject<void>();
 
   constructor(
-    private renderer: Renderer2,
-    private cd: ChangeDetectorRef,
-    private scriptService: ScriptService
+    private scriptService: ScriptService,
+    private editorService: EditorService
   ) {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
       this.highlightValue.setValue(highlightValue);
     }
-    const underlineValue = localStorage.getItem(this.toolBoxUnderlineKey);
-    if (underlineValue) {
-      this.underlineValue.setValue(underlineValue);
+    const baseFormValue = localStorage.getItem(this.toolBoxBaseFormKey);
+    if (baseFormValue) {
+      this.baseFormValue.setValue(baseFormValue);
     }
+
+    this.textColorCtr.valueChanges
+      .pipe(
+        filter((v) => v),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((value) => {
+        const newColorHex = `#${value.toHex()}`;
+        this.editorService.onChangeTextColor(newColorHex);
+        localStorage.setItem(this.toolBoxTextColorCodeKey, newColorHex);
+      });
+
+    this.backgroundColorCtr.valueChanges
+      .pipe(
+        filter((v) => v),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((value) => {
+        const newColorHex = `#${value.toHex()}`;
+        this.editorService.onChangeBackgroundColor(newColorHex);
+        localStorage.setItem(this.toolBoxBackgroundColorCodeKey, newColorHex);
+      });
+
+    const textColorHex = localStorage.getItem(this.toolBoxTextColorCodeKey);
+    const textColorCode = textColorHex ? `${textColorHex}` : `#000000`;
+    const textColorGba = this.hex2rgb(textColorCode);
+    this.textColorCtr.setValue(
+      new Color(textColorGba[0], textColorGba[1], textColorGba[2])
+    );
+
+    const backgroundColorHex = localStorage.getItem(
+      this.toolBoxBackgroundColorCodeKey
+    );
+    const backgroundColorCode = backgroundColorHex
+      ? `${backgroundColorHex}`
+      : `#000000`;
+    const backgroundColorGba = this.hex2rgb(backgroundColorCode);
+    this.backgroundColorCtr.setValue(
+      new Color(
+        backgroundColorGba[0],
+        backgroundColorGba[1],
+        backgroundColorGba[2]
+      )
+    );
   }
 
   ngOnInit(): void {}
@@ -60,95 +108,54 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     this.unsubscriber$.next();
   }
 
-  highlight(word: string): void {
+  highlight(words: string[], color?: string): void {
+    const word = this.highlightValue.value;
     if (!word) {
       return;
     }
-    localStorage.setItem(this.toolBoxHighlightKey, word);
-
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    this.recursiveTextNodeFunc(elm, (textNode) => {
-      const parent = textNode.parentNode as Element;
-      if (parent.tagName === 'MARK') {
-        return;
-      }
-      const indexes = [...Array(textNode.nodeValue.length)]
-        .map((_, i) => i)
-        .filter((i) => textNode.nodeValue.substring(i).startsWith(word));
-      if (indexes.length === 0) {
-        return;
-      }
-      const nodes: Node[] = [];
-      let start = 0;
-      for (const idx of indexes) {
-        const mark = this.renderer.createElement('mark');
-        mark.appendChild(this.renderer.createText(word));
-        const text = textNode.nodeValue.substring(start, idx);
-        start = idx + word.length;
-
-        nodes.push(this.renderer.createText(text), mark);
-      }
-      nodes.push(this.renderer.createText(textNode.nodeValue.substring(start)));
-
-      this.renderer.removeChild(parent, textNode);
-      nodes.forEach((node) => {
-        this.renderer.appendChild(parent, node);
-      });
-    });
-
-    this.value = elm.innerHTML;
-    this.valueChange.emit(this.value);
+    this.editorService.highlight(words, color);
   }
 
   removeOldHighlighted(): void {
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    this.removeStyles(elm, ['highlight']);
-
-    this.value = elm.innerHTML;
-    this.valueChange.emit(this.value);
+    this.editorService.removeHighlight();
   }
 
-  underlineSentenceByWord(word: string): void {
-    if (!word) {
+  highlightBaseForm(words: string[], color?: string): void {
+    if (words.length === 0) {
+      return;
+    }
+    this.loadingStateChange.emit(true);
+
+    forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
+      .pipe(
+        map((tokensArray) => {
+          const baseForms: string[] = tokensArray.map(
+            (tokens) => tokens[0].basic_form
+          );
+          const noBaseForms = baseForms.filter((baseForm) => baseForm === '*');
+          if (noBaseForms.length > 0) {
+            alert(`以下の語句の表層系が見つかりません。\n${noBaseForms.join}`);
+          }
+          return baseForms.filter((baseForm) => baseForm !== '*');
+        }),
+        catchError((e) => of([])),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((baseForms) => {
+        if (baseForms) {
+          this.editorService.highlight(baseForms, color);
+        }
+        this.loadingStateChange.emit(false);
+      });
+  }
+
+  bulkUnderline(words: string[]): void {
+    if (words.length === 0) {
       return;
     }
 
     this.loadingStateChange.emit(true);
 
-    this.scriptService
-      .tokenize(word)
-      .pipe(
-        mergeMap((tokens) => {
-          const baseFormWord = tokens[0].basic_form;
-          if (baseFormWord === '*') {
-            alert(`「${word}」の表層系が見つかりません。`);
-            return of(undefined);
-          }
-          localStorage.setItem(this.toolBoxUnderlineKey, baseFormWord);
-          return from(this.underlineSentence([baseFormWord]));
-        }),
-        takeUntil(this.unsubscriber$)
-      )
-      .subscribe(
-        (innerHtml) => {
-          if (innerHtml) {
-            this.value = innerHtml;
-            this.valueChange.emit(this.value);
-          }
-          this.loadingStateChange.emit(false);
-        },
-        (error) => {
-          this.loadingStateChange.emit(false);
-        }
-      );
-  }
-
-  bulkUnderline(): void {
-    const words = this.keywordValues.value;
     forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
         map((tokensArray) => {
@@ -157,79 +164,31 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
             .filter((baseForm) => baseForm !== '*');
           return baseForms;
         }),
-        mergeMap((baseForms) => {
-          return from(this.underlineSentence(baseForms));
-        }),
+        catchError((e) => of([])),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe(
-        (innerHtml) => {
-          if (innerHtml) {
-            this.value = innerHtml;
-            this.valueChange.emit(this.value);
-          }
-          this.loadingStateChange.emit(false);
-        },
-        (error) => {
-          this.loadingStateChange.emit(false);
+      .subscribe((baseForms: string[]) => {
+        if (baseForms.length > 0) {
+          this.editorService.underline(baseForms);
         }
-      );
+        this.loadingStateChange.emit(false);
+      });
   }
 
   removeAllUnderlinedSentences(): void {
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    this.removeStyles(elm, ['underline']);
-
-    this.value = elm.innerHTML;
-    this.valueChange.emit(this.value);
+    this.editorService.removeUnderline();
   }
 
   removeStrike(): void {
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    this.removeStyles(elm, ['strike']);
-
-    this.value = elm.innerHTML;
-    this.valueChange.emit(this.value);
+    this.editorService.removeStrikes();
   }
 
   reformat(): void {
-    if (
-      !confirm('highlightやunderlineなどのスタイルが外れますが実行しますか？')
-    ) {
-      return;
-    }
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    this.removeStyles(elm);
-
-    // const textContent = [...elm.childNodes]
-    //   .map((node) => node.textContent)
-    //   .join('\n');
-    // const text = textContent;
-    // // .replace(/\n(?!\n)/g, '');
-    // const splitted = text
-    //   .split(/。(?!\n)/g)
-    //   .join('。\n')
-    //   .replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
-
-    const textContent = [...elm.childNodes]
-      .map((node) => {
-        const content = node.textContent;
-        return this.scriptService.splitTextByNewline(content);
-      })
-      .join('\n');
-    const splitted = textContent.replace(/(?<!\n)\n{2}(?!\n)/g, '\n');
-
-    this.setText.emit(splitted);
+    this.editorService.reformat();
   }
 
   textLint(): void {
-    const text = this.getText();
+    const text = this.editorService.getText();
     if (!text) {
       return;
     }
@@ -245,98 +204,22 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getText(): string {
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    const textContent = [...elm.childNodes]
-      .map((node) => node.textContent)
-      .join('\n');
-    return textContent;
-  }
-
-  private recursiveTextNodeFunc(
-    node: Node,
-    callback: (textNode: Node) => void
-  ): void {
-    if (node.nodeName === '#text') {
-      callback(node);
-    } else {
-      node.childNodes.forEach((child) => {
-        this.recursiveTextNodeFunc(child, callback);
-      });
+  private hex2rgb(hex: string): number[] {
+    if (hex.slice(0, 1) === '#') {
+      hex = hex.slice(1);
     }
-  }
-
-  private underlineSentence(baseFormWords: string[]): Promise<string> {
-    const className = 'text--underlined';
-    const elm = this.renderer.createElement('div');
-    elm.innerHTML = this.value;
-
-    return Promise.all(
-      [...elm.childNodes].map((child) => {
-        if (child.nodeType === 'SPAN' && child.className === className) {
-          return Promise.resolve();
-        }
-        return this.scriptService
-          .tokenize(child.textContent)
-          .pipe(
-            map(
-              (tokens): string =>
-                tokens.find((token) => baseFormWords.includes(token.basic_form))
-                  ?.surface_form
-            )
-          )
-          .toPromise()
-          .then((surfaceForm) => {
-            if (!surfaceForm) {
-              return;
-            }
-            const underlineSpan = this.renderer.createElement('span');
-            this.renderer.addClass(underlineSpan, className);
-            this.renderer.addClass(underlineSpan, 'text__tooltip-relative');
-            const tooltip = this.renderer.createElement('span');
-            this.renderer.addClass(tooltip, 'text__tooltip-absolute');
-            this.renderer.appendChild(
-              tooltip,
-              this.renderer.createText(surfaceForm)
-            );
-            this.renderer.appendChild(underlineSpan, tooltip);
-
-            if (child.childNodes.length > 0) {
-              child.childNodes.forEach((grandchild) => {
-                this.renderer.appendChild(underlineSpan, grandchild);
-              });
-            }
-            this.renderer.appendChild(child, underlineSpan);
-          });
-      })
-    ).then(() => elm.innerHTML);
-  }
-
-  private removeStyles(elm, types?: ('highlight' | 'underline' | 'strike')[]) {
-    if (!types) {
-      types = ['highlight', 'underline', 'strike'];
+    if (hex.length === 3) {
+      hex =
+        hex.slice(0, 1) +
+        hex.slice(0, 1) +
+        hex.slice(1, 2) +
+        hex.slice(1, 2) +
+        hex.slice(2, 3) +
+        hex.slice(2, 3);
     }
-    types.forEach((value) => {
-      switch (value) {
-        case 'highlight':
-          elm.querySelectorAll('mark').forEach((highlighted) => {
-            highlighted.replaceWith(...highlighted.childNodes);
-          });
-        case 'underline':
-          const className = 'text--underlined';
-          elm.querySelectorAll(`.text__tooltip-absolute`).forEach((child) => {
-            child.remove();
-          });
-          elm.querySelectorAll(`.${className}`).forEach((child) => {
-            child.replaceWith(...child.childNodes);
-          });
-        case 'strike':
-          elm.querySelectorAll('strike').forEach((child) => {
-            child.replaceWith(...child.childNodes);
-          });
-      }
-    });
+
+    return [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map((str) =>
+      parseInt(str, 16)
+    );
   }
 }

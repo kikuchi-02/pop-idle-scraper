@@ -1,4 +1,4 @@
-<div class="wrapper">
+<div class="wrapper" *ngIf="!!script">
   <div class="tool">
     <form class="tool__item">
       <div class="form__item">
@@ -11,66 +11,67 @@
         </mat-form-field>
       </div>
       <div class="form__item">
-        <button mat-raised-button color="primary" (click)="save()">save</button>
+        <div (click)="save()"><mat-icon class="svg__icon">save</mat-icon></div>
       </div>
     </form>
     <div class="tool__item">
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="deleteScript()"
-        [disabled]="!script.id"
-      >
-        delete
-      </button>
+      <div (click)="deleteScript()" [disabled]="!script.id">
+        <mat-icon class="svg__icon">inventory_2</mat-icon>
+      </div>
     </div>
 
     <div class="tool__item">
-      <button mat-button color="primary" (click)="copy2Clipboard()">
-        copy to clipboard
-      </button>
+      <div (click)="copy2Clipboard()">
+        <mat-icon class="svg__icon">content_copy</mat-icon>
+      </div>
     </div>
     <div class="tool__item">
-      <button mat-button color="primary" (click)="editableDirective?.undo()">
-        undo
-      </button>
-      <button mat-button color="primary" (click)="editableDirective?.redo()">
-        redo
-      </button>
+      <div (click)="undo()">
+        <mat-icon class="svg__icon">undo</mat-icon>
+      </div>
+    </div>
+    <div class="tool__item">
+      <div (click)="redo()"><mat-icon class="svg__icon">redo</mat-icon></div>
     </div>
     <div class="tool__item">
       <button mat-raised-button color="primary" (click)="navigateSubtitle()">
-        subtitle
+        To subtitle
       </button>
     </div>
-  </div>
-  <div class="tool-box__wrapper">
-    <app-tool-box
-      [(value)]="script.innerHtml"
-      (setText)="setTextContent($event)"
-      (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
-      (loadingStateChange)="loading = $event"
-    ></app-tool-box>
-  </div>
-
-  <div class="editor">
-    <div class="editor__subtitle" *ngIf="showSubtitleLine">
-      <div class="editor__subtitle-line"></div>
-    </div>
-    <div
-      appEditable
-      class="editor__main"
-      placeholder="input text here"
-      [(ngModel)]="script.innerHtml"
-    ></div>
-
-    <div class="console__wrapper" [style.top.px]="consolePositionTop">
-      <app-console></app-console>
+    <div class="tool__item tool__item--right" *ngIf="script.updated">
+      <p>last update:</p>
+      <p>{{ script.updated | date: 'short' }}</p>
     </div>
   </div>
-  <app-balloon></app-balloon>
-  <div class="loading-modal" *ngIf="loading">loading</div>
+
+  <main class="main">
+    <div class="tool-box__wrapper">
+      <app-tool-box
+        (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
+        (loadingStateChange)="loading = $event"
+      ></app-tool-box>
+    </div>
+
+    <div class="editor">
+      <div class="editor__subtitle" *ngIf="showSubtitleLine">
+        <div class="editor__subtitle-line"></div>
+      </div>
+
+      <quill-editor
+        class="editor__main"
+        (onEditorCreated)="onEditorCreated($event)"
+        (onContentChanged)="onContentChanged($event)"
+        (onSelectionChanged)="onSelectionChanged($event)"
+      ></quill-editor>
+
+      <div class="console__wrapper">
+        <app-console></app-console>
+      </div>
+    </div>
+    <app-balloon></app-balloon>
+  </main>
 </div>
+<div class="loading-modal" *ngIf="loading">loading</div>
 
 <div class="scroller">
   <button mat-raised-button color="primary" (click)="scrollTop()">↑</button>
