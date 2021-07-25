@@ -1,8 +1,14 @@
+$tool-box-height: 60px;
+
 .tool {
   display: flex;
 
   &__item {
     margin-right: 20px;
+
+    &--right {
+      margin-left: auto;
+    }
   }
 }
 
@@ -18,9 +24,12 @@ form {
 }
 
 .tool-box__wrapper {
+  height: $tool-box-height;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2;
+  box-sizing: border-box;
+  background-color: #fff;
 }
 
 .editor {
@@ -41,31 +50,31 @@ form {
 
   ::ng-deep &__main {
     min-height: 600px;
-    flex-basis: 80%;
+    width: 70%;
     border: 1px solid #000;
     white-space: pre-line;
 
-    &:empty:before {
-      content: attr(placeholder);
-      pointer-events: none;
-      display: block; /* For Firefox */
-      opacity: 50%;
+    .ql-toolbar {
+      position: sticky;
+      top: $tool-box-height;
+      background: #fff;
+      z-index: 1;
     }
 
-    outline: 0px solid transparent;
-    padding: 10px 16px;
-    counter-reset: line;
+    // .ql-editor {
+    //   counter-reset: line;
+    //   padding-left: 0;
+    // }
 
-    div {
-      &:before {
-        counter-increment: line;
-        content: counter(line);
-        display: inline-block;
-        border-right: 1px solid #ddd;
-        margin-right: 0.5em;
-        color: #888;
-      }
-    }
+    // .ql-editor p:before {
+    //   counter-increment: line;
+    //   content: counter(line);
+    //   display: inline-block;
+    //   border-right: 1px solid #ddd;
+    //   padding: 0 0.5em;
+    //   margin-right: 0.5em;
+    //   color: #888;
+    // }
 
     .text {
       &--highlighted {
@@ -96,9 +105,10 @@ form {
   }
 
   .console__wrapper {
-    flex-basis: 20%;
+    width: 30%;
     height: 100%;
     position: sticky;
+    top: $tool-box-height;
   }
 }
 .loading-modal {
@@ -109,10 +119,18 @@ form {
   font-size: 150px;
   color: red;
   opacity: 0.7;
+  z-index: 1000;
 }
 
 .scroller {
   position: fixed;
   bottom: 10px;
   left: 10px;
+}
+
+.svg__icon {
+  &:hover {
+    color: #3f51b5;
+  }
+  cursor: pointer;
 }

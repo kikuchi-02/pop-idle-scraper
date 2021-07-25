@@ -8,6 +8,8 @@
   >
     generate subtitle
   </button>
+  <button mat-raised-button (click)="undo()">undo</button>
+  <button mat-raised-button (click)="redo()">redo</button>
   <div class="subtitle_Layout_Buttons">
     <button
       mat-stroked-button
@@ -41,6 +43,7 @@
     </div>
     <div class="subtitle_TextAreas">
       <textarea
+        #subtitle_TextArea
         class="subtitle_TextArea left"
         [class.hide]="layout === 'right'"
         [(ngModel)]="inputArea"

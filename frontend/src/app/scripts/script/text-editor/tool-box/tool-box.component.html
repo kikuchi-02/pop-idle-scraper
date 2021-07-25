@@ -1,9 +1,12 @@
-<div class="wrapper">
+<mat-expansion-panel class="wrapper">
+  <mat-expansion-panel-header>
+    <mat-panel-title> Toolbox </mat-panel-title>
+  </mat-expansion-panel-header>
   <div class="row">
-    <div class="row__item highlight">
-      <form (ngSubmit)="highlight(highlightValue.value)">
+    <div class="row__item">
+      <form (ngSubmit)="highlight([highlightValue.value])">
         <mat-form-field>
-          <mat-label>Hight light</mat-label>
+          <mat-label>Highlight</mat-label>
           <input matInput [formControl]="highlightValue" />
           <button
             type="reset"
@@ -19,25 +22,27 @@
         </mat-form-field>
       </form>
     </div>
-    <div class="row__item underline">
-      <form (ngSubmit)="underlineSentenceByWord(underlineValue.value)">
+    <div class="row__item">
+      <form (ngSubmit)="highlightBaseForm([baseFormValue.value])">
         <mat-form-field>
-          <mat-label>Underline by base form</mat-label>
-          <input matInput [formControl]="underlineValue" />
+          <mat-label>Highlight base form</mat-label>
+          <input matInput [formControl]="baseFormValue" />
           <button
             type="reset"
             mat-button
-            *ngIf="underlineValue.value"
+            *ngIf="baseFormValue.value"
             matSuffix
             mat-icon-button
             aria-label="Clear"
-            (click)="underlineValue.reset()"
+            (click)="baseFormValue.reset()"
           >
             <mat-icon>close</mat-icon>
           </button>
         </mat-form-field>
       </form>
     </div>
+  </div>
+  <div class="row">
     <div class="row__item">
       <mat-form-field>
         <mat-label>Keywords</mat-label>
@@ -50,30 +55,91 @@
           }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-button color="primary" (click)="bulkUnderline()">
-        bulk underline
-      </button>
+      <div class="svg__icon" (click)="highlight(keywordValues.value, 'orange')">
+        <mat-icon>border_color</mat-icon>
+      </div>
     </div>
+    <div class="row__item">
+      <mat-form-field>
+        <mat-label>conjunctions</mat-label>
+        <mat-select [formControl]="conjunctionValues" multiple>
+          <mat-select-trigger>
+            <span class="keywords">{{ conjunctionValues.value?.length }}</span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let key of conjunctions" [value]="key">{{
+            key
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div
+        class="svg__icon"
+        (click)="highlight(conjunctionValues.value, 'green')"
+      >
+        <mat-icon>border_color</mat-icon>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <mat-form-field class="row__item">
+      <mat-label>text color</mat-label>
+      <input
+        matInput
+        [ngxMatColorPicker]="picker1"
+        [formControl]="textColorCtr"
+      />
+      <ngx-mat-color-toggle matSuffix [for]="picker1"></ngx-mat-color-toggle>
+      <ngx-mat-color-picker
+        #picker1
+        [touchUi]="'false'"
+        [color]="color"
+      ></ngx-mat-color-picker>
+    </mat-form-field>
+    <mat-form-field class="row__item">
+      <mat-label>background color</mat-label>
+      <input
+        matInput
+        [ngxMatColorPicker]="picker2"
+        [formControl]="backgroundColorCtr"
+      />
+      <ngx-mat-color-toggle matSuffix [for]="picker2"></ngx-mat-color-toggle>
+      <ngx-mat-color-picker
+        #picker2
+        [touchUi]="'false'"
+        [color]="color"
+      ></ngx-mat-color-picker>
+    </mat-form-field>
+  </div>
+  <div class="row">
+    <div class="row__label">buttons:</div>
+    <button mat-button color="primary" class="row__item" (click)="textLint()">
+      textLint
+    </button>
+    <button mat-button color="primary" class="row__item" (click)="reformat()">
+      format
+    </button>
     <mat-slide-toggle
       class="row__item"
       color="primary"
       [checked]="true"
       (toggleChange)="toggleSubtitleButton.emit()"
     >
-      subtitle line
+      subtitle
     </mat-slide-toggle>
   </div>
   <div class="row">
-    <button mat-button color="primary" (click)="reformat()">reformat</button>
-    <button mat-button color="primary" (click)="textLint()">textLint</button>
-    <button mat-button color="primary" (click)="removeOldHighlighted()">
-      remove highlight
-    </button>
-    <button mat-button color="primary" (click)="removeAllUnderlinedSentences()">
-      remove underline
-    </button>
-    <button mat-button color="primary" (click)="removeStrike()">
-      remove strike
-    </button>
+    <div class="row__item row__item-remove">
+      <div class="row__label">remove:</div>
+      <div class="svg__icon" (click)="removeOldHighlighted()">
+        <mat-icon>format_color_fill</mat-icon>
+      </div>
+
+      <div class="svg__icon" (click)="removeAllUnderlinedSentences()">
+        <mat-icon>format_underlined</mat-icon>
+      </div>
+
+      <div class="svg__icon" (click)="removeStrike()">
+        <mat-icon>strikethrough_s</mat-icon>
+      </div>
+    </div>
   </div>
-</div>
+</mat-expansion-panel>

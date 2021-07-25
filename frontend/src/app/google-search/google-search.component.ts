@@ -73,10 +73,13 @@ export class GoogleSearchComponent implements OnInit, OnDestroy {
           switch (item.kind) {
             case 'nogizaka':
               this.nogizakaLinks = item.value;
+              break;
             case 'sakurazaka':
               this.sakurazakaLinks = item.value;
+              break;
             case 'hinatazaka':
               this.hinatazakaLinks = item.value;
+              break;
           }
         });
         this.cd.markForCheck();
