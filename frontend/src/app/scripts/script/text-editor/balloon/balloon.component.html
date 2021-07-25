@@ -1,14 +1,18 @@
 <div class="wrapper">
-  <mat-form-field>
-    <input matInput [ngxMatColorPicker]="picker" [formControl]="colorCtr" />
-    <ngx-mat-color-toggle matSuffix [for]="picker"></ngx-mat-color-toggle>
-    <ngx-mat-color-picker
-      #picker
-      [touchUi]="'false'"
-      [color]="color"
-    ></ngx-mat-color-picker>
-  </mat-form-field>
-  <button (click)="backColor()">color</button>
-  <button (click)="format()">format</button>
-  <button (click)="strike()">strike</button>
+  <div class="svg__icon item" (click)="bold()">
+    <mat-icon>format_bold</mat-icon>
+  </div>
+  <div class="svg__icon item" (click)="colorUp()">
+    <mat-icon>format_color_text</mat-icon>
+  </div>
+  <div class="svg__icon item" (click)="backColor()">
+    <mat-icon>format_color_fill</mat-icon>
+  </div>
+  <div class="svg__icon item" (click)="strike()">
+    <mat-icon>strikethrough_s</mat-icon>
+  </div>
+  <div class="svg__icon item" (click)="comment()">
+    <mat-icon>comment</mat-icon>
+  </div>
+  <button class="item" (click)="format()">format</button>
 </div>

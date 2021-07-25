@@ -39,7 +39,7 @@ export const updateScript = async (req: Request, res: Response) => {
 
   const params = {
     title: req.body.title,
-    innerHtml: req.body.innerHtml,
+    deltaOps: req.body.deltaOps,
     author: req.user,
     id: parseInt(id, 10),
   };
@@ -61,7 +61,7 @@ export const createScript = async (req: Request, res: Response) => {
 
   const params = {
     title: req.body.title,
-    innerHtml: req.body.innerHtml,
+    deltaOps: req.body.deltaOps,
     author: req.user,
   };
 

@@ -9,31 +9,64 @@
     </div>
   </ng-container>
 
-  <form #form [formGroup]="chatForm" class="chat-form" (ngSubmit)="submit()">
-    <textarea
-      class="chat-form__textarea"
-      formControlName="body"
-      [disabled]="disabled"
-    ></textarea>
-    <button class="chat-form__submit" type="submit" [disabled]="disabled">
-      submit
-    </button>
-  </form>
+  <div class="chat-form">
+    <p class="chat-form__status">
+      <ng-container *ngIf="selected.text">
+        Target: {{ selected.text }}
+      </ng-container>
+      <ng-container *ngIf="!!activeMessage">Reply: </ng-container>
+    </p>
+    <form
+      #form
+      class="chat-form__form"
+      [formGroup]="chatForm"
+      (ngSubmit)="submit()"
+    >
+      <textarea class="chat-form__textarea" formControlName="body"></textarea>
+    </form>
+  </div>
 </div>
 
 <ng-template #messageTemplate let-message="message">
-  <div class="chat-messages__body">
-    <div class="chat-messages__text">
-      <p class="chat-messages__text-p">{{ message.body }}</p>
+  <div class="chat-message">
+    <div
+      class="chat-message__expand-icon"
+      [class.chat-message__expand-icon--expanded]="message.expanded"
+      (click)="messageClick(message)"
+    >
+      <mat-icon class="svg__icon">arrow_right</mat-icon>
     </div>
-    <div class="chat-messages__sub">
-      <span class="chat-messages__sub-author">{{ message.author.name }}</span>
-      <span class="chat-messages__sub-created">{{
-        message.created | date: 'short'
-      }}</span>
+    <div class="chat-message__body">
+      <div
+        class="chat-message__text"
+        [class.chat-message__text--active]="activeMessage === message"
+        (click)="messageClick(message)"
+      >
+        <p class="chat-message__text-p">{{ message.body }}</p>
+      </div>
+      <p class="chat-message__selected-text" *ngIf="message.selectedText">
+        {{
+          message.selectedText.length > 15
+            ? message.selectedText.slice(0, 15) + '..'
+            : message.selectedText
+        }}
+      </p>
+      <div class="chat-message__sub">
+        <span class="chat-message__sub-reply" (click)="replyMessage(message)">{{
+          message.children?.length || 0
+        }}</span>
+
+        <span class="chat-message__sub-author">{{ message.author.name }}</span>
+        <span class="chat-message__sub-created">{{
+          message.created | date: 'short'
+        }}</span>
+      </div>
     </div>
   </div>
-  <div class="chat-messages__replay" *ngIf="!!message.children?.length">
+  <div
+    class="chat-message__replay"
+    *ngIf="message.expanded && !!message.children?.length"
+  >
     <ng-container *ngFor="let child of message.children">
       <ng-container
         *ngTemplateOutlet="messageTemplate; context: { message: child }"

@@ -12,7 +12,7 @@ export const readMessage = async (req: Request, res: Response) => {
   const messageRepository = getCustomRepository(MessageRepository);
 
   const messages = await messageRepository
-    .findByScriptId(parseInt(scriptId, 10))
+    .findByScriptIdWithChildren(parseInt(scriptId, 10))
     .catch((e) => {
       console.error(e);
     });
@@ -31,7 +31,8 @@ export const createMessage = async (req: Request, res: Response) => {
     scriptId: req.body.scriptId,
     body: req.body.body,
     author: req.body.author,
-    created: req.body.created,
+    uuid: req.body.uuid,
+    parentId: req.body.parentId,
   };
 
   const messages = await messageRepository.createAndSave(params).catch((e) => {

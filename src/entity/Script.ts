@@ -10,6 +10,19 @@ import {
 import { Message } from './Message';
 import { User } from './User';
 
+// from quill
+export interface StringMap {
+  [key: string]: any;
+}
+export interface OptionalAttributes {
+  attributes?: StringMap;
+}
+export type DeltaOperation = {
+  insert?: any;
+  delete?: number;
+  retain?: number;
+} & OptionalAttributes;
+
 @Entity()
 export class Script {
   @PrimaryGeneratedColumn()
@@ -24,8 +37,8 @@ export class Script {
   @UpdateDateColumn()
   updated: Date;
 
-  @Column()
-  innerHtml: string;
+  @Column({ type: 'json', default: [] })
+  deltaOps: DeltaOperation[];
 
   @ManyToOne((type) => User, (user) => user.scripts, {
     nullable: false,

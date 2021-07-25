@@ -2,8 +2,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DoCheck,
+  ElementRef,
+  NgZone,
+  OnDestroy,
   OnInit,
+  ViewChild,
 } from '@angular/core';
+import { Subject } from 'rxjs';
+import { first, takeUntil } from 'rxjs/operators';
+import { CrdtTextService } from '../services/crdt-text.service';
 
 const layouts = ['left', 'right', 'both'] as const;
 type Layout = typeof layouts[number];
@@ -13,29 +21,88 @@ type Layout = typeof layouts[number];
   templateUrl: './subtitle.component.html',
   styleUrls: ['./subtitle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [CrdtTextService],
 })
-export class SubtitleComponent implements OnInit {
+export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
+  public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
+
   inputArea = '';
   outputArea = '';
 
   layout: Layout = 'both';
 
-  private subtitleLocalStorageKey = 'subtitleLocalStorageKey';
+  @ViewChild('subtitle_TextArea')
+  private inputAreaElm: ElementRef;
 
-  constructor(private cd: ChangeDetectorRef) {
-    const input = localStorage.getItem(this.subtitleLocalStorageKey);
-    if (input) {
-      this.inputArea = input;
-      this.outputArea = this.formatSubtitle(input);
+  private unsubscriber$ = new Subject<void>();
+
+  constructor(
+    private cd: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private crdtTextService: CrdtTextService
+  ) {
+    this.inputArea = this.getInput();
+
+    const ytext = this.crdtTextService.createText('test', this.inputArea);
+    this.inputArea = ytext || this.inputArea;
+    this.cd.markForCheck();
+
+    this.crdtTextService.registerObserver((txt, delta) => {
+      if (txt === this.inputArea) {
+        return;
+      }
+      const current = this.crdtTextService.applyDeltaToCurrent(delta, {
+        txt: this.inputArea,
+        selectionStart: this.inputAreaElm?.nativeElement?.selectionStart,
+        selectionEnd: this.inputAreaElm?.nativeElement?.selectionEnd,
+      });
+
+      this.inputArea = current.txt;
       this.cd.markForCheck();
-    }
+
+      if (
+        current.selectionStart !== undefined &&
+        current.selectionEnd !== undefined
+      ) {
+        this.ngZone.onStable
+          .pipe(first(), takeUntil(this.unsubscriber$))
+          .subscribe(() => {
+            this.inputAreaElm.nativeElement.setSelectionRange(
+              current.selectionStart,
+              current.selectionEnd
+            );
+          });
+      }
+    });
+  }
+
+  getInput(): string {
+    const input = localStorage.getItem(
+      SubtitleComponent.subtitleLocalStorageKey
+    );
+    return input || '';
+  }
+
+  undo(): void {
+    this.crdtTextService.undo();
+  }
+  redo(): void {
+    this.crdtTextService.redo();
   }
 
   ngOnInit(): void {}
 
+  ngOnDestroy(): void {
+    this.unsubscriber$.next();
+  }
+
+  ngDoCheck(): void {
+    this.crdtTextService.onTextChange(this.inputArea);
+  }
+
   generateSubtitle(): void {
     const input = this.inputArea;
-    localStorage.setItem(this.subtitleLocalStorageKey, input);
+    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     const output = this.formatSubtitle(input);
     this.outputArea = output;
     this.cd.markForCheck();
