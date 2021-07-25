@@ -166,9 +166,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         const focusMessage = this.messages.find(
           (message) => message.uuid === uuid
         );
-        focusMessage.expanded = true;
-        this.activeMessage = focusMessage;
-        this.cd.markForCheck();
+        if (focusMessage) {
+          focusMessage.expanded = true;
+          this.activeMessage = focusMessage;
+          this.cd.markForCheck();
+        }
       });
   }
 
