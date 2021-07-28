@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { getCustomRepository } from 'typeorm';
 import { ENV_SETTINGS } from '../conf';
+import { RefreshToken } from '../entity/RefreshToken';
 import { RefreshTokenRepository } from '../repositories/refreshToken';
 import { UserRepository } from '../repositories/user';
 
@@ -43,7 +44,13 @@ export const refresh = async (req: Request, res: Response) => {
   }
 
   const refreshTokenRepository = getCustomRepository(RefreshTokenRepository);
-  const refreshToken = await refreshTokenRepository.findByToken(refresh);
+  let refreshToken: RefreshToken;
+  try {
+    refreshToken = await refreshTokenRepository.findByToken(refresh);
+  } catch (err) {
+    res.status(401).send('Invalid token');
+    return;
+  }
   if (!refreshToken) {
     res.status(403).send('Refresh token is not in database');
     return;
