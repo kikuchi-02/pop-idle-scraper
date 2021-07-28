@@ -26,15 +26,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
-            "assets": [
-              "src/favicon.ico",
-              "src/assets",
-              {
-                "glob": "**/*",
-                "input": "./node_modules/kuromoji/dict/",
-                "output": "./assets/kuromoji/dict/"
-              }
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "./node_modules/quill/dist/quill.core.css",
@@ -42,10 +34,7 @@
               "./node_modules/quill/dist/quill.snow.css",
               "src/styles.scss"
             ],
-            "scripts": [
-              "./node_modules/kuromoji/build/kuromoji.js",
-              "./node_modules/quill/dist/quill.min.js"
-            ],
+            "scripts": ["./node_modules/quill/dist/quill.min.js"],
             "allowedCommonJsDependencies": ["brace/mode/markdown"]
           },
           "configurations": {

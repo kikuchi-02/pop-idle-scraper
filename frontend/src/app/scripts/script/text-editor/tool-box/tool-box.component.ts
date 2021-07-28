@@ -10,7 +10,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
-import { catchError, filter, map, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
@@ -138,15 +138,19 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
           }
           return baseForms.filter((baseForm) => baseForm !== '*');
         }),
-        catchError((e) => of([])),
+        mergeMap((baseForms) => {
+          return this.editorService.highlightByBaseForm(baseForms, color);
+        }),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe((baseForms) => {
-        if (baseForms) {
-          this.editorService.highlight(baseForms, color);
+      .subscribe(
+        (baseForms) => {
+          this.loadingStateChange.emit(false);
+        },
+        (error) => {
+          this.loadingStateChange.emit(false);
         }
-        this.loadingStateChange.emit(false);
-      });
+      );
   }
 
   bulkUnderline(words: string[]): void {

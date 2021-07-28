@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, Quill } from 'quill';
-import { ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
 import { AppService } from '../../../services/app.service';
+import { ScriptService } from '../script.service';
 
 @Injectable()
 export class EditorService {
@@ -29,7 +31,10 @@ export class EditorService {
 
   public initialized$ = new ReplaySubject<void>(1);
 
-  constructor(private appService: AppService) {}
+  constructor(
+    private appService: AppService,
+    private scriptService: ScriptService
+  ) {}
 
   initialize(scriptId: number, editor: Quill): void {
     this.editor = editor;
@@ -118,6 +123,27 @@ export class EditorService {
         targetIndex = this.editor.getText().indexOf(word, targetIndex + 1);
       }
     });
+  }
+
+  highlightByBaseForm(
+    baseForms: string[],
+    color = '#FFAF7A'
+  ): Observable<void> {
+    const text = this.editor.getText();
+    return this.scriptService.tokenize(text).pipe(
+      map((tokens) => {
+        tokens.forEach((token) => {
+          if (baseForms.includes(token.basic_form)) {
+            this.editor.formatText(
+              token.word_position - 1,
+              token.surface_form.length,
+              'background-color',
+              color
+            );
+          }
+        });
+      })
+    );
   }
 
   removeHighlight(): void {
