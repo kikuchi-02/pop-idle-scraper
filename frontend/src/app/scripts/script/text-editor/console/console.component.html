@@ -6,16 +6,12 @@
         <button
           type="button"
           class="textlint-result__collapsible-button"
-          (click)="collapse(content)"
+          (click)="textLint()"
         >
-          Show TextLint result
+          Refresh TextLint result
         </button>
-        <div
-          class="textlint-result__collapsible-content"
-          #content
-          [style.display]="'block'"
-        >
-          <ng-container *ngIf="!!textLintErrors; else tryTextLint">
+        <div class="textlint-result__collapsible-content">
+          <ng-container *ngIf="!!textLintErrors; else NoResult">
             <ng-container
               *ngIf="textLintErrors.length > 0; else NoTextLintErrors"
             >
@@ -28,8 +24,14 @@
               <p>no text lint errors</p>
             </ng-template>
           </ng-container>
-          <ng-template #tryTextLint>
-            <p>try text lint</p>
+          <ng-template #NoResult>
+            <ng-container *ngIf="textLintRaisedError; else tryTextLint">
+              <p>textlint something went wrong</p>
+              <p>please try again latter</p>
+            </ng-container>
+            <ng-template #tryTextLint>
+              <p>try text lint</p>
+            </ng-template>
           </ng-template>
         </div>
       </div>

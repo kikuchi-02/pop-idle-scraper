@@ -63,6 +63,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private editorService: EditorService,
     private elementRef: ElementRef
   ) {
+    this.scriptService.loadingState$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((state) => {
+        this.loading = state;
+        this.cd.markForCheck();
+      });
+
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
     if (id === 'new') {

@@ -3,8 +3,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IpadicFeatures } from 'kuromoji';
-import { Observable, ReplaySubject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Script } from 'src/app/typing';
 import { ConstituencyResult } from '../../typing';
 
@@ -27,10 +27,14 @@ export interface TextLintMessages {
   providedIn: 'root',
 })
 export class ScriptService {
-  private lintResultSubject$ = new ReplaySubject<TextLintMessages>(1);
-  lintResult$ = this.lintResultSubject$.asObservable();
+  private loadingStateSubject$ = new BehaviorSubject(false);
+  loadingState$ = this.loadingStateSubject$.asObservable();
 
   constructor(private http: HttpClient) {}
+
+  loadingStateChange(state: boolean): void {
+    this.loadingStateSubject$.next(state);
+  }
 
   tokenize(text: string): Observable<IpadicFeatures[]> {
     return this.http.post<IpadicFeatures[]>(`api/v1/tokenize`, { text });
@@ -43,13 +47,7 @@ export class ScriptService {
   }
 
   textLint(text: string): Observable<TextLintMessages> {
-    return this.http
-      .post<TextLintMessages>('api/v1/textlint', { text })
-      .pipe(
-        tap((result) => {
-          this.lintResultSubject$.next(result);
-        })
-      );
+    return this.http.post<TextLintMessages>('api/v1/textlint', { text });
   }
 
   splitTextByNewline(content: string): string {

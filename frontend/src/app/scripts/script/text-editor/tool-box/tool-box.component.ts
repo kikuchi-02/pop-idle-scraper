@@ -36,8 +36,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
 
-  @Output() loadingStateChange = new EventEmitter<boolean>();
-
   private toolBoxHighlightKey = 'tool-box-highlight-key';
   private toolBoxBaseFormKey = 'tool-box-base-form-key';
   private toolBoxTextColorCodeKey = 'tool-box-text-color-code-key';
@@ -124,7 +122,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     if (words.length === 0) {
       return;
     }
-    this.loadingStateChange.emit(true);
+    this.scriptService.loadingStateChange(true);
 
     forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
@@ -145,10 +143,10 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (baseForms) => {
-          this.loadingStateChange.emit(false);
+          this.scriptService.loadingStateChange(false);
         },
         (error) => {
-          this.loadingStateChange.emit(false);
+          this.scriptService.loadingStateChange(false);
         }
       );
   }
@@ -158,7 +156,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadingStateChange.emit(true);
+    this.scriptService.loadingStateChange(true);
 
     forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
@@ -175,7 +173,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         if (baseForms.length > 0) {
           this.editorService.underline(baseForms);
         }
-        this.loadingStateChange.emit(false);
+        this.scriptService.loadingStateChange(false);
       });
   }
 
@@ -189,23 +187,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   reformat(): void {
     this.editorService.reformat();
-  }
-
-  textLint(): void {
-    const text = this.editorService.getText();
-    if (!text) {
-      return;
-    }
-    this.loadingStateChange.emit(true);
-    this.scriptService
-      .textLint(text)
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe(
-        () => {
-          this.loadingStateChange.emit(false);
-        },
-        (err) => this.loadingStateChange.emit(false)
-      );
   }
 
   private hex2rgb(hex: string): number[] {
