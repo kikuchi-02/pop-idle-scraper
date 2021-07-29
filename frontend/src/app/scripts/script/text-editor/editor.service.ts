@@ -245,7 +245,7 @@ export class EditorService {
       if (op.attributes?.comment?.uuid === uuid) {
         find = true;
         delete op.attributes.comment;
-        delete op.attributes.background;
+        // delete op.attributes.background;
       }
       return op;
     });
@@ -260,7 +260,7 @@ export class EditorService {
     const contents = this.editor.getContents();
     contents.ops = contents.ops.map((op) => {
       if (op.attributes?.comment?.uuid === uuid) {
-        op.attributes.comment.color = '#FCC933';
+        // op.attributes.comment.color = '#FCC933';
       }
       return op;
     });
@@ -271,7 +271,7 @@ export class EditorService {
     const contents = this.editor.getContents();
     contents.ops = contents.ops.map((op) => {
       if (op.attributes?.comment?.uuid === uuid) {
-        op.attributes.comment.color = '#FEE9B2';
+        // op.attributes.comment.color = '#FEE9B2';
       }
       return op;
     });

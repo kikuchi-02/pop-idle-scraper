@@ -35,12 +35,12 @@ interface CommentBlotAttributes {
 }
 export class CommentBlot extends Inline {
   static blotName = 'comment';
-  static tagName = 'span';
+  static tagName = 'mark';
 
   static create(value: CommentBlotAttributes): Node {
     const node = super.create();
     node.setAttribute('data-uuid', value.uuid);
-    node.setAttribute('style', `background-color: ${value.color};`);
+    // node.setAttribute('style', `background-color: ${value.color};`);
     return node;
   }
 
@@ -61,9 +61,9 @@ export class CommentBlot extends Inline {
     if (uuid) {
       format.uuid = uuid;
     }
-    if (colorCode) {
-      format.color = colorCode;
-    }
+    // if (colorCode) {
+    //   format.color = colorCode;
+    // }
 
     return format;
   }
@@ -76,19 +76,19 @@ export class CommentBlot extends Inline {
         } else {
           this.domNode.removeAttribute('data-uuid');
         }
-        if (value.color) {
-          if (['#FCC933', '#FEE9B2'].includes(value.color)) {
-            this.domNode.setAttribute(
-              'style',
-              `background-color: ${value.color};`
-            );
-          } else {
-            this.domNode.removeAttribute('style');
-          }
-        }
+        // if (value.color) {
+        //   if (['#FCC933', '#FEE9B2'].includes(value.color)) {
+        //     this.domNode.setAttribute(
+        //       'style',
+        //       `background-color: ${value.color};`
+        //     );
+        //   } else {
+        //     this.domNode.removeAttribute('style');
+        //   }
+        // }
       } else {
         this.domNode.removeAttribute('data-uuid');
-        this.domNode.removeAttribute('style');
+        // this.domNode.removeAttribute('style');
       }
     } else {
       super.format(name, value);
