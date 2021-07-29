@@ -229,9 +229,11 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((event: MouseEvent) => {
         this.balloonComponent.selectionChange(event);
 
-        const commentedElement = (event.target as any).closest('[data-uuid]');
+        const commentedElement = (event.target as any).closest(
+          '[data-comment-uuid]'
+        );
         if (commentedElement) {
-          const uuid = commentedElement.getAttribute('data-uuid');
+          const uuid = commentedElement.getAttribute('data-comment-uuid');
           this.editorService.focusChatMessage(uuid);
         }
       });
@@ -261,7 +263,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((uuid) => {
         const targetElm = this.elementRef.nativeElement.querySelector(
-          `[data-uuid="${uuid}"]`
+          `[data-comment-uuid="${uuid}"]`
         );
         if (targetElm) {
           const rect = targetElm.getBoundingClientRect();

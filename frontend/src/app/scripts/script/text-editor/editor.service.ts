@@ -257,25 +257,25 @@ export class EditorService {
   }
 
   selectionCommentFocused(uuid: string): void {
-    const contents = this.editor.getContents();
-    contents.ops = contents.ops.map((op) => {
-      if (op.attributes?.comment?.uuid === uuid) {
-        // op.attributes.comment.color = '#FCC933';
-      }
-      return op;
-    });
-    this.editor.setContents(contents);
+    // const contents = this.editor.getContents();
+    // contents.ops = contents.ops.map((op) => {
+    //   if (op.attributes?.comment?.uuid === uuid) {
+    //     op.attributes.comment.color = '#FCC933';
+    //   }
+    //   return op;
+    // });
+    // this.editor.setContents(contents);
     this.commentFocused$.next(uuid);
   }
   selectionCommentUnfocused(uuid: string): void {
-    const contents = this.editor.getContents();
-    contents.ops = contents.ops.map((op) => {
-      if (op.attributes?.comment?.uuid === uuid) {
-        // op.attributes.comment.color = '#FEE9B2';
-      }
-      return op;
-    });
-    this.editor.setContents(contents);
+    // const contents = this.editor.getContents();
+    // contents.ops = contents.ops.map((op) => {
+    //   if (op.attributes?.comment?.uuid === uuid) {
+    //     op.attributes.comment.color = '#FEE9B2';
+    //   }
+    //   return op;
+    // });
+    // this.editor.setContents(contents);
   }
   selectionCommentText(uuid: string): string {
     return this.editor

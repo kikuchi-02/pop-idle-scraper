@@ -189,7 +189,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       if (!!this.activeMessage) {
-        const commentedElement = (event.target as any).closest('[data-uuid]');
+        const commentedElement = (event.target as any).closest(
+          '[data-comment-uuid]'
+        );
         if (!commentedElement) {
           // this.editorService.selectionCommentUnfocused(this.activeMessage.uuid);
           this.activeMessage = undefined;
