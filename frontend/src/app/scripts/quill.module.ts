@@ -4,14 +4,16 @@ const Inline = Quill.import('blots/inline');
 
 interface CommentBlotAttributes {
   uuid: string;
+  message: string;
 }
 export class CommentBlot extends Inline {
   static blotName = 'comment';
-  static tagName = 'mark';
+  static tagName = 'span';
 
   static create(value: CommentBlotAttributes): Node {
     const node = super.create();
     node.setAttribute('data-comment-uuid', value.uuid);
+    node.setAttribute('data-comment-message', value.message);
     return node;
   }
 
@@ -20,6 +22,10 @@ export class CommentBlot extends Inline {
     const uuid = node.getAttribute('data-comment-uuid');
     if (uuid) {
       format.uuid = uuid;
+    }
+    const message = node.getAttribute('data-comment-message');
+    if (message) {
+      format.message = message;
     }
     return format;
   }
@@ -32,8 +38,14 @@ export class CommentBlot extends Inline {
         } else {
           this.domNode.removeAttribute('data-comment-uuid');
         }
+        if (value.message) {
+          this.domNode.setAttribute('data-comment-message', value.message);
+        } else {
+          this.domNode.removeAttribute('data-comment-message');
+        }
       } else {
         this.domNode.removeAttribute('data-comment-uuid');
+        this.domNode.removeAttribute('data-comment-message');
       }
     } else {
       super.format(name, value);
@@ -79,7 +91,7 @@ export class LintBlot extends Inline {
         }
 
         if (value.message) {
-          this.domNode.setAttribute('data-lint-message', value.uuid);
+          this.domNode.setAttribute('data-lint-message', value.message);
         } else {
           this.domNode.removeAttribute('data-lint-message');
         }

@@ -3,6 +3,7 @@ import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, Quill } from 'quill';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Message } from 'src/app/typing';
 import { v4 as uuidv4 } from 'uuid';
 import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
@@ -255,7 +256,6 @@ export class EditorService {
     const selection = this.selectionRange;
     this.editor.formatText(selection.index, selection.length, 'comment', {
       uuid,
-      color: '#FCC933',
     });
 
     this.commentSubject$.next(uuid);
@@ -268,7 +268,6 @@ export class EditorService {
       if (op.attributes?.comment?.uuid === uuid) {
         find = true;
         delete op.attributes.comment;
-        // delete op.attributes.background;
       }
       return op;
     });
@@ -279,33 +278,50 @@ export class EditorService {
     this.focusChatMessage$.next(uuid);
   }
 
+  initialComments(messages: Message[]): Message[] {
+    const uuids = messages.reduce((acc, message, index) => {
+      acc[message.uuid] = index;
+      return acc;
+    }, {});
+    const contents = this.editor.getContents();
+
+    contents.ops = contents.ops.map((op) => {
+      if (!op.attributes?.comment?.uuid) {
+        return;
+      }
+      const index = uuids[op.attributes.comment.uuid];
+      if (index) {
+        messages[index].selectedText =
+          (messages[index].selectedText || '') + op.insert;
+        op.attributes.comment.message = messages[index].body;
+      } else {
+        delete op.attributes.comment;
+      }
+      return op;
+    });
+    return messages;
+  }
+
   selectionCommentFocused(uuid: string): void {
-    // const contents = this.editor.getContents();
-    // contents.ops = contents.ops.map((op) => {
-    //   if (op.attributes?.comment?.uuid === uuid) {
-    //     op.attributes.comment.color = '#FCC933';
-    //   }
-    //   return op;
-    // });
-    // this.editor.setContents(contents);
     this.commentFocused$.next(uuid);
   }
-  selectionCommentUnfocused(uuid: string): void {
-    // const contents = this.editor.getContents();
-    // contents.ops = contents.ops.map((op) => {
-    //   if (op.attributes?.comment?.uuid === uuid) {
-    //     op.attributes.comment.color = '#FEE9B2';
-    //   }
-    //   return op;
-    // });
-    // this.editor.setContents(contents);
-  }
+
   selectionCommentText(uuid: string): string {
     return this.editor
       .getContents()
       .ops.filter((delta) => delta.attributes?.comment?.uuid === uuid)
       .map((delta) => delta.insert)
       .join();
+  }
+  applySelectionCommentMessage(uuid: string, message: string): void {
+    const contents = this.editor.getContents();
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.comment?.uuid === uuid) {
+        op.attributes.comment.message = message;
+      }
+      return op;
+    });
+    this.editor.setContents(contents);
   }
 
   applyTextLintResult(result: TextlintResultWithUUid): TextlintResultWithUUid {

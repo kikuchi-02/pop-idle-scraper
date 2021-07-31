@@ -11,11 +11,19 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
-import { filter, first, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, fromEvent, Subject } from 'rxjs';
+import {
+  catchError,
+  filter,
+  first,
+  mergeMap,
+  switchMap,
+  takeUntil,
+} from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { WsService } from 'src/app/services/ws.service';
 import { Message } from 'src/app/typing';
+import { ScriptService } from '../../script.service';
 import { EditorService } from '../editor.service';
 import { ChatService } from './chat.service';
 
@@ -27,7 +35,15 @@ import { ChatService } from './chat.service';
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   messages: Message[] = [];
-  disabled = false;
+
+  private disable = true;
+  get disabled(): boolean {
+    return this.disable;
+  }
+  set disabled(val: boolean) {
+    this.disable = val;
+    this.chatForm.controls.body.enable();
+  }
 
   chatForm = new FormGroup({
     body: new FormControl({ value: '', disabled: this.disabled }, [
@@ -60,59 +76,40 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     private authenticationService: AuthenticationService,
     private route: ActivatedRoute,
     private chatService: ChatService,
-    private editorService: EditorService
+    private editorService: EditorService,
+    private scriptService: ScriptService
   ) {
-    const params = this.route.snapshot.paramMap;
-    const scriptId = params.get('id');
-    if (scriptId === 'new') {
-      this.disabled = true;
-    } else {
-      this.scriptId = parseInt(scriptId, 10);
+    this.route.paramMap
+      .pipe(
+        filter((params) => {
+          const scriptId = params.get('id');
+          return scriptId !== 'new';
+        }),
+        switchMap((params) => {
+          const scriptId = params.get('id');
+          this.scriptId = parseInt(scriptId, 10);
 
-      this.chatService
-        .getMessages(this.scriptId)
-        .pipe(
-          mergeMap(
-            (messages: Message[]): Observable<Message[]> => {
-              return this.editorService.initialized$.pipe(
-                first(),
-                map(() => {
-                  const uuids = messages.reduce((acc, message, index) => {
-                    acc[message.uuid] = index;
-                    return acc;
-                  }, {});
-                  const deltaOps = this.editorService.getDelta();
-                  deltaOps.forEach((delta) => {
-                    if (!delta.attributes?.comment?.uuid) {
-                      return;
-                    }
-                    const index = uuids[delta.attributes.comment.uuid];
-                    if (index) {
-                      messages[index].selectedText =
-                        (messages[index].selectedText || '') + delta.insert;
-                    } else {
-                      delete delta.attributes.comment;
-                    }
-                  });
-                  return messages;
-                })
-              );
-            }
-          ),
-          takeUntil(this.unsubscriber$)
-        )
-        .subscribe(
-          (messages) => {
-            this.messages = messages;
-            this.initialized$.next(true);
-            this.cd.markForCheck();
-          },
-          (error) => {
-            this.initialized$.next(true);
-            console.error(error);
-          }
-        );
-    }
+          return forkJoin([
+            this.chatService.getMessages(this.scriptId),
+            this.editorService.initialized$.pipe(first()),
+          ]);
+        }),
+        catchError((error) => undefined),
+        filter((v) => !!v),
+        first(),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe(
+        ([messages, _]: [Message[], void]) => {
+          this.disabled = false;
+          this.messages = this.editorService.initialComments(messages);
+          this.initialized$.next(true);
+          this.cd.markForCheck();
+        },
+        (error) => {
+          this.initialized$.next(true);
+        }
+      );
     this.wsService.connect();
     this.wsService
       .messageReceiver(this.wsMessageType)
@@ -120,7 +117,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(
         (message) => {
           this.messages.push(message);
-          this.scrollToMessageBottom();
           this.cd.markForCheck();
         },
         (err) => {
@@ -145,7 +141,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((event: KeyboardEvent) => {
         this.submit();
       });
-    this.scrollToMessageBottom();
 
     this.editorService.commentSubject$
       .pipe(takeUntil(this.unsubscriber$))
@@ -193,7 +188,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           '[data-comment-uuid]'
         );
         if (!commentedElement) {
-          // this.editorService.selectionCommentUnfocused(this.activeMessage.uuid);
           this.activeMessage = undefined;
           this.cd.markForCheck();
         }
@@ -206,7 +200,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (message.expanded) {
       this.activeMessage = undefined;
       message.expanded = false;
-      this.editorService.selectionCommentUnfocused(uuid);
       this.cd.markForCheck();
       return;
     }
@@ -231,6 +224,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.chatForm.valid || this.disabled) {
       return;
     }
+    this.scriptService.loadingStateChange(true);
+
     const msg: Message = {
       body: this.chatForm.get('body').value,
       author: this.authenticationService.user,
@@ -241,46 +236,40 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.chatService
       .postMessage(msg)
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((message) => {
-        message.selectedText = this.selected.text;
+      .subscribe(
+        (message) => {
+          message.selectedText = this.selected.text;
 
-        if (this.activeMessage?.id) {
-          const parent = this.messages.findIndex(
-            (parentMessage) => parentMessage.id === this.activeMessage.id
-          );
-          if (this.messages[parent].children) {
-            this.messages[parent].children.push(message);
+          if (this.activeMessage?.id) {
+            const parent = this.messages.findIndex(
+              (parentMessage) => parentMessage.id === this.activeMessage.id
+            );
+            if (this.messages[parent].children) {
+              this.messages[parent].children.push(message);
+            } else {
+              this.messages[parent].children = [message];
+            }
           } else {
-            this.messages[parent].children = [message];
+            this.messages.push(message);
           }
-        } else {
-          this.messages.push(message);
+
+          this.wsService.sendMessage(this.wsMessageType, message);
+
+          if (message.uuid) {
+            this.editorService.applySelectionCommentMessage(
+              message.uuid,
+              message.body
+            );
+            this.selected.uuid = undefined;
+            this.selected.text = undefined;
+          }
+          this.chatForm.reset();
+          this.scriptService.loadingStateChange(false);
+          this.cd.markForCheck();
+        },
+        (error) => {
+          this.scriptService.loadingStateChange(false);
         }
-
-        this.wsService.sendMessage(this.wsMessageType, message);
-
-        if (this.selected.uuid) {
-          this.editorService.selectionCommentUnfocused(this.selected.uuid);
-          this.selected.uuid = undefined;
-          this.selected.text = undefined;
-        }
-        this.chatForm.reset();
-        this.cd.markForCheck();
-      });
-  }
-
-  /**
-   * TODO
-   */
-  private scrollToMessageBottom(): void {
-    // this.initialized$
-    //   .pipe(
-    //     filter((v) => v),
-    //     first(),
-    //     takeUntil(this.unsubscriber$)
-    //   )
-    //   .subscribe(() => {
-    //     this.chatMessageElement.nativeElement.scrollTop = this.chatMessageElement.nativeElement.scrollHeight;
-    //   });
+      );
   }
 }

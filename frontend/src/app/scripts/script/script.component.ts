@@ -223,6 +223,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/subtitle']);
   }
 
+  undo(): void {
+    this.editorService.undo();
+  }
+  redo(): void {
+    this.editorService.redo();
+  }
+
   private registerEditorEventListener(): void {
     fromEvent(this.editorComponent.elementRef.nativeElement, 'mouseup')
       .pipe(takeUntil(this.unsubscriber$))
