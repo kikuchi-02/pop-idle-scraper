@@ -4,12 +4,11 @@
   padding: 5px;
 
   .textlint-result {
-    &__collapsible-button {
+    &__button {
       background-color: #777;
       color: white;
       cursor: pointer;
       padding: 18px;
-      width: 100%;
       border: none;
       text-align: left;
       outline: none;
@@ -18,13 +17,28 @@
         background-color: #555;
       }
     }
-    &__collapsible-content {
+    &__show-button {
+      width: 50%;
+    }
+    &__remove-button {
+      width: 50%;
+    }
+
+    &__content {
       padding: 0 18px;
       overflow: hidden;
       background-color: #f1f1f1;
-    }
-    & li {
-      padding-bottom: 5px;
+
+      .textlint-detail {
+        &__li {
+          padding-bottom: 5px;
+
+          &:hover {
+            border-bottom: 1px solid #000;
+            cursor: pointer;
+          }
+        }
+      }
     }
   }
 }

@@ -5,31 +5,46 @@
       <div class="textlint-result">
         <button
           type="button"
-          class="textlint-result__collapsible-button"
-          (click)="collapse(content)"
+          class="textlint-result__button textlint-result__show-button"
+          (click)="textLint()"
         >
-          Show TextLint result
+          Refresh
         </button>
-        <div
-          class="textlint-result__collapsible-content"
-          #content
-          [style.display]="'block'"
+        <button
+          type="button"
+          class="textlint-result__button textlint-result__remove-button"
+          (click)="removeOldLint()"
         >
-          <ng-container *ngIf="!!textLintErrors; else tryTextLint">
+          Remove
+        </button>
+        <div class="textlint-result__content">
+          <ng-container *ngIf="!!textLintErrors; else NoResult">
             <ng-container
               *ngIf="textLintErrors.length > 0; else NoTextLintErrors"
             >
               {{ 'count: ' + textLintErrors.length }}
-              <ul>
-                <li *ngFor="let error of textLintErrors">{{ error }}</li>
+              <ul class="textlint-detail">
+                <li
+                  class="textlint-detail__li"
+                  *ngFor="let error of textLintErrors"
+                  (click)="onClickMessage(error)"
+                >
+                  {{ error.line }}-{{ error.message }}({{ error.target }})
+                </li>
               </ul>
             </ng-container>
             <ng-template #NoTextLintErrors>
               <p>no text lint errors</p>
             </ng-template>
           </ng-container>
-          <ng-template #tryTextLint>
-            <p>try text lint</p>
+          <ng-template #NoResult>
+            <ng-container *ngIf="textLintRaisedError; else tryTextLint">
+              <p>textlint something went wrong</p>
+              <p>please try again latter</p>
+            </ng-container>
+            <ng-template #tryTextLint>
+              <p>try text lint</p>
+            </ng-template>
           </ng-template>
         </div>
       </div>
