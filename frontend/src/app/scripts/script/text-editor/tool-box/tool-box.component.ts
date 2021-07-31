@@ -10,7 +10,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
-import { catchError, filter, map, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
@@ -35,8 +35,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   color: ThemePalette = 'primary';
 
   @Output() toggleSubtitleButton = new EventEmitter<void>();
-
-  @Output() loadingStateChange = new EventEmitter<boolean>();
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
   private toolBoxBaseFormKey = 'tool-box-base-form-key';
@@ -124,7 +122,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     if (words.length === 0) {
       return;
     }
-    this.loadingStateChange.emit(true);
+    this.scriptService.loadingStateChange(true);
 
     forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
@@ -138,15 +136,19 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
           }
           return baseForms.filter((baseForm) => baseForm !== '*');
         }),
-        catchError((e) => of([])),
+        mergeMap((baseForms) => {
+          return this.editorService.highlightByBaseForm(baseForms, color);
+        }),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe((baseForms) => {
-        if (baseForms) {
-          this.editorService.highlight(baseForms, color);
+      .subscribe(
+        (baseForms) => {
+          this.scriptService.loadingStateChange(false);
+        },
+        (error) => {
+          this.scriptService.loadingStateChange(false);
         }
-        this.loadingStateChange.emit(false);
-      });
+      );
   }
 
   bulkUnderline(words: string[]): void {
@@ -154,7 +156,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadingStateChange.emit(true);
+    this.scriptService.loadingStateChange(true);
 
     forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
       .pipe(
@@ -171,7 +173,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         if (baseForms.length > 0) {
           this.editorService.underline(baseForms);
         }
-        this.loadingStateChange.emit(false);
+        this.scriptService.loadingStateChange(false);
       });
   }
 
@@ -185,23 +187,6 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   reformat(): void {
     this.editorService.reformat();
-  }
-
-  textLint(): void {
-    const text = this.editorService.getText();
-    if (!text) {
-      return;
-    }
-    this.loadingStateChange.emit(true);
-    this.scriptService
-      .textLint(text)
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe(
-        () => {
-          this.loadingStateChange.emit(false);
-        },
-        (err) => this.loadingStateChange.emit(false)
-      );
   }
 
   private hex2rgb(hex: string): number[] {

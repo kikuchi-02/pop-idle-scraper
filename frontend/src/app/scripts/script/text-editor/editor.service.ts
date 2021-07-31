@@ -1,11 +1,35 @@
 import { Injectable } from '@angular/core';
 import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, Quill } from 'quill';
-import { ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Message } from 'src/app/typing';
 import { v4 as uuidv4 } from 'uuid';
 import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
 import { AppService } from '../../../services/app.service';
+import { ScriptService } from '../script.service';
+
+export interface TextLintMessageWithUuid {
+  type: string;
+  ruleId: string;
+  message: string;
+  data?: any;
+  // fix?: TextlintMessageFixCommand;
+  fix?: any;
+  line: number;
+  column: number;
+  index: number;
+  severity: number;
+
+  uuid?: string;
+  target?: string;
+}
+
+export interface TextlintResultWithUUid {
+  filePath: string;
+  messages: TextLintMessageWithUuid[];
+}
 
 @Injectable()
 export class EditorService {
@@ -27,9 +51,14 @@ export class EditorService {
   public commentFocused$ = new Subject<string>();
   public focusChatMessage$ = new Subject<string>();
 
+  public textlintResultFocused$ = new Subject<TextLintMessageWithUuid>();
+
   public initialized$ = new ReplaySubject<void>(1);
 
-  constructor(private appService: AppService) {}
+  constructor(
+    private appService: AppService,
+    private scriptService: ScriptService
+  ) {}
 
   initialize(scriptId: number, editor: Quill): void {
     this.editor = editor;
@@ -120,6 +149,27 @@ export class EditorService {
     });
   }
 
+  highlightByBaseForm(
+    baseForms: string[],
+    color = '#FFAF7A'
+  ): Observable<void> {
+    const text = this.editor.getText();
+    return this.scriptService.tokenize(text).pipe(
+      map((tokens) => {
+        tokens.forEach((token) => {
+          if (baseForms.includes(token.basic_form)) {
+            this.editor.formatText(
+              token.word_position - 1,
+              token.surface_form.length,
+              'background-color',
+              color
+            );
+          }
+        });
+      })
+    );
+  }
+
   removeHighlight(): void {
     const contents = this.editor.getContents();
     contents.ops = contents.ops.map((op) => {
@@ -206,7 +256,6 @@ export class EditorService {
     const selection = this.selectionRange;
     this.editor.formatText(selection.index, selection.length, 'comment', {
       uuid,
-      color: '#FCC933',
     });
 
     this.commentSubject$.next(uuid);
@@ -219,7 +268,6 @@ export class EditorService {
       if (op.attributes?.comment?.uuid === uuid) {
         find = true;
         delete op.attributes.comment;
-        delete op.attributes.background;
       }
       return op;
     });
@@ -230,33 +278,102 @@ export class EditorService {
     this.focusChatMessage$.next(uuid);
   }
 
-  selectionCommentFocused(uuid: string): void {
+  initialComments(messages: Message[]): Message[] {
+    const uuids = messages.reduce((acc, message, index) => {
+      acc[message.uuid] = index;
+      return acc;
+    }, {});
     const contents = this.editor.getContents();
+
     contents.ops = contents.ops.map((op) => {
-      if (op.attributes?.comment?.uuid === uuid) {
-        op.attributes.comment.color = '#FCC933';
+      if (!op.attributes?.comment?.uuid) {
+        return;
+      }
+      const index = uuids[op.attributes.comment.uuid];
+      if (index) {
+        messages[index].selectedText =
+          (messages[index].selectedText || '') + op.insert;
+        op.attributes.comment.message = messages[index].body;
+      } else {
+        delete op.attributes.comment;
       }
       return op;
     });
-    this.editor.setContents(contents);
+    return messages;
+  }
+
+  selectionCommentFocused(uuid: string): void {
     this.commentFocused$.next(uuid);
   }
-  selectionCommentUnfocused(uuid: string): void {
-    const contents = this.editor.getContents();
-    contents.ops = contents.ops.map((op) => {
-      if (op.attributes?.comment?.uuid === uuid) {
-        op.attributes.comment.color = '#FEE9B2';
-      }
-      return op;
-    });
-    this.editor.setContents(contents);
-  }
+
   selectionCommentText(uuid: string): string {
     return this.editor
       .getContents()
       .ops.filter((delta) => delta.attributes?.comment?.uuid === uuid)
       .map((delta) => delta.insert)
       .join();
+  }
+  applySelectionCommentMessage(uuid: string, message: string): void {
+    const contents = this.editor.getContents();
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.comment?.uuid === uuid) {
+        op.attributes.comment.message = message;
+      }
+      return op;
+    });
+    this.editor.setContents(contents);
+  }
+
+  applyTextLintResult(result: TextlintResultWithUUid): TextlintResultWithUUid {
+    const text = this.editor.getText();
+    const splitted = text.split('\n');
+
+    const accumulated = splitted.reduce((previous, current, index) => {
+      let start = 0;
+      if (index > 0) {
+        start += previous[index - 1].end + 1;
+      }
+      const end = start + current.length;
+      previous.push({ start, end });
+      return previous;
+    }, []);
+
+    result.messages = (result as TextlintResultWithUUid).messages.map((msg) => {
+      msg.uuid = uuidv4();
+      const targetIndexes = accumulated[msg.line - 1];
+      this.editor.formatText(
+        targetIndexes.start,
+        targetIndexes.end - targetIndexes.start,
+        'lint',
+        { uuid: msg.uuid, message: msg.message }
+      );
+
+      const endIndex = Math.min(targetIndexes.end, targetIndexes.start + 10);
+      msg.target = text.slice(targetIndexes.start, endIndex) + '..';
+
+      return msg;
+    });
+
+    return result;
+  }
+
+  removeTextLintResult(): void {
+    const contents = this.editor.getContents();
+    let find = false;
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.lint) {
+        find = true;
+        delete op.attributes.lint;
+      }
+      return op;
+    });
+    if (find) {
+      this.editor.setContents(contents);
+    }
+  }
+
+  focusTextLintMessage(message: TextLintMessageWithUuid): void {
+    this.textlintResultFocused$.next(message);
   }
 
   private checkInitialized(): void {

@@ -4,12 +4,15 @@ import {
   Component,
   OnDestroy,
   OnInit,
-  Renderer2,
 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ScriptService, TextLintMessages } from '../../script.service';
+import { first, takeUntil } from 'rxjs/operators';
+import { ScriptService } from '../../script.service';
+import {
+  EditorService,
+  TextLintMessageWithUuid,
+  TextlintResultWithUUid,
+} from '../editor.service';
 
 @Component({
   selector: 'app-console',
@@ -20,39 +23,59 @@ import { ScriptService, TextLintMessages } from '../../script.service';
 export class ConsoleComponent implements OnInit, OnDestroy {
   private unsubscriber$ = new Subject<void>();
 
-  textLintErrors: string[];
+  textLintErrors: TextLintMessageWithUuid[];
+  textLintRaisedError = false;
 
   constructor(
     private scriptService: ScriptService,
-    private sanitizer: DomSanitizer,
-    private renderer: Renderer2,
-    private cd: ChangeDetectorRef
-  ) {
-    this.scriptService.lintResult$
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((result) => {
-        const formatted = this.formatTextLintResult(result);
-        this.textLintErrors = formatted;
-        this.cd.markForCheck();
+    private cd: ChangeDetectorRef,
+    private editorService: EditorService
+  ) {}
+
+  ngOnInit(): void {
+    this.editorService.initialized$
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        this.textLint();
       });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
   }
 
-  collapse(elm: HTMLElement): void {
-    if (elm.style.display === 'none') {
-      this.renderer.setStyle(elm, 'display', 'block');
-    } else {
-      this.renderer.setStyle(elm, 'display', 'none');
+  textLint(): void {
+    const text = this.editorService.getText();
+    if (!text) {
+      return;
     }
-    this.cd.markForCheck();
+    this.removeOldLint();
+
+    this.scriptService.loadingStateChange(true);
+    this.scriptService
+      .textLint(text)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe(
+        (result: TextlintResultWithUUid) => {
+          const formatted = this.editorService.applyTextLintResult(result);
+          this.textLintErrors = formatted.messages;
+          this.cd.markForCheck();
+          this.scriptService.loadingStateChange(false);
+        },
+        (err) => {
+          this.textLintRaisedError = true;
+          this.textLintErrors = undefined;
+          this.cd.markForCheck();
+          this.scriptService.loadingStateChange(false);
+        }
+      );
   }
 
-  private formatTextLintResult(result: TextLintMessages): string[] {
-    return result[0].messages.map((msg) => `${msg.line} - ${msg.message}`);
+  removeOldLint(): void {
+    this.editorService.removeTextLintResult();
+  }
+
+  onClickMessage(message: TextLintMessageWithUuid): void {
+    this.editorService.focusTextLintMessage(message);
   }
 }

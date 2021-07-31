@@ -45,7 +45,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
-  @ViewChild(QuillEditorComponent) editor: QuillEditorComponent;
+  @ViewChild(QuillEditorComponent) editorComponent: QuillEditorComponent;
 
   consolePositionTop = 0;
 
@@ -63,6 +63,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private editorService: EditorService,
     private elementRef: ElementRef
   ) {
+    this.scriptService.loadingState$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((state) => {
+        this.loading = state;
+        this.cd.markForCheck();
+      });
+
     const params = this.route.snapshot.paramMap;
     const id = params.get('id');
     if (id === 'new') {
@@ -216,20 +223,29 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/subtitle']);
   }
 
+  undo(): void {
+    this.editorService.undo();
+  }
+  redo(): void {
+    this.editorService.redo();
+  }
+
   private registerEditorEventListener(): void {
-    fromEvent(this.editor.elementRef.nativeElement, 'mouseup')
+    fromEvent(this.editorComponent.elementRef.nativeElement, 'mouseup')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((event: MouseEvent) => {
         this.balloonComponent.selectionChange(event);
 
-        const commentedElement = (event.target as any).closest('[data-uuid]');
+        const commentedElement = (event.target as any).closest(
+          '[data-comment-uuid]'
+        );
         if (commentedElement) {
-          const uuid = commentedElement.getAttribute('data-uuid');
+          const uuid = commentedElement.getAttribute('data-comment-uuid');
           this.editorService.focusChatMessage(uuid);
         }
       });
 
-    fromEvent(this.editor.elementRef.nativeElement, 'keydown')
+    fromEvent(this.editorComponent.elementRef.nativeElement, 'keydown')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((event: KeyboardEvent) => {
         if (event.ctrlKey) {
@@ -254,7 +270,25 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((uuid) => {
         const targetElm = this.elementRef.nativeElement.querySelector(
-          `[data-uuid="${uuid}"]`
+          `[data-comment-uuid="${uuid}"]`
+        );
+        if (targetElm) {
+          const rect = targetElm.getBoundingClientRect();
+          const offset = 300;
+
+          const y = rect.y + window.scrollY - offset;
+          window.scroll({
+            top: y > offset ? 0 : y,
+            behavior: 'smooth',
+          });
+        }
+      });
+
+    this.editorService.textlintResultFocused$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((message) => {
+        const targetElm = this.elementRef.nativeElement.querySelector(
+          `[data-lint-uuid="${message.uuid}"]`
         );
         if (targetElm) {
           const rect = targetElm.getBoundingClientRect();

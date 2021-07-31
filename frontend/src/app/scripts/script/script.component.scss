@@ -61,10 +61,46 @@ form {
       z-index: 1;
     }
 
-    // .ql-editor {
-    //   counter-reset: line;
-    //   padding-left: 0;
-    // }
+    [data-comment-uuid] {
+      position: relative;
+      border-bottom: dotted 2px greenyellow;
+      padding-bottom: 2px;
+
+      &:hover:after {
+        content: attr(data-comment-message) '';
+        position: absolute;
+        top: 20px;
+        left: 10px;
+        z-index: 25;
+        background-color: #c0c0c0;
+        box-shadow: 0px 0px 10px;
+        width: 200px;
+        border: 1px solid greenyellow;
+      }
+    }
+
+    [data-lint-uuid] {
+      position: relative;
+      border-bottom: dotted 2px red;
+
+      &:hover:after {
+        content: attr(data-lint-message) '';
+        position: absolute;
+        bottom: 20px;
+        left: 10px;
+        z-index: 25;
+        background-color: #c0c0c0;
+        box-shadow: 0px 0px 10px;
+        width: 200px;
+        border: 1px solid red;
+      }
+    }
+
+    .ql-editor {
+      // counter-reset: line;
+      // padding-left: 0;
+      padding-top: 30px;
+    }
 
     // .ql-editor p:before {
     //   counter-increment: line;
