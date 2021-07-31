@@ -7,21 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Script } from 'src/app/typing';
 import { ConstituencyResult } from '../../typing';
-
-export interface TextLintMessages {
-  0: {
-    filePath: '<text>';
-    messages: {
-      column: number;
-      index: number;
-      line: number;
-      message: string;
-      ruleId: string;
-      severity: number;
-      type: string;
-    }[];
-  };
-}
+import { TextlintResultWithUUid } from './text-editor/editor.service';
 
 @Injectable({
   providedIn: 'root',
@@ -46,8 +32,10 @@ export class ScriptService {
     });
   }
 
-  textLint(text: string): Observable<TextLintMessages> {
-    return this.http.post<TextLintMessages>('api/v1/textlint', { text });
+  textLint(text: string): Observable<TextlintResultWithUUid> {
+    return this.http
+      .post<TextlintResultWithUUid[]>('api/v1/textlint', { text })
+      .pipe(map((val) => val[0]));
   }
 
   splitTextByNewline(content: string): string {

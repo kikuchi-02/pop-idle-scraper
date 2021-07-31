@@ -45,7 +45,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
-  @ViewChild(QuillEditorComponent) editor: QuillEditorComponent;
+  @ViewChild(QuillEditorComponent) editorComponent: QuillEditorComponent;
 
   consolePositionTop = 0;
 
@@ -224,7 +224,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private registerEditorEventListener(): void {
-    fromEvent(this.editor.elementRef.nativeElement, 'mouseup')
+    fromEvent(this.editorComponent.elementRef.nativeElement, 'mouseup')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((event: MouseEvent) => {
         this.balloonComponent.selectionChange(event);
@@ -238,7 +238,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
 
-    fromEvent(this.editor.elementRef.nativeElement, 'keydown')
+    fromEvent(this.editorComponent.elementRef.nativeElement, 'keydown')
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((event: KeyboardEvent) => {
         if (event.ctrlKey) {
@@ -264,6 +264,24 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((uuid) => {
         const targetElm = this.elementRef.nativeElement.querySelector(
           `[data-comment-uuid="${uuid}"]`
+        );
+        if (targetElm) {
+          const rect = targetElm.getBoundingClientRect();
+          const offset = 300;
+
+          const y = rect.y + window.scrollY - offset;
+          window.scroll({
+            top: y > offset ? 0 : y,
+            behavior: 'smooth',
+          });
+        }
+      });
+
+    this.editorService.textlintResultFocused$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((message) => {
+        const targetElm = this.elementRef.nativeElement.querySelector(
+          `[data-lint-uuid="${message.uuid}"]`
         );
         if (targetElm) {
           const rect = targetElm.getBoundingClientRect();

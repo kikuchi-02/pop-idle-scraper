@@ -6,9 +6,13 @@ import {
   OnInit,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ScriptService, TextLintMessages } from '../../script.service';
-import { EditorService } from '../editor.service';
+import { first, takeUntil } from 'rxjs/operators';
+import { ScriptService } from '../../script.service';
+import {
+  EditorService,
+  TextLintMessageWithUuid,
+  TextlintResultWithUUid,
+} from '../editor.service';
 
 @Component({
   selector: 'app-console',
@@ -19,7 +23,7 @@ import { EditorService } from '../editor.service';
 export class ConsoleComponent implements OnInit, OnDestroy {
   private unsubscriber$ = new Subject<void>();
 
-  textLintErrors: string[];
+  textLintErrors: TextLintMessageWithUuid[];
   textLintRaisedError = false;
 
   constructor(
@@ -28,7 +32,13 @@ export class ConsoleComponent implements OnInit, OnDestroy {
     private editorService: EditorService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.editorService.initialized$
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        this.textLint();
+      });
+  }
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
@@ -39,14 +49,16 @@ export class ConsoleComponent implements OnInit, OnDestroy {
     if (!text) {
       return;
     }
+    this.removeOldLint();
+
     this.scriptService.loadingStateChange(true);
     this.scriptService
       .textLint(text)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe(
-        (result) => {
-          const formatted = this.formatTextLintResult(result);
-          this.textLintErrors = formatted;
+        (result: TextlintResultWithUUid) => {
+          const formatted = this.editorService.applyTextLintResult(result);
+          this.textLintErrors = formatted.messages;
           this.cd.markForCheck();
           this.scriptService.loadingStateChange(false);
         },
@@ -59,7 +71,11 @@ export class ConsoleComponent implements OnInit, OnDestroy {
       );
   }
 
-  private formatTextLintResult(result: TextLintMessages): string[] {
-    return result[0].messages.map((msg) => `${msg.line} - ${msg.message}`);
+  removeOldLint(): void {
+    this.editorService.removeTextLintResult();
+  }
+
+  onClickMessage(message: TextLintMessageWithUuid): void {
+    this.editorService.focusTextLintMessage(message);
   }
 }

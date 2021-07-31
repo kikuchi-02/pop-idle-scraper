@@ -9,6 +9,27 @@ import { Text, UndoManager } from 'yjs';
 import { AppService } from '../../../services/app.service';
 import { ScriptService } from '../script.service';
 
+export interface TextLintMessageWithUuid {
+  type: string;
+  ruleId: string;
+  message: string;
+  data?: any;
+  // fix?: TextlintMessageFixCommand;
+  fix?: any;
+  line: number;
+  column: number;
+  index: number;
+  severity: number;
+
+  uuid?: string;
+  target?: string;
+}
+
+export interface TextlintResultWithUUid {
+  filePath: string;
+  messages: TextLintMessageWithUuid[];
+}
+
 @Injectable()
 export class EditorService {
   private ytext: Text;
@@ -28,6 +49,8 @@ export class EditorService {
   public commentSubject$ = new Subject<string>();
   public commentFocused$ = new Subject<string>();
   public focusChatMessage$ = new Subject<string>();
+
+  public textlintResultFocused$ = new Subject<TextLintMessageWithUuid>();
 
   public initialized$ = new ReplaySubject<void>(1);
 
@@ -283,6 +306,58 @@ export class EditorService {
       .ops.filter((delta) => delta.attributes?.comment?.uuid === uuid)
       .map((delta) => delta.insert)
       .join();
+  }
+
+  applyTextLintResult(result: TextlintResultWithUUid): TextlintResultWithUUid {
+    const text = this.editor.getText();
+    const splitted = text.split('\n');
+
+    const accumulated = splitted.reduce((previous, current, index) => {
+      let start = 0;
+      if (index > 0) {
+        start += previous[index - 1].end + 1;
+      }
+      const end = start + current.length;
+      previous.push({ start, end });
+      return previous;
+    }, []);
+
+    result.messages = (result as TextlintResultWithUUid).messages.map((msg) => {
+      msg.uuid = uuidv4();
+      const targetIndexes = accumulated[msg.line - 1];
+      this.editor.formatText(
+        targetIndexes.start,
+        targetIndexes.end - targetIndexes.start,
+        'lint',
+        { uuid: msg.uuid, message: msg.message }
+      );
+
+      const endIndex = Math.min(targetIndexes.end, targetIndexes.start + 10);
+      msg.target = text.slice(targetIndexes.start, endIndex) + '..';
+
+      return msg;
+    });
+
+    return result;
+  }
+
+  removeTextLintResult(): void {
+    const contents = this.editor.getContents();
+    let find = false;
+    contents.ops = contents.ops.map((op) => {
+      if (op.attributes?.lint) {
+        find = true;
+        delete op.attributes.lint;
+      }
+      return op;
+    });
+    if (find) {
+      this.editor.setContents(contents);
+    }
+  }
+
+  focusTextLintMessage(message: TextLintMessageWithUuid): void {
+    this.textlintResultFocused$.next(message);
   }
 
   private checkInitialized(): void {

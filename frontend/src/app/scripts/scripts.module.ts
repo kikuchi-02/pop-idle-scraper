@@ -19,7 +19,7 @@ import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import { SharedModule } from '../shared/shared.module';
-import { CommentBlot } from './quill.module';
+import { CommentBlot, LintBlot } from './quill.module';
 import { ScriptListComponent } from './script-list/script-list.component';
 import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';
@@ -29,6 +29,7 @@ import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.compone
 import { ScriptsRoutingModule } from './scripts-routing.module';
 
 Quill.register(CommentBlot);
+Quill.register(LintBlot);
 Quill.register('modules/cursors', QuillCursors);
 
 @NgModule({

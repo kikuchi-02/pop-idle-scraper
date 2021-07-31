@@ -40,3 +40,55 @@ export class CommentBlot extends Inline {
     }
   }
 }
+
+interface LintBlotAttributes {
+  uuid: string;
+  message: string;
+}
+export class LintBlot extends Inline {
+  static blotName = 'lint';
+  static tagName = 'span';
+
+  static create(value: LintBlotAttributes): Node {
+    const node = super.create();
+    node.setAttribute('data-lint-uuid', value.uuid);
+    node.setAttribute('data-lint-message', value.message);
+    return node;
+  }
+
+  static formats(node: any): LintBlotAttributes {
+    const format = {} as LintBlotAttributes;
+    const uuid = node.getAttribute('data-lint-uuid');
+    if (uuid) {
+      format.uuid = uuid;
+    }
+    const message = node.getAttribute('data-lint-message');
+    if (message) {
+      format.message = message;
+    }
+    return format;
+  }
+
+  format(name: string, value: LintBlotAttributes): void {
+    if (name === 'lint') {
+      if (value) {
+        if (value.uuid) {
+          this.domNode.setAttribute('data-lint-uuid', value.uuid);
+        } else {
+          this.domNode.removeAttribute('data-lint-uuid');
+        }
+
+        if (value.message) {
+          this.domNode.setAttribute('data-lint-message', value.uuid);
+        } else {
+          this.domNode.removeAttribute('data-lint-message');
+        }
+      } else {
+        this.domNode.removeAttribute('data-lint-uuid');
+        this.domNode.removeAttribute('data-lint-message');
+      }
+    } else {
+      super.format(name, value);
+    }
+  }
+}
