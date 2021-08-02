@@ -107,8 +107,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => {
         const content = editor.getContents();
         content.ops = this.script.deltaOps;
-        editor.setContents(content);
-        this.editorService.initialize(this.script.id, editor);
+        this.editorService.initialize(this.script.id, editor, content);
       });
   }
 

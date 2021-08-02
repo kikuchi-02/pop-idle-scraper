@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ContentChange, Range, SelectionChange } from 'ngx-quill';
-import { DeltaOperation, Quill } from 'quill';
+import { DeltaOperation, DeltaStatic, Quill } from 'quill';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Message } from 'src/app/typing';
@@ -60,27 +60,26 @@ export class EditorService {
     private scriptService: ScriptService
   ) {}
 
-  initialize(scriptId: number, editor: Quill): void {
+  initialize(
+    scriptId: number,
+    editor: Quill,
+    initialContent: DeltaStatic
+  ): void {
     this.editor = editor;
-    const contents = this.editor.getContents();
     this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
     this.ytext = this.appService.ydoc.getText(label);
     this.undoManager = new UndoManager(this.ytext);
 
-    if (this.wsConnected) {
-      this.binding = new QuillBinding(
-        this.ytext,
-        editor,
-        this.appService.wsProvider.awareness
-      );
-      // default
-      if (this.editor.getText() === '\n') {
-        this.editor.setContents(contents);
-      } else if (scriptId === undefined) {
-        this.editor.setContents(contents);
-      }
+    this.binding = new QuillBinding(
+      this.ytext,
+      editor,
+      this.appService.wsProvider.awareness
+    );
+    // default
+    if (this.editor.getText() === '\n' || scriptId === undefined) {
+      this.editor.setContents(initialContent);
     }
     this.initialized$.next();
   }
