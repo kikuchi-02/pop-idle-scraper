@@ -15,6 +15,7 @@ export class ScriptRepository extends Repository<Script> {
     return this.find({
       select: ['id', 'title', 'created', 'updated'],
       relations: ['author'],
+      order: { updated: 'DESC' },
     });
   }
   findById(id: number) {
