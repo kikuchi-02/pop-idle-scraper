@@ -12,8 +12,12 @@ export class CommentBlot extends Inline {
 
   static create(value: CommentBlotAttributes): Node {
     const node = super.create();
-    node.setAttribute('data-comment-uuid', value.uuid);
-    node.setAttribute('data-comment-message', value.message);
+    if (value.uuid) {
+      node.setAttribute('data-comment-uuid', value.uuid);
+    }
+    if (value.message) {
+      node.setAttribute('data-comment-message', value.message);
+    }
     return node;
   }
 
@@ -63,8 +67,12 @@ export class LintBlot extends Inline {
 
   static create(value: LintBlotAttributes): Node {
     const node = super.create();
-    node.setAttribute('data-lint-uuid', value.uuid);
-    node.setAttribute('data-lint-message', value.message);
+    if (value.uuid) {
+      node.setAttribute('data-lint-uuid', value.uuid);
+    }
+    if (value.message) {
+      node.setAttribute('data-lint-message', value.message);
+    }
     return node;
   }
 

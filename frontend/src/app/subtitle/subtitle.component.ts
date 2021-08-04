@@ -2,16 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DoCheck,
-  ElementRef,
-  NgZone,
   OnDestroy,
   OnInit,
-  ViewChild,
 } from '@angular/core';
+import Quill from 'quill';
 import { Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { CrdtTextService } from '../services/crdt-text.service';
+import { SubtitleService } from './subtitle.service';
 
 const layouts = ['left', 'right', 'both'] as const;
 type Layout = typeof layouts[number];
@@ -23,57 +21,35 @@ type Layout = typeof layouts[number];
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CrdtTextService],
 })
-export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
+export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
 
-  inputArea = '';
-  outputArea = '';
+  loading = true;
 
   layout: Layout = 'both';
-
-  @ViewChild('subtitle_TextArea')
-  private inputAreaElm: ElementRef;
+  dictionaryOpen = false;
 
   private unsubscriber$ = new Subject<void>();
+  private inputEditor: Quill;
+  private outputEditor: Quill;
 
   constructor(
     private cd: ChangeDetectorRef,
-    private ngZone: NgZone,
-    private crdtTextService: CrdtTextService
+    private subtitleService: SubtitleService
   ) {
-    this.inputArea = this.getInput();
+    // TODO get user dictionary
 
-    const ytext = this.crdtTextService.createText('test', this.inputArea);
-    this.inputArea = ytext || this.inputArea;
+    this.loading = false;
     this.cd.markForCheck();
+  }
 
-    this.crdtTextService.registerObserver((txt, delta) => {
-      if (txt === this.inputArea) {
-        return;
-      }
-      const current = this.crdtTextService.applyDeltaToCurrent(delta, {
-        txt: this.inputArea,
-        selectionStart: this.inputAreaElm?.nativeElement?.selectionStart,
-        selectionEnd: this.inputAreaElm?.nativeElement?.selectionEnd,
-      });
-
-      this.inputArea = current.txt;
-      this.cd.markForCheck();
-
-      if (
-        current.selectionStart !== undefined &&
-        current.selectionEnd !== undefined
-      ) {
-        this.ngZone.onStable
-          .pipe(first(), takeUntil(this.unsubscriber$))
-          .subscribe(() => {
-            this.inputAreaElm.nativeElement.setSelectionRange(
-              current.selectionStart,
-              current.selectionEnd
-            );
-          });
-      }
-    });
+  onEditorCreated(event: Quill, type: 'input' | 'output'): void {
+    if (type === 'input') {
+      this.inputEditor = event;
+      this.inputEditor.setText(this.getInput());
+    } else if (type === 'output') {
+      this.outputEditor = event;
+    }
   }
 
   getInput(): string {
@@ -83,29 +59,48 @@ export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
     return input || '';
   }
 
-  undo(): void {
-    this.crdtTextService.undo();
-  }
-  redo(): void {
-    this.crdtTextService.redo();
-  }
-
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
   }
 
-  ngDoCheck(): void {
-    this.crdtTextService.onTextChange(this.inputArea);
-  }
-
   generateSubtitle(): void {
-    const input = this.inputArea;
+    const input = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     const output = this.formatSubtitle(input);
-    this.outputArea = output;
-    this.cd.markForCheck();
+    this.outputEditor.setText(output);
+  }
+
+  convertSound(): void {
+    // TODO use quill for highlight
+    this.loading = true;
+    const input = this.inputEditor.getText();
+    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
+    this.subtitleService
+      .textToSoundText(input)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((result) => {
+        Object.values(result.inputUnkownIndexes).forEach(({ start, end }) => {
+          this.inputEditor.formatText(
+            start,
+            end - start,
+            'background-color',
+            'orange'
+          );
+        });
+        this.outputEditor.setText(result.text);
+        Object.values(result.outputUnkownIndexes).forEach(({ start, end }) => {
+          this.outputEditor.formatText(
+            start,
+            end - start,
+            'background-color',
+            'orange'
+          );
+        });
+        this.loading = false;
+        this.cd.markForCheck();
+      });
   }
 
   applyLayout(type: Layout): void {

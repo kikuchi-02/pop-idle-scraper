@@ -15,6 +15,7 @@ interface WebSocketMessage<T> {
   type: string;
   message: T;
 }
+// unsused
 
 @Injectable({
   providedIn: 'root',

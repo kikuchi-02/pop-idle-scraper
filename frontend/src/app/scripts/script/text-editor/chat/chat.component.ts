@@ -16,12 +16,12 @@ import {
   catchError,
   filter,
   first,
+  map,
   mergeMap,
   switchMap,
   takeUntil,
 } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/services/authentication.service';
-import { WsService } from 'src/app/services/ws.service';
 import { Message } from 'src/app/typing';
 import { ScriptService } from '../../script.service';
 import { EditorService } from '../editor.service';
@@ -32,6 +32,7 @@ import { ChatService } from './chat.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ChatService],
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   messages: Message[] = [];
@@ -71,7 +72,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   initialized$ = new BehaviorSubject<boolean>(false);
 
   constructor(
-    private wsService: WsService<Message>,
     private cd: ChangeDetectorRef,
     private authenticationService: AuthenticationService,
     private route: ActivatedRoute,
@@ -97,33 +97,30 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         catchError((error) => undefined),
         filter((v) => !!v),
         first(),
+        mergeMap(([messages, _]: [Message[], void]) => {
+          return this.chatService.createArray(this.wsMessageType).pipe(
+            map((wsMessages, index) => {
+              if (index === 0) {
+                if (messages.length > 0 && wsMessages.length === 0) {
+                  this.chatService.insertArray(0, ...messages);
+                }
+                this.disabled = false;
+                this.messages = this.editorService.initialComments(messages);
+                this.initialized$.next(true);
+              } else {
+                this.messages = wsMessages;
+              }
+            })
+          );
+        }),
         takeUntil(this.unsubscriber$)
       )
       .subscribe(
-        ([messages, _]: [Message[], void]) => {
-          this.disabled = false;
-          this.messages = this.editorService.initialComments(messages);
-          this.initialized$.next(true);
+        () => {
           this.cd.markForCheck();
         },
         (error) => {
           this.initialized$.next(true);
-        }
-      );
-    this.wsService.connect();
-    this.wsService
-      .messageReceiver(this.wsMessageType)
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe(
-        (message) => {
-          this.messages.push(message);
-          this.cd.markForCheck();
-        },
-        (err) => {
-          console.log('error', err);
-        },
-        () => {
-          console.log('complete');
         }
       );
   }
@@ -249,11 +246,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             } else {
               this.messages[parent].children = [message];
             }
+            this.chatService.spliceArray(parent, 1, this.messages[parent]);
           } else {
-            this.messages.push(message);
+            this.chatService.pushArray(message);
           }
-
-          this.wsService.sendMessage(this.wsMessageType, message);
 
           if (message.uuid) {
             this.editorService.applySelectionCommentMessage(
