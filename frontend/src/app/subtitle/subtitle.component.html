@@ -1,16 +1,33 @@
-<div class="subtitle_Wrapper">
-  <button
-    mat-stroked-button
-    color="primary"
-    class="subtitle_MainButton"
-    type="button"
-    (click)="generateSubtitle()"
-  >
-    generate subtitle
-  </button>
-  <button mat-raised-button (click)="undo()">undo</button>
-  <button mat-raised-button (click)="redo()">redo</button>
-  <div class="subtitle_Layout_Buttons">
+<div class="wrapper">
+  <div class="tool__container">
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      (click)="generateSubtitle()"
+    >
+      generate subtitle
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      (click)="convertSound()"
+    >
+      convertSoundText
+    </button>
+    <button
+      (click)="dictionaryOpen = !dictionaryOpen"
+      type="button"
+      cdkOverlayOrigin
+      #trigger="cdkOverlayOrigin"
+      mat-raised-button
+      color="primary"
+    >
+      dictionary
+    </button>
+  </div>
+  <div class="layout-button__container">
     <button
       mat-stroked-button
       color="primary"
@@ -36,24 +53,32 @@
       both
     </button>
   </div>
-  <div class="subtitle_Inner">
-    <div class="subtitle_Labels">
-      <label [class.hide]="layout === 'right'">input</label>
-      <label [class.hide]="layout === 'left'">output</label>
+  <div class="input-area__container">
+    <div class="input-area__label">
+      <label [class.input-area__label--hide]="layout === 'right'">input</label>
+      <label [class.input-area__label--hide]="layout === 'left'">output</label>
     </div>
-    <div class="subtitle_TextAreas">
-      <textarea
-        #subtitle_TextArea
-        class="subtitle_TextArea left"
-        [class.hide]="layout === 'right'"
-        [(ngModel)]="inputArea"
-        placeholder="paste subtitle here"
-      ></textarea>
-      <textarea
-        class="subtitle_TextArea right"
-        [class.hide]="layout === 'left'"
-        [(ngModel)]="outputArea"
-      ></textarea>
+    <div class="input-area__textarea">
+      <quill-editor
+        class="textarea"
+        [class.textarea--hide]="layout === 'left'"
+        (onEditorCreated)="onEditorCreated($event, 'input')"
+      ></quill-editor>
+      <quill-editor
+        class="textarea"
+        [class.textarea--hide]="layout === 'right'"
+        (onEditorCreated)="onEditorCreated($event, 'output')"
+      ></quill-editor>
     </div>
   </div>
 </div>
+
+<div class="loading-modal" *ngIf="loading">loading</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="dictionaryOpen"
+>
+  <app-dictionary (closeEvent)="dictionaryOpen = false"></app-dictionary>
+</ng-template>

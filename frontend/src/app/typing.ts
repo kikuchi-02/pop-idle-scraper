@@ -131,3 +131,11 @@ export interface Message {
   expanded?: boolean;
   selectedText?: string;
 }
+
+export interface WordDetail {
+  id: number;
+  word: string;
+  pronunciation: string;
+}
+
+export type UserDictionary = WordDetail[];

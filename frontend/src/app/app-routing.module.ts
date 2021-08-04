@@ -23,6 +23,7 @@ const routes: Routes = [
     path: 'subtitle',
     loadChildren: () =>
       import('./subtitle/subtitle.module').then((m) => m.SubtitleModule),
+    canActivate: [AuthenticationGuard],
   },
   {
     path: 'login',

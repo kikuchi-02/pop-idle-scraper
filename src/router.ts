@@ -1,5 +1,6 @@
 import { Express, Router } from 'express';
 import * as authController from './controllers/authentication';
+import * as dictionaryController from './controllers/dictionary';
 import * as magazineController from './controllers/magazine';
 import * as messageController from './controllers/message';
 import * as scraperController from './controllers/scrape';
@@ -47,6 +48,17 @@ export const setRoutes = (app: Express) => {
   routeV1.post('/messages', verifyToken, messageController.createMessage);
 
   routeV1.post('/textlint', verifyToken, textlintController.postTextLint);
+
+  routeV1.get(
+    '/dictionary',
+    verifyToken,
+    dictionaryController.getUserDictionary
+  );
+  routeV1.put(
+    '/dictionary',
+    verifyToken,
+    dictionaryController.updateUserDictionary
+  );
 
   app.use('/api/v1', routeV1);
   return app;
