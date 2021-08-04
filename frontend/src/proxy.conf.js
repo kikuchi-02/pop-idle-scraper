@@ -14,12 +14,12 @@ const PROXY_CONFIG = [
     target: 'http://localhost:8000',
     secure: false,
   },
-  {
-    context: ['/__ws'],
-    target: 'http://localhost:8081',
-    secure: false,
-    ws: true,
-  },
+  // {
+  //   context: ['/__ws'],
+  //   target: 'http://localhost:8081',
+  //   secure: false,
+  //   ws: true,
+  // },
   {
     context: ['/__text'],
     target: 'http://localhost:1234',

@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { IpadicFeatures } from 'kuromoji';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Script } from 'src/app/typing';
@@ -20,10 +19,6 @@ export class ScriptService {
 
   loadingStateChange(state: boolean): void {
     this.loadingStateSubject$.next(state);
-  }
-
-  tokenize(text: string): Observable<IpadicFeatures[]> {
-    return this.http.post<IpadicFeatures[]>(`api/v1/tokenize`, { text });
   }
 
   constituencyParse(textBlocks: string[]): Observable<ConstituencyResult[][]> {
