@@ -19,7 +19,7 @@ import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import { SharedModule } from '../shared/shared.module';
-import { CommentBlot, LintBlot } from './quill.module';
+import { CommentBlot, LintBlot } from './quill-module';
 import { ScriptListComponent } from './script-list/script-list.component';
 import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';

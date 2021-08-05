@@ -50,6 +50,11 @@
         &--hide {
           display: none;
         }
+
+        ::ng-deep [data-warning-uuid] {
+          border-bottom: dotted 2px red;
+          cursor: pointer;
+        }
       }
     }
   }

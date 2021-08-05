@@ -14,7 +14,7 @@
       type="button"
       (click)="convertSound()"
     >
-      convertSoundText
+      convert sound text
     </button>
     <button
       (click)="dictionaryOpen = !dictionaryOpen"
@@ -72,6 +72,11 @@
     </div>
   </div>
 </div>
+
+<app-warning-ballon
+  [messenger$]="warningMessenger$"
+  (formatChange)="warningChange($event)"
+></app-warning-ballon>
 
 <div class="loading-modal" *ngIf="loading">loading</div>
 

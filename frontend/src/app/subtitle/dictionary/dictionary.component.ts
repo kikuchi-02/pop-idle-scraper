@@ -5,13 +5,14 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  NgZone,
   OnDestroy,
   OnInit,
   Output,
   ViewChild,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import { UserDictionary } from 'src/app/typing';
 import { DictionaryService, WordInformationParams } from './dictionary.service';
 
@@ -35,7 +36,8 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private cd: ChangeDetectorRef,
     private dictionaryService: DictionaryService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private ngZone: NgZone
   ) {
     this.dictionaryService
       .getUserDictionary()
@@ -70,12 +72,16 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   add(): void {
     this.dictionary.push({ id: undefined, word: '', pronunciation: '' });
-    this.cd.detectChanges();
-    const nodes = this.elementRef.nativeElement.querySelectorAll(
-      '.dictionary__word'
-    );
-    const addedElement = nodes[nodes.length - 1];
-    addedElement.focus();
+    this.cd.markForCheck();
+    this.ngZone.onStable
+      .pipe(first(), takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        const nodes = this.elementRef.nativeElement.querySelectorAll(
+          '.dictionary__word'
+        );
+        const addedElement = nodes[nodes.length - 1];
+        addedElement.focus();
+      });
   }
 
   // sort(by: 'word' | 'pronunciation'): void {

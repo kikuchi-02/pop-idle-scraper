@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  NgZone,
   OnDestroy,
   OnInit,
 } from '@angular/core';
 import Quill from 'quill';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { CrdtTextService } from '../services/crdt-text.service';
 import { SubtitleService } from './subtitle.service';
 
@@ -29,26 +31,32 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   layout: Layout = 'both';
   dictionaryOpen = false;
 
+  warningMessenger$ = new Subject<void>();
+
   private unsubscriber$ = new Subject<void>();
+  private warningUnsubscriber$ = new Subject<void>();
   private inputEditor: Quill;
   private outputEditor: Quill;
 
   constructor(
     private cd: ChangeDetectorRef,
-    private subtitleService: SubtitleService
-  ) {
-    // TODO get user dictionary
-
-    this.loading = false;
-    this.cd.markForCheck();
-  }
+    private subtitleService: SubtitleService,
+    private ngZone: NgZone
+  ) {}
 
   onEditorCreated(event: Quill, type: 'input' | 'output'): void {
+    const text = this.getInput();
     if (type === 'input') {
       this.inputEditor = event;
-      this.inputEditor.setText(this.getInput());
+      this.inputEditor.setText(text);
     } else if (type === 'output') {
       this.outputEditor = event;
+    }
+    if (!text) {
+      this.loading = false;
+      this.cd.markForCheck();
+    } else {
+      this.convertSound();
     }
   }
 
@@ -73,7 +81,6 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   convertSound(): void {
-    // TODO use quill for highlight
     this.loading = true;
     const input = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
@@ -81,7 +88,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .textToSoundText(input)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((result) => {
-        Object.values(result.inputUnkownIndexes).forEach(({ start, end }) => {
+        Object.values(result.inputUnknownIndexes).forEach(({ start, end }) => {
           this.inputEditor.formatText(
             start,
             end - start,
@@ -90,7 +97,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           );
         });
         this.outputEditor.setText(result.text);
-        Object.values(result.outputUnkownIndexes).forEach(({ start, end }) => {
+        Object.values(result.outputUnknownIndexes).forEach(({ start, end }) => {
           this.outputEditor.formatText(
             start,
             end - start,
@@ -98,8 +105,27 @@ export class SubtitleComponent implements OnInit, OnDestroy {
             'orange'
           );
         });
+        const outputText = this.outputEditor.getText();
+        result.outputWarningIndexes.forEach(({ start, end }) => {
+          const uuid = uuidv4();
+          const num = parseInt(outputText.slice(start, end), 10);
+          this.outputEditor.formatText(start, end - start, 'warning', {
+            uuid,
+            num,
+          });
+        });
         this.loading = false;
         this.cd.markForCheck();
+
+        this.ngZone.onStable
+          .pipe(
+            first(),
+            takeUntil(this.warningUnsubscriber$),
+            takeUntil(this.unsubscriber$)
+          )
+          .subscribe(() => {
+            this.warningMessenger$.next();
+          });
       });
   }
 
@@ -108,6 +134,20 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       this.layout = type;
       this.cd.markForCheck();
     }
+  }
+
+  warningChange(event: { uuid: string; numberString: string }): void {
+    const delta = this.outputEditor.getContents();
+    delta.ops = delta.ops.map((op) => {
+      if (op.attributes?.warning?.uuid !== event.uuid) {
+        return op;
+      }
+      op.insert = event.numberString;
+      return op;
+    });
+    this.outputEditor.setContents(delta);
+    this.warningMessenger$.next();
+    this.cd.markForCheck();
   }
 
   private formatSubtitle(input: string): string {
