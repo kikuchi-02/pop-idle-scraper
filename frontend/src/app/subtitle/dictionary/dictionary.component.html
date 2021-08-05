@@ -29,7 +29,7 @@
                 class="dictionary__word"
                 contenteditable="true"
                 [textContent]="row.word"
-                (input)="row.word = $event.target.textContent"
+                (input)="onInput(index, $event, 'word')"
               ></div>
             </td>
             <td>
@@ -37,9 +37,7 @@
                 class="dictionary__pronunciation"
                 contenteditable="true"
                 [textContent]="row.pronunciation"
-                (input)="
-                  onInput(index, $event.target.textContent, 'pronunciation')
-                "
+                (input)="onInput(index, $event, 'pronunciation')"
               ></div>
               <p
                 class="dictionary__pronunciation--error"
@@ -51,7 +49,7 @@
             <td>
               <div
                 class="dictionary__icon dictionary__icon-delete"
-                (click)="dictionary.pop(index)"
+                (click)="dictionary.splice(index, 1)"
               >
                 <mat-icon>close</mat-icon>
               </div>
