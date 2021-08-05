@@ -110,9 +110,15 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  onInput(index: number, text: string, type: 'word' | 'pronunciation'): void {
-    this.dictionary[index].pronunciation = text;
+  onInput(index: number, event, type: 'word' | 'pronunciation'): void {
+    const text = event.target.textContent;
+    if (type === 'word') {
+      this.dictionary[index].word = text;
+    } else if (type === 'pronunciation') {
+      this.dictionary[index].pronunciation = text;
+    }
     this.checkIsKatakana(index, text);
+    this.cd.markForCheck();
   }
 
   private checkIsKatakana(index: number, text: string): void {
