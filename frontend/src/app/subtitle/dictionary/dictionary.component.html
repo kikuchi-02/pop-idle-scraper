@@ -37,8 +37,16 @@
                 class="dictionary__pronunciation"
                 contenteditable="true"
                 [textContent]="row.pronunciation"
-                (input)="row.pronunciation = $event.target.textContent"
+                (input)="
+                  onInput(index, $event.target.textContent, 'pronunciation')
+                "
               ></div>
+              <p
+                class="dictionary__pronunciation--error"
+                *ngIf="errors.has(index)"
+              >
+                {{ errors.get(index) }}
+              </p>
             </td>
             <td>
               <div

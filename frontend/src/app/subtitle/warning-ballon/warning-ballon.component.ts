@@ -52,10 +52,9 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
   }
 
   watchWarningElement(): Observable<MouseEvent> {
-    const uuidAttributeKey = '[data-warning-uuid]';
     const warningSelectors = this.elementRef.nativeElement
       .closest('app-subtitle')
-      .querySelectorAll(uuidAttributeKey);
+      .querySelectorAll('[data-warning-uuid]');
 
     return merge(
       ...[...warningSelectors].map((elm) => fromEvent(elm, 'click'))

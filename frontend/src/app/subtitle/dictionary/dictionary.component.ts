@@ -25,6 +25,8 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
   dictionary: UserDictionary;
   text = '';
 
+  errors = new Map<number, string>();
+
   @ViewChild('form') fromElement: ElementRef;
   @ViewChild('searchInput') searchInputElement: ElementRef;
 
@@ -44,12 +46,19 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
       .getUserDictionary()
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((dictionary) => {
-        this.dictionary = dictionary;
+        this.dictionary = dictionary.map((wordInfo, index) => {
+          this.checkIsKatakana(index, wordInfo.pronunciation);
+          return wordInfo;
+        });
         this.add(this.newDictionaryKeys);
         this.cd.markForCheck();
       });
   }
   ngOnDestroy(): void {
+    this.dictionary = this.dictionary.filter((wordInfo) =>
+      this.isKatakana(wordInfo.pronunciation)
+    );
+
     this.dictionaryService
       .bulkUpdateUserDictionary(this.dictionary)
       .pipe(
@@ -73,13 +82,8 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
     //   });
   }
 
-  isKatakana(word: string): boolean {
-    const reg = /^[\u{3000}-\u{301C}\u{30A1}-\u{30F6}\u{30FB}-\u{30FE}]+$/mu;
-    return reg.test(word);
-  }
-
   add(words?: string[]): void {
-    if (words) {
+    if (words && words.length > 0) {
       this.dictionary.push(
         ...words.map((word) => ({
           id: undefined,
@@ -104,6 +108,26 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
         const addedElement = nodes[nodes.length - 1];
         addedElement.focus();
       });
+  }
+
+  onInput(index: number, text: string, type: 'word' | 'pronunciation'): void {
+    this.dictionary[index].pronunciation = text;
+    this.checkIsKatakana(index, text);
+  }
+
+  private checkIsKatakana(index: number, text: string): void {
+    if (this.isKatakana(text)) {
+      if (this.errors.has(index)) {
+        this.errors.delete(index);
+      }
+    } else {
+      this.errors.set(index, 'should be katakana');
+    }
+  }
+
+  isKatakana(word: string): boolean {
+    const reg = /^[\u{3000}-\u{301C}\u{30A1}-\u{30F6}\u{30FB}-\u{30FE}|']+$/mu;
+    return reg.test(word);
   }
 
   // sort(by: 'word' | 'pronunciation'): void {

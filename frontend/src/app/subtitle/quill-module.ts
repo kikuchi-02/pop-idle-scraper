@@ -36,7 +36,7 @@ export class WarningBlot extends Inline {
       format.num = num;
     }
     const unknown = node.getAttribute('data-warning-unknown');
-    if (num) {
+    if (unknown) {
       format.unknown = unknown;
     }
     return format;
