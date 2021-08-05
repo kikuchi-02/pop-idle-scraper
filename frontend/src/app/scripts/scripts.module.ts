@@ -4,7 +4,6 @@ import {
   NGX_MAT_COLOR_FORMATS,
 } from '@angular-material-components/color-picker';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,7 +47,6 @@ Quill.register('modules/cursors', QuillCursors);
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    HttpClientModule,
     ScriptsRoutingModule,
     MatButtonModule,
     MatTabsModule,
