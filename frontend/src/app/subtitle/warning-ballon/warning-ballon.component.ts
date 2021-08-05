@@ -26,14 +26,15 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
   @HostBinding('style.display') display = 'none';
 
   @Input() messenger$: Subject<void>;
-  @Output() formatChange = new EventEmitter<{
+  @Output() warningChange = new EventEmitter<{
     uuid: string;
-    numberString: string;
+    num?: string;
+    unknown?: string;
   }>();
 
   private unsubscriber$ = new Subject<void>();
 
-  private activeUuid: string;
+  activeWarning: { uuid: string; num?: string; unknown?: string };
 
   constructor(private cd: ChangeDetectorRef, private elementRef: ElementRef) {}
 
@@ -65,7 +66,15 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
         if (!uuid) {
           return;
         }
-        this.activeUuid = uuid;
+        const num = (target as HTMLElement)?.getAttribute('data-warning-num');
+        const unknown = (target as HTMLElement)?.getAttribute(
+          'data-warning-unknown'
+        );
+        if (!num && !unknown) {
+          return;
+        }
+
+        this.activeWarning = { uuid, num, unknown };
         const rect = (target as HTMLElement)?.getBoundingClientRect();
         const offset = 50;
         this.top = rect.top + window.pageYOffset - offset + 'px';
@@ -78,7 +87,7 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.activeUuid) {
+    if (!this.activeWarning) {
       return;
     }
     const isInnerClick = (event.target as HTMLElement)?.closest(
@@ -93,26 +102,29 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
     if (isOtherWarning) {
       return;
     }
-    this.activeUuid = undefined;
+    this.activeWarning = undefined;
     this.display = 'none';
     this.cd.markForCheck();
   }
 
-  format(type: 0 | 1): void {
-    const elm = document.querySelector(
-      `[data-warning-uuid=${this.activeUuid}]`
-    );
-    try {
-      const num = elm.getAttribute('data-warning-num');
-      const parsed = parseInt(num, 10);
+  addDictionary(): void {
+    this.warningChange.emit({
+      uuid: this.activeWarning.uuid,
+      unknown: this.activeWarning.unknown,
+    });
+  }
 
-      let numberString: string;
+  format(type: 0 | 1): void {
+    try {
+      const parsed = parseInt(this.activeWarning.num, 10);
+
+      let num: string;
       if (type === 0) {
-        numberString = this.number2String(parsed);
+        num = this.number2String(parsed);
       } else {
-        numberString = parsed.toString();
+        num = parsed.toString();
       }
-      this.formatChange.emit({ uuid: this.activeUuid, numberString });
+      this.warningChange.emit({ uuid: this.activeWarning.uuid, num });
     } catch (e) {
       return;
     }

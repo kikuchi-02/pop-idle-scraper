@@ -42,7 +42,7 @@
       display: flex;
       width: 100%;
 
-      .textarea {
+      ::ng-deep .textarea {
         min-height: 1000px;
         // flex-grow: 1;
         width: 50%;
@@ -51,9 +51,15 @@
           display: none;
         }
 
-        ::ng-deep [data-warning-uuid] {
-          border-bottom: dotted 2px red;
+        [data-warning-uuid] {
           cursor: pointer;
+        }
+        [data-warning-num] {
+          border-bottom: dotted 2px red;
+        }
+
+        [data-warning-unknown] {
+          background-color: orange;
         }
       }
     }

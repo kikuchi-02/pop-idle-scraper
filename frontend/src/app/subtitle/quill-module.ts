@@ -4,7 +4,8 @@ const Inline = Quill.import('blots/inline');
 
 interface WarningAttributes {
   uuid: string;
-  num: number;
+  num?: number;
+  unknown?: string;
 }
 export class WarningBlot extends Inline {
   static blotName = 'warning';
@@ -18,6 +19,9 @@ export class WarningBlot extends Inline {
     if (value.num) {
       node.setAttribute('data-warning-num', value.num);
     }
+    if (value.unknown) {
+      node.setAttribute('data-warning-unknown', value.unknown);
+    }
     return node;
   }
 
@@ -30,6 +34,10 @@ export class WarningBlot extends Inline {
     const num = node.getAttribute('data-warning-num');
     if (num) {
       format.num = num;
+    }
+    const unknown = node.getAttribute('data-warning-unknown');
+    if (num) {
+      format.unknown = unknown;
     }
     return format;
   }
@@ -47,9 +55,15 @@ export class WarningBlot extends Inline {
         } else {
           this.domNode.removeAttribute('data-warning-num');
         }
+        if (value.unknown) {
+          this.domNode.setAttribute('data-warning-unknown', value.unknown);
+        } else {
+          this.domNode.removeAttribute('data-warning-unknown');
+        }
       } else {
         this.domNode.removeAttribute('data-warning-uuid');
         this.domNode.removeAttribute('data-warning-num');
+        this.domNode.removeAttribute('data-warning-unknown');
       }
     } else {
       super.format(name, value);

@@ -4,17 +4,16 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
+  Input,
   NgZone,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { catchError, first, takeUntil } from 'rxjs/operators';
 import { UserDictionary } from 'src/app/typing';
-import { DictionaryService, WordInformationParams } from './dictionary.service';
+import { DictionaryService } from './dictionary.service';
 
 @Component({
   selector: 'app-dictionary',
@@ -29,7 +28,7 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('form') fromElement: ElementRef;
   @ViewChild('searchInput') searchInputElement: ElementRef;
 
-  @Output() closeEvent = new EventEmitter<void>();
+  @Input() newDictionaryKeys: string[];
 
   private unsubscriber$ = new Subject<void>();
 
@@ -38,19 +37,28 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
     private dictionaryService: DictionaryService,
     private elementRef: ElementRef,
     private ngZone: NgZone
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.dictionaryService
       .getUserDictionary()
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((dictionary) => {
         this.dictionary = dictionary;
+        this.add(this.newDictionaryKeys);
         this.cd.markForCheck();
       });
   }
-
-  ngOnInit(): void {}
   ngOnDestroy(): void {
-    this.unsubscriber$.next();
+    this.dictionaryService
+      .bulkUpdateUserDictionary(this.dictionary)
+      .pipe(
+        catchError(() => undefined),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe(() => {
+        this.unsubscriber$.next();
+      });
   }
 
   ngAfterViewInit(): void {
@@ -70,8 +78,22 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
     return reg.test(word);
   }
 
-  add(): void {
-    this.dictionary.push({ id: undefined, word: '', pronunciation: '' });
+  add(words?: string[]): void {
+    if (words) {
+      this.dictionary.push(
+        ...words.map((word) => ({
+          id: undefined,
+          word,
+          pronunciation: '',
+        }))
+      );
+    } else {
+      this.dictionary.push({
+        id: undefined,
+        word: '',
+        pronunciation: '',
+      });
+    }
     this.cd.markForCheck();
     this.ngZone.onStable
       .pipe(first(), takeUntil(this.unsubscriber$))
@@ -96,65 +118,4 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
   //   }
   //   this.cd.markForCheck();
   // }
-
-  close(): void {
-    this.dictionaryService.bulkUpdateUserDictionary(this.dictionary);
-    this.closeEvent.emit();
-
-    this.save();
-  }
-
-  private save(): void {
-    const oldUserDictionary = this.dictionaryService.userDictionary;
-
-    const oldDictionaryMap = new Map<number, WordInformationParams>();
-    oldUserDictionary.forEach((wordInfo) => {
-      oldDictionaryMap.set(wordInfo.id, wordInfo);
-    });
-
-    const currentDictionary = this.dictionary;
-
-    const currentDictionaryIds = new Set();
-    currentDictionary.map((wordInfo) => {
-      if (wordInfo.id) {
-        currentDictionaryIds.add(wordInfo.id);
-      }
-      wordInfo.word = wordInfo.word.trim().toLowerCase();
-      wordInfo.pronunciation = wordInfo.pronunciation.trim().toLowerCase();
-      return wordInfo;
-    });
-
-    const requestData: WordInformationParams[] = currentDictionary
-      .filter((wordInfo) => wordInfo.word && wordInfo.pronunciation)
-      .map((wordInfo: WordInformationParams) => {
-        if (!wordInfo.id) {
-          wordInfo.change = 'create';
-          return wordInfo;
-        }
-        const old = oldDictionaryMap.get(wordInfo.id);
-        if (
-          wordInfo.word !== old.word ||
-          wordInfo.pronunciation !== old.pronunciation
-        ) {
-          wordInfo.change = 'update';
-          return wordInfo;
-        }
-        return wordInfo;
-      })
-      .filter((word) => word.change);
-
-    oldUserDictionary.forEach((wordInfo) => {
-      if (!currentDictionaryIds.has(wordInfo.id)) {
-        (wordInfo as WordInformationParams).change = 'delete';
-        requestData.push(wordInfo);
-      }
-    });
-
-    if (requestData.length > 0) {
-      this.dictionaryService
-        .bulkUpdateUserDictionary(requestData)
-        .pipe(takeUntil(this.unsubscriber$))
-        .subscribe();
-    }
-  }
 }

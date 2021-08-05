@@ -75,7 +75,7 @@
 
 <app-warning-ballon
   [messenger$]="warningMessenger$"
-  (formatChange)="warningChange($event)"
+  (warningChange)="warningChange($event)"
 ></app-warning-ballon>
 
 <div class="loading-modal" *ngIf="loading">loading</div>
@@ -84,6 +84,7 @@
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayOpen]="dictionaryOpen"
+  (overlayOutsideClick)="dictionaryOpen = false"
 >
-  <app-dictionary (closeEvent)="dictionaryOpen = false"></app-dictionary>
+  <app-dictionary [newDictionaryKeys]="newDictionaryKeys"></app-dictionary>
 </ng-template>

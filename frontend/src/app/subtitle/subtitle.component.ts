@@ -32,6 +32,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   dictionaryOpen = false;
 
   warningMessenger$ = new Subject<void>();
+  newDictionaryKeys: string[] = [];
 
   private unsubscriber$ = new Subject<void>();
   private warningUnsubscriber$ = new Subject<void>();
@@ -97,18 +98,18 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           );
         });
         this.outputEditor.setText(result.text);
-        Object.values(result.outputUnknownIndexes).forEach(({ start, end }) => {
-          this.outputEditor.formatText(
-            start,
-            end - start,
-            'background-color',
-            'orange'
-          );
-        });
         const outputText = this.outputEditor.getText();
+        Object.values(result.outputUnknownIndexes).forEach(({ start, end }) => {
+          const uuid = uuidv4();
+          const unknown = outputText.substring(start, end);
+          this.outputEditor.formatText(start, end - start, 'warning', {
+            uuid,
+            unknown,
+          });
+        });
         result.outputWarningIndexes.forEach(({ start, end }) => {
           const uuid = uuidv4();
-          const num = parseInt(outputText.slice(start, end), 10);
+          const num = parseInt(outputText.substring(start, end), 10);
           this.outputEditor.formatText(start, end - start, 'warning', {
             uuid,
             num,
@@ -136,17 +137,23 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     }
   }
 
-  warningChange(event: { uuid: string; numberString: string }): void {
-    const delta = this.outputEditor.getContents();
-    delta.ops = delta.ops.map((op) => {
-      if (op.attributes?.warning?.uuid !== event.uuid) {
+  warningChange(event: { uuid: string; num?: string; unknown?: string }): void {
+    if (event.num) {
+      const delta = this.outputEditor.getContents();
+      delta.ops = delta.ops.map((op) => {
+        if (op.attributes?.warning?.uuid !== event.uuid) {
+          return op;
+        }
+        op.insert = event.num;
         return op;
-      }
-      op.insert = event.numberString;
-      return op;
-    });
-    this.outputEditor.setContents(delta);
-    this.warningMessenger$.next();
+      });
+      this.outputEditor.setContents(delta);
+      this.warningMessenger$.next();
+    }
+    if (event.unknown) {
+      this.newDictionaryKeys = [event.unknown];
+      this.dictionaryOpen = true;
+    }
     this.cd.markForCheck();
   }
 
