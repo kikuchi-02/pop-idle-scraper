@@ -1,0 +1,7 @@
+<div class="wrapper">
+  <button *ngIf="activeWarning?.num" (click)="format(0)">n->カ</button>
+  <button *ngIf="activeWarning?.num" (click)="format(1)">カ->n</button>
+  <button *ngIf="activeWarning?.unknown" (click)="addDictionary()">
+    dictionary
+  </button>
+</div>

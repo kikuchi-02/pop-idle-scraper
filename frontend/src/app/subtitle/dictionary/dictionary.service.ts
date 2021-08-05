@@ -29,12 +29,56 @@ export class DictionaryService {
         })
       );
   }
+
   bulkUpdateUserDictionary(
-    userDictionary: WordInformationParams[]
+    currentDictionary: WordInformationParams[]
   ): Observable<UserDictionary> {
+    const oldUserDictionary = this.userDictionary;
+
+    const oldDictionaryMap = new Map<number, WordInformationParams>();
+    oldUserDictionary.forEach((wordInfo) => {
+      oldDictionaryMap.set(wordInfo.id, wordInfo);
+    });
+
+    const currentDictionaryIds = new Set();
+    currentDictionary = currentDictionary.map((wordInfo) => {
+      if (wordInfo.id) {
+        currentDictionaryIds.add(wordInfo.id);
+      }
+      wordInfo.word = wordInfo.word.trim().toLowerCase();
+      wordInfo.pronunciation = wordInfo.pronunciation.trim().toLowerCase();
+      return wordInfo;
+    });
+
+    const requestData: WordInformationParams[] = currentDictionary
+      .filter((wordInfo) => wordInfo.word && wordInfo.pronunciation)
+      .map((wordInfo: WordInformationParams) => {
+        if (!wordInfo.id) {
+          wordInfo.change = 'create';
+          return wordInfo;
+        }
+        const old = oldDictionaryMap.get(wordInfo.id);
+        if (
+          wordInfo.word !== old.word ||
+          wordInfo.pronunciation !== old.pronunciation
+        ) {
+          wordInfo.change = 'update';
+          return wordInfo;
+        }
+        return wordInfo;
+      })
+      .filter((word) => word.change);
+
+    oldUserDictionary.forEach((wordInfo) => {
+      if (!currentDictionaryIds.has(wordInfo.id)) {
+        (wordInfo as WordInformationParams).change = 'delete';
+        requestData.push(wordInfo);
+      }
+    });
+
     return this.http
       .put<{ dictionary: UserDictionary }>('api/v1/dictionary', {
-        dictionary: userDictionary,
+        dictionary: requestData,
       })
       .pipe(
         map((response) => {
