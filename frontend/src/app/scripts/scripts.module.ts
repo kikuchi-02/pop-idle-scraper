@@ -4,7 +4,6 @@ import {
   NGX_MAT_COLOR_FORMATS,
 } from '@angular-material-components/color-picker';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +18,7 @@ import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import { SharedModule } from '../shared/shared.module';
-import { CommentBlot, LintBlot } from './quill.module';
+import { CommentBlot, LintBlot } from './quill-module';
 import { ScriptListComponent } from './script-list/script-list.component';
 import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';
@@ -48,7 +47,6 @@ Quill.register('modules/cursors', QuillCursors);
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    HttpClientModule,
     ScriptsRoutingModule,
     MatButtonModule,
     MatTabsModule,

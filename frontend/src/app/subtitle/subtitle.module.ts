@@ -7,13 +7,22 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { QuillModule } from 'ngx-quill';
+import Quill from 'quill';
 import { SharedModule } from '../shared/shared.module';
 import { DictionaryComponent } from './dictionary/dictionary.component';
+import { WarningBlot } from './quill-module';
 import { SubtitleRoutingModule } from './subtitle-routing.module';
 import { SubtitleComponent } from './subtitle.component';
+import { WarningBallonComponent } from './warning-ballon/warning-ballon.component';
+
+Quill.register(WarningBlot);
 
 @NgModule({
-  declarations: [SubtitleComponent, DictionaryComponent],
+  declarations: [
+    SubtitleComponent,
+    DictionaryComponent,
+    WarningBallonComponent,
+  ],
   imports: [
     CommonModule,
     SharedModule,

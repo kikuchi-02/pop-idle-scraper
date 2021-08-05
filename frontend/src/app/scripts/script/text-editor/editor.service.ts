@@ -264,10 +264,8 @@ export class EditorService {
 
   unselectComment(uuid: string): void {
     const contents = this.editor.getContents();
-    let find = false;
     contents.ops = contents.ops.map((op) => {
       if (op.attributes?.comment?.uuid === uuid) {
-        find = true;
         delete op.attributes.comment;
       }
       return op;

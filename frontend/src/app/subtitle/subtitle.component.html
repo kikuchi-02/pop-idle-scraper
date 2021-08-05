@@ -14,7 +14,7 @@
       type="button"
       (click)="convertSound()"
     >
-      convertSoundText
+      convert sound text
     </button>
     <button
       (click)="dictionaryOpen = !dictionaryOpen"
@@ -73,12 +73,18 @@
   </div>
 </div>
 
+<app-warning-ballon
+  [messenger$]="warningMessenger$"
+  (warningChange)="warningChange($event)"
+></app-warning-ballon>
+
 <div class="loading-modal" *ngIf="loading">loading</div>
 
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayOpen]="dictionaryOpen"
+  (overlayOutsideClick)="dictionaryOpen = false"
 >
-  <app-dictionary (closeEvent)="dictionaryOpen = false"></app-dictionary>
+  <app-dictionary [newDictionaryKeys]="newDictionaryKeys"></app-dictionary>
 </ng-template>
