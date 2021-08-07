@@ -20,8 +20,10 @@ import { Quill } from 'quill';
 import { fromEvent, ReplaySubject, Subject } from 'rxjs';
 import {
   debounceTime,
+  distinctUntilChanged,
   filter,
   first,
+  map,
   mergeMap,
   skip,
   takeUntil,
@@ -144,6 +146,20 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         this.consolePositionTop = document
           .querySelector('.tool-box__wrapper')
           .getBoundingClientRect().height;
+      });
+
+    fromEvent(window, 'resize')
+      .pipe(
+        map(() => window.innerWidth),
+        distinctUntilChanged(),
+        debounceTime(300),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((width) => {
+        if (width < 400) {
+          this.showSubtitleLine = false;
+          this.cd.markForCheck();
+        }
       });
   }
 
@@ -295,6 +311,11 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         this.renderer.addClass(targetElm, 'focused');
         const rect = targetElm.getBoundingClientRect();
         const offset = 300;
+        const y = rect.y + window.scrollY - offset;
+        window.scroll({
+          top: y < offset ? 0 : y,
+          behavior: 'smooth',
+        });
 
         fromEvent(document, 'click')
           .pipe(
@@ -309,12 +330,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           .subscribe((event) => {
             this.renderer.removeClass(targetElm, 'focused');
           });
-
-        const y = rect.y + window.scrollY - offset;
-        window.scroll({
-          top: y < offset ? 0 : y,
-          behavior: 'smooth',
-        });
       });
   }
 
