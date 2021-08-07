@@ -49,10 +49,12 @@ export class EditorService {
   }
 
   public commentSubject$ = new Subject<string>();
-  public commentFocused$ = new Subject<string>();
   public focusChatMessage$ = new Subject<string>();
 
-  public textlintResultFocused$ = new Subject<TextLintMessageWithUuid>();
+  public editorFocus$ = new Subject<{
+    uuid: string;
+    type: 'textlint' | 'comment';
+  }>();
 
   public initialized$ = new ReplaySubject<void>(1);
 
@@ -302,7 +304,7 @@ export class EditorService {
   }
 
   selectionCommentFocused(uuid: string): void {
-    this.commentFocused$.next(uuid);
+    this.editorFocus$.next({ uuid, type: 'comment' });
   }
 
   selectionCommentText(uuid: string): string {
@@ -372,7 +374,7 @@ export class EditorService {
   }
 
   focusTextLintMessage(message: TextLintMessageWithUuid): void {
-    this.textlintResultFocused$.next(message);
+    this.editorFocus$.next({ uuid: message.uuid, type: 'textlint' });
   }
 
   private checkInitialized(): void {

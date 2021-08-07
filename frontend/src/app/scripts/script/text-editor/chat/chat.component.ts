@@ -97,8 +97,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         catchError((error) => undefined),
         filter((v) => !!v),
         first(),
-        mergeMap(([messages, _]: [Message[], void]) => {
-          return this.chatService.createArray(this.wsMessageType).pipe(
+        mergeMap(([messages, _]: [Message[], void]) =>
+          this.chatService.createArray(this.wsMessageType).pipe(
             map((wsMessages, index) => {
               if (index === 0) {
                 if (messages.length > 0 && wsMessages.length === 0) {
@@ -111,8 +111,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.messages = wsMessages;
               }
             })
-          );
-        }),
+          )
+        ),
         takeUntil(this.unsubscriber$)
       )
       .subscribe(
@@ -198,13 +198,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.activeMessage = undefined;
       message.expanded = false;
       this.cd.markForCheck();
-      return;
+    } else {
+      message.expanded = true;
+
+      this.activeMessage = message;
+      this.formElement.nativeElement.querySelector('textarea').focus();
     }
-
-    message.expanded = true;
-
-    this.activeMessage = message;
-    this.formElement.nativeElement.querySelector('textarea').focus();
 
     if (uuid) {
       this.editorService.selectionCommentFocused(uuid);

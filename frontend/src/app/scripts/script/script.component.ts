@@ -18,7 +18,14 @@ import {
 } from 'ngx-quill';
 import { Quill } from 'quill';
 import { fromEvent, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, first, mergeMap, takeUntil } from 'rxjs/operators';
+import {
+  debounceTime,
+  filter,
+  first,
+  mergeMap,
+  skip,
+  takeUntil,
+} from 'rxjs/operators';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
@@ -265,40 +272,49 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
 
-    this.editorService.commentFocused$
+    this.editorService.editorFocus$
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((uuid) => {
-        const targetElm = this.elementRef.nativeElement.querySelector(
-          `[data-comment-uuid="${uuid}"]`
-        );
-        if (targetElm) {
-          const rect = targetElm.getBoundingClientRect();
-          const offset = 300;
-
-          const y = rect.y + window.scrollY - offset;
-          window.scroll({
-            top: y > offset ? 0 : y,
-            behavior: 'smooth',
-          });
+      .subscribe(({ uuid, type }) => {
+        let targetElm: HTMLElement;
+        switch (type) {
+          case 'textlint':
+            targetElm = this.elementRef.nativeElement.querySelector(
+              `[data-lint-uuid="${uuid}"]`
+            );
+            break;
+          case 'comment':
+            targetElm = this.elementRef.nativeElement.querySelector(
+              `[data-comment-uuid="${uuid}"]`
+            );
+            break;
         }
-      });
 
-    this.editorService.textlintResultFocused$
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((message) => {
-        const targetElm = this.elementRef.nativeElement.querySelector(
-          `[data-lint-uuid="${message.uuid}"]`
-        );
-        if (targetElm) {
-          const rect = targetElm.getBoundingClientRect();
-          const offset = 300;
-
-          const y = rect.y + window.scrollY - offset;
-          window.scroll({
-            top: y > offset ? 0 : y,
-            behavior: 'smooth',
-          });
+        if (!targetElm) {
+          return;
         }
+        this.renderer.addClass(targetElm, 'focused');
+        const rect = targetElm.getBoundingClientRect();
+        const offset = 300;
+
+        fromEvent(document, 'click')
+          .pipe(
+            skip(1),
+            filter((event) => {
+              const clickedElement = event.target as HTMLElement;
+              return !targetElm.contains(clickedElement);
+            }),
+            first(),
+            takeUntil(this.unsubscriber$)
+          )
+          .subscribe((event) => {
+            this.renderer.removeClass(targetElm, 'focused');
+          });
+
+        const y = rect.y + window.scrollY - offset;
+        window.scroll({
+          top: y < offset ? 0 : y,
+          behavior: 'smooth',
+        });
       });
   }
 
