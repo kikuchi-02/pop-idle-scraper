@@ -18,6 +18,7 @@ module.exports = {
   entities: ['src/entity/**/*.ts'],
   migrations: ['src/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
+  timezone: 'Z',
   cli: {
     entitiesDir: 'src/entity',
     migrationsDir: 'src/migration',
