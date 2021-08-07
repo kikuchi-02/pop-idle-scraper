@@ -21,6 +21,8 @@ export class SubtitleService {
   ) {}
 
   textToSoundText(text: string): Observable<SoundText> {
+    text = text.replace(/（[^）]*）/g, '');
+
     return defer(() => {
       if (this.dictionaryService.userDictionary) {
         return of(this.dictionaryService.userDictionary);
