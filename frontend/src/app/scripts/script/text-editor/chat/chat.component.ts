@@ -97,8 +97,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         catchError((error) => undefined),
         filter((v) => !!v),
         first(),
-        mergeMap(([messages, _]: [Message[], void]) => {
-          return this.chatService.createArray(this.wsMessageType).pipe(
+        mergeMap(([messages, _]: [Message[], void]) =>
+          this.chatService.createArray(this.wsMessageType).pipe(
             map((wsMessages, index) => {
               if (index === 0) {
                 if (messages.length > 0 && wsMessages.length === 0) {
@@ -111,8 +111,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.messages = wsMessages;
               }
             })
-          );
-        }),
+          )
+        ),
         takeUntil(this.unsubscriber$)
       )
       .subscribe(
@@ -198,13 +198,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.activeMessage = undefined;
       message.expanded = false;
       this.cd.markForCheck();
-      return;
+    } else {
+      message.expanded = true;
+
+      this.activeMessage = message;
+      this.formElement.nativeElement.querySelector('textarea').focus();
     }
-
-    message.expanded = true;
-
-    this.activeMessage = message;
-    this.formElement.nativeElement.querySelector('textarea').focus();
 
     if (uuid) {
       this.editorService.selectionCommentFocused(uuid);
@@ -221,7 +220,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.chatForm.valid || this.disabled) {
       return;
     }
-    this.scriptService.loadingStateChange(true);
 
     const msg: Message = {
       body: this.chatForm.get('body').value,
@@ -233,39 +231,33 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     this.chatService
       .postMessage(msg)
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe(
-        (message) => {
-          message.selectedText = this.selected.text;
+      .subscribe((message) => {
+        message.selectedText = this.selected.text;
 
-          if (this.activeMessage?.id) {
-            const parent = this.messages.findIndex(
-              (parentMessage) => parentMessage.id === this.activeMessage.id
-            );
-            if (this.messages[parent].children) {
-              this.messages[parent].children.push(message);
-            } else {
-              this.messages[parent].children = [message];
-            }
-            this.chatService.spliceArray(parent, 1, this.messages[parent]);
+        if (this.activeMessage?.id) {
+          const parent = this.messages.findIndex(
+            (parentMessage) => parentMessage.id === this.activeMessage.id
+          );
+          if (this.messages[parent].children) {
+            this.messages[parent].children.push(message);
           } else {
-            this.chatService.pushArray(message);
+            this.messages[parent].children = [message];
           }
-
-          if (message.uuid) {
-            this.editorService.applySelectionCommentMessage(
-              message.uuid,
-              message.body
-            );
-            this.selected.uuid = undefined;
-            this.selected.text = undefined;
-          }
-          this.chatForm.reset();
-          this.scriptService.loadingStateChange(false);
-          this.cd.markForCheck();
-        },
-        (error) => {
-          this.scriptService.loadingStateChange(false);
+          this.chatService.spliceArray(parent, 1, this.messages[parent]);
+        } else {
+          this.chatService.pushArray(message);
         }
-      );
+
+        if (message.uuid) {
+          this.editorService.applySelectionCommentMessage(
+            message.uuid,
+            message.body
+          );
+          this.selected.uuid = undefined;
+          this.selected.text = undefined;
+        }
+        this.chatForm.reset();
+        this.cd.markForCheck();
+      });
   }
 }

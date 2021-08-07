@@ -1,7 +1,10 @@
+@import '../../../styles.scss';
+
 $tool-box-height: 60px;
 
 .tool {
   display: flex;
+  flex-wrap: wrap;
 
   &__item {
     margin-right: 20px;
@@ -34,6 +37,10 @@ form {
 
 .editor {
   display: flex;
+  flex-wrap: wrap;
+  @include mq('sm') {
+    flex-wrap: nowrap;
+  }
 
   &__subtitle {
     align-self: stretch;
@@ -50,7 +57,12 @@ form {
 
   ::ng-deep &__main {
     min-height: 600px;
-    width: 70%;
+    width: 100%;
+    @include mq('sm') {
+      flex: 70%;
+      width: auto;
+    }
+
     border: 1px solid #000;
     white-space: pre-line;
 
@@ -63,7 +75,7 @@ form {
 
     [data-comment-uuid] {
       position: relative;
-      border-bottom: dotted 2px greenyellow;
+      border-bottom: dotted 2px green;
       padding-bottom: 2px;
 
       &:hover:after {
@@ -75,7 +87,11 @@ form {
         background-color: #c0c0c0;
         box-shadow: 0px 0px 10px;
         width: 200px;
-        border: 1px solid greenyellow;
+        border: 1px solid green;
+      }
+
+      &.focused {
+        border: 5px solid green;
       }
     }
 
@@ -93,6 +109,10 @@ form {
         box-shadow: 0px 0px 10px;
         width: 200px;
         border: 1px solid red;
+      }
+
+      &.focused {
+        border: 5px solid red;
       }
     }
 
@@ -141,10 +161,16 @@ form {
   }
 
   .console__wrapper {
-    width: 30%;
-    height: 100%;
-    position: sticky;
-    top: $tool-box-height;
+    width: 100%;
+    order: -1;
+    @include mq('sm') {
+      order: 0;
+      flex: 30%;
+      width: auto;
+      height: 100%;
+      position: sticky;
+      top: $tool-box-height;
+    }
   }
 }
 .loading-modal {

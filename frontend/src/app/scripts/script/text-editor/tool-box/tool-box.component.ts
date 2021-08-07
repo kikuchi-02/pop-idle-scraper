@@ -124,7 +124,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     if (words.length === 0) {
       return;
     }
-    this.scriptService.loadingStateChange(true);
+    const uuid = this.scriptService.loadingStateChange();
 
     forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
@@ -138,17 +138,17 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
           }
           return baseForms.filter((baseForm) => baseForm !== '*');
         }),
-        mergeMap((baseForms) => {
-          return this.editorService.highlightByBaseForm(baseForms, color);
-        }),
+        mergeMap((baseForms) =>
+          this.editorService.highlightByBaseForm(baseForms, color)
+        ),
         takeUntil(this.unsubscriber$)
       )
       .subscribe(
         (baseForms) => {
-          this.scriptService.loadingStateChange(false);
+          this.scriptService.loadingStateChange(uuid);
         },
         (error) => {
-          this.scriptService.loadingStateChange(false);
+          this.scriptService.loadingStateChange(uuid);
         }
       );
   }
@@ -158,7 +158,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.scriptService.loadingStateChange(true);
+    const uuid = this.scriptService.loadingStateChange();
 
     forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
@@ -175,7 +175,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         if (baseForms.length > 0) {
           this.editorService.underline(baseForms);
         }
-        this.scriptService.loadingStateChange(false);
+        this.scriptService.loadingStateChange(uuid);
       });
   }
 

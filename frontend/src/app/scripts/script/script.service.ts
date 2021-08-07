@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Script } from 'src/app/typing';
+import { v4 as uuidv4 } from 'uuid';
 import { ConstituencyResult } from '../../typing';
 import { TextlintResultWithUUid } from './text-editor/editor.service';
 
@@ -14,11 +15,26 @@ import { TextlintResultWithUUid } from './text-editor/editor.service';
 export class ScriptService {
   private loadingStateSubject$ = new BehaviorSubject(false);
   loadingState$ = this.loadingStateSubject$.asObservable();
+  private loadingUuids: string[] = [];
 
   constructor(private http: HttpClient) {}
 
-  loadingStateChange(state: boolean): void {
-    this.loadingStateSubject$.next(state);
+  loadingStateChange(uuid?: string): string {
+    if (uuid) {
+      const index = this.loadingUuids.indexOf(uuid);
+      if (index > -1) {
+        this.loadingUuids.splice(index, 1);
+      }
+    } else {
+      uuid = uuidv4();
+      this.loadingUuids.push(uuid);
+    }
+    if (this.loadingUuids.length > 0) {
+      this.loadingStateSubject$.next(true);
+    } else {
+      this.loadingStateSubject$.next(false);
+    }
+    return uuid;
   }
 
   constituencyParse(textBlocks: string[]): Observable<ConstituencyResult[][]> {
