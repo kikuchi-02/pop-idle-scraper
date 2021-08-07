@@ -49,10 +49,12 @@ export class EditorService {
   }
 
   public commentSubject$ = new Subject<string>();
-  public commentFocused$ = new Subject<string>();
   public focusChatMessage$ = new Subject<string>();
 
-  public textlintResultFocused$ = new Subject<TextLintMessageWithUuid>();
+  public editorFocus$ = new Subject<{
+    uuid: string;
+    type: 'textlint' | 'comment';
+  }>();
 
   public initialized$ = new ReplaySubject<void>(1);
 
@@ -67,23 +69,27 @@ export class EditorService {
     editor: Quill,
     initialContent: DeltaStatic
   ): void {
+    const uuid = this.scriptService.loadingStateChange();
+
     this.editor = editor;
     this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
-    this.ytext = this.appService.ydoc.getText(label);
-    this.undoManager = new UndoManager(this.ytext);
-
-    this.binding = new QuillBinding(
-      this.ytext,
-      editor,
-      this.appService.wsProvider.awareness
-    );
-    // default
-    if (this.editor.getText() === '\n' || scriptId === undefined) {
-      this.editor.setContents(initialContent);
-    }
-    this.initialized$.next();
+    this.appService.wsConnected().subscribe(() => {
+      this.ytext = this.appService.ydoc.getText(label);
+      this.undoManager = new UndoManager(this.ytext);
+      this.binding = new QuillBinding(
+        this.ytext,
+        editor,
+        this.appService.wsProvider.awareness
+      );
+      // default
+      if (this.editor.getText() === '\n' || scriptId === undefined) {
+        this.editor.setContents(initialContent);
+      }
+      this.initialized$.next();
+      this.scriptService.loadingStateChange(uuid);
+    });
   }
 
   onContentChanged(event: ContentChange): void {}
@@ -302,7 +308,7 @@ export class EditorService {
   }
 
   selectionCommentFocused(uuid: string): void {
-    this.commentFocused$.next(uuid);
+    this.editorFocus$.next({ uuid, type: 'comment' });
   }
 
   selectionCommentText(uuid: string): string {
@@ -372,7 +378,7 @@ export class EditorService {
   }
 
   focusTextLintMessage(message: TextLintMessageWithUuid): void {
-    this.textlintResultFocused$.next(message);
+    this.editorFocus$.next({ uuid: message.uuid, type: 'textlint' });
   }
 
   private checkInitialized(): void {

@@ -51,7 +51,7 @@ export class ConsoleComponent implements OnInit, OnDestroy {
     }
     this.removeOldLint();
 
-    this.scriptService.loadingStateChange(true);
+    const uuid = this.scriptService.loadingStateChange();
     this.scriptService
       .textLint(text)
       .pipe(takeUntil(this.unsubscriber$))
@@ -60,13 +60,13 @@ export class ConsoleComponent implements OnInit, OnDestroy {
           const formatted = this.editorService.applyTextLintResult(result);
           this.textLintErrors = formatted.messages;
           this.cd.markForCheck();
-          this.scriptService.loadingStateChange(false);
+          this.scriptService.loadingStateChange(uuid);
         },
         (err) => {
           this.textLintRaisedError = true;
           this.textLintErrors = undefined;
           this.cd.markForCheck();
-          this.scriptService.loadingStateChange(false);
+          this.scriptService.loadingStateChange(uuid);
         }
       );
   }
