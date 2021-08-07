@@ -75,14 +75,15 @@ export class EditorService {
     this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
-    this.appService.wsConnected().subscribe(() => {
-      this.ytext = this.appService.ydoc.getText(label);
-      this.undoManager = new UndoManager(this.ytext);
-      this.binding = new QuillBinding(
-        this.ytext,
-        editor,
-        this.appService.wsProvider.awareness
-      );
+
+    this.ytext = this.appService.ydoc.getText(label);
+    this.undoManager = new UndoManager(this.ytext);
+    this.binding = new QuillBinding(
+      this.ytext,
+      editor,
+      this.appService.wsProvider.awareness
+    );
+    this.appService.wsSynced().subscribe(() => {
       // default
       if (this.editor.getText() === '\n' || scriptId === undefined) {
         this.editor.setContents(initialContent);

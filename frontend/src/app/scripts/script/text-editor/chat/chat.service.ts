@@ -12,17 +12,16 @@ export class ChatService {
   constructor(private http: HttpClient, private appService: AppService) {}
 
   createArray(label: string): Observable<Message[]> {
-    return this.appService.wsConnected().pipe(
-      mergeMap(() => {
-        this.yarray = this.appService.ydoc.getArray(label);
-        const subject = new ReplaySubject<Message[]>(1);
-        this.yarray.observe((event, transaction) => {
-          const array = this.yarray.toArray();
-          subject.next(array);
-        });
-        subject.next(this.yarray.toArray());
-        return subject.asObservable().pipe(distinctUntilChanged());
-      })
+    this.yarray = this.appService.ydoc.getArray(label);
+    const subject = new ReplaySubject<Message[]>(1);
+    this.yarray.observe((event, transaction) => {
+      const array = this.yarray.toArray();
+      subject.next(array);
+    });
+    subject.next(this.yarray.toArray());
+    return this.appService.wsSynced().pipe(
+      mergeMap(() => subject.asObservable()),
+      distinctUntilChanged()
     );
   }
   insertArray(index: number, ...messages: Message[]): void {
