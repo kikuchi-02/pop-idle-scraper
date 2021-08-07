@@ -79,7 +79,7 @@ form {
       }
 
       &.focused {
-        background-color: green;
+        border: 5px solid green;
       }
     }
 
@@ -100,7 +100,7 @@ form {
       }
 
       &.focused {
-        background-color: red;
+        border: 5px solid red;
       }
     }
 
