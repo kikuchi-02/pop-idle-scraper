@@ -20,9 +20,9 @@ export class AppService {
     );
   }
 
-  wsConnected(): Observable<void> {
+  wsSynced(): Observable<void> {
     return interval(300).pipe(
-      filter(() => this.wsProvider.wsconnected),
+      filter(() => this.wsProvider.synced),
       map(() => void 0),
       first()
     );
