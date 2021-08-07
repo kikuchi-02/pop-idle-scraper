@@ -3,6 +3,7 @@ import { ContentChange, Range, SelectionChange } from 'ngx-quill';
 import { DeltaOperation, DeltaStatic, Quill } from 'quill';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TokenizeService } from 'src/app/services/tokenizer.service';
 import { Message } from 'src/app/typing';
 import { v4 as uuidv4 } from 'uuid';
 import { QuillBinding } from 'y-quill';
@@ -57,7 +58,8 @@ export class EditorService {
 
   constructor(
     private appService: AppService,
-    private scriptService: ScriptService
+    private scriptService: ScriptService,
+    private tokenizeService: TokenizeService
   ) {}
 
   initialize(
@@ -153,7 +155,7 @@ export class EditorService {
     color = '#FFAF7A'
   ): Observable<void> {
     const text = this.editor.getText();
-    return this.scriptService.tokenize(text).pipe(
+    return this.tokenizeService.tokenize(text).pipe(
       map((tokens) => {
         tokens.forEach((token) => {
           if (baseForms.includes(token.basic_form)) {
@@ -262,10 +264,8 @@ export class EditorService {
 
   unselectComment(uuid: string): void {
     const contents = this.editor.getContents();
-    let find = false;
     contents.ops = contents.ops.map((op) => {
       if (op.attributes?.comment?.uuid === uuid) {
-        find = true;
         delete op.attributes.comment;
       }
       return op;

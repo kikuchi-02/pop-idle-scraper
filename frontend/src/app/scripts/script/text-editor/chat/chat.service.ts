@@ -6,9 +6,7 @@ import { AppService } from 'src/app/services/app.service';
 import { Message } from 'src/app/typing';
 import { Array } from 'yjs';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ChatService {
   private yarray: Array<Message>;
   constructor(private http: HttpClient, private appService: AppService) {}

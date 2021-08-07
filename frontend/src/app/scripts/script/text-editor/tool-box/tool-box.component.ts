@@ -11,6 +11,7 @@ import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { TokenizeService } from 'src/app/services/tokenizer.service';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
@@ -45,7 +46,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   constructor(
     private scriptService: ScriptService,
-    private editorService: EditorService
+    private editorService: EditorService,
+    private tokenizeService: TokenizeService
   ) {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
@@ -124,7 +126,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     }
     this.scriptService.loadingStateChange(true);
 
-    forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
+    forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
         map((tokensArray) => {
           const baseForms: string[] = tokensArray.map(
@@ -158,7 +160,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
     this.scriptService.loadingStateChange(true);
 
-    forkJoin(words.map((word: string) => this.scriptService.tokenize(word)))
+    forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
         map((tokensArray) => {
           const baseForms: string[] = tokensArray

@@ -32,6 +32,7 @@ import { ChatService } from './chat.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ChatService],
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   messages: Message[] = [];

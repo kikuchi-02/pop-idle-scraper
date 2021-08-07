@@ -1,0 +1,63 @@
+<div class="wrapper">
+  <div class="form">
+    <input
+      [disabled]="true"
+      #searchInput
+      type="text"
+      [(ngModel)]="text"
+      placeholder="keyword"
+      class="form__input"
+    />
+    <button type="button" (click)="add()">add</button>
+  </div>
+  <div class="inner">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let col of ['word', 'pronunciation']">
+            {{ col }}
+            <!-- <button (click)="sort(col)">sort</button> -->
+          </th>
+          <th></th>
+        </tr>
+      </thead>
+      <ng-container *ngIf="!!dictionary; else yetInitialized">
+        <tbody>
+          <tr *ngFor="let row of dictionary; index as index">
+            <td>
+              <div
+                class="dictionary__word"
+                contenteditable="true"
+                [textContent]="row.word"
+                (input)="onInput(index, $event, 'word')"
+              ></div>
+            </td>
+            <td>
+              <div
+                class="dictionary__pronunciation"
+                contenteditable="true"
+                [textContent]="row.pronunciation"
+                (input)="onInput(index, $event, 'pronunciation')"
+              ></div>
+              <p
+                class="dictionary__pronunciation--error"
+                *ngIf="errors.has(index)"
+              >
+                {{ errors.get(index) }}
+              </p>
+            </td>
+            <td>
+              <div
+                class="dictionary__icon dictionary__icon-delete"
+                (click)="dictionary.splice(index, 1)"
+              >
+                <mat-icon>close</mat-icon>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </ng-container>
+      <ng-template #yetInitialized></ng-template>
+    </table>
+  </div>
+</div>

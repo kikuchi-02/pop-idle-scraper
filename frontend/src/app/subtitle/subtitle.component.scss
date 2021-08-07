@@ -1,46 +1,81 @@
 @import '../../styles.scss';
-.subtitle_Wrapper {
+.wrapper {
   @include wrapper;
-  width: 100%;
+  width: auto;
   max-width: none;
 
-  .subtitle_MainButton {
-    margin: 20px;
-    height: 50px;
-    width: 500px;
+  .tool {
+    &__container {
+      margin: 20px;
+    }
   }
-  .subtitle_Layout_Buttons {
-    margin: 20px;
+
+  .layout-button {
+    &__container {
+      margin: 20px;
+    }
     button {
       width: 300px;
       height: 50px;
     }
   }
 
-  .subtitle_Inner {
-    .subtitle_Labels {
+  .input-area {
+    &__container {
+      margin: 20px;
+    }
+    &__label {
       display: flex;
       width: 100%;
+
+      &--hide {
+        display: none;
+      }
 
       label {
         flex-grow: 1;
         font-size: 30px;
-        margin: 10px 30px;
+        margin: 10px;
       }
     }
-    .subtitle_TextAreas {
+    &__textarea {
       display: flex;
       width: 100%;
 
-      .subtitle_TextArea {
-        height: 1000px;
-        margin: 0 20px;
-        flex-grow: 1;
+      ::ng-deep .textarea {
+        min-height: 1000px;
+        // flex-grow: 1;
+        width: 50%;
+
+        &--hide {
+          display: none;
+        }
+
+        [data-warning-uuid] {
+          cursor: pointer;
+        }
+        [data-warning-num] {
+          border-bottom: dotted 2px red;
+        }
+
+        [data-warning-unknown] {
+          background-color: orange;
+        }
       }
     }
   }
 }
-
-.hide {
-  display: none;
+.loading-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 150px;
+  color: red;
+  opacity: 0.7;
+  z-index: 1000;
 }
+/**
+私の名前は田中です。
+家へ帰る道中。
+*/

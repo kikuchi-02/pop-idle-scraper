@@ -2,16 +2,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DoCheck,
-  ElementRef,
   NgZone,
   OnDestroy,
   OnInit,
-  ViewChild,
 } from '@angular/core';
+import Quill from 'quill';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { CrdtTextService } from '../services/crdt-text.service';
+import { SubtitleService } from './subtitle.service';
 
 const layouts = ['left', 'right', 'both'] as const;
 type Layout = typeof layouts[number];
@@ -23,57 +23,42 @@ type Layout = typeof layouts[number];
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CrdtTextService],
 })
-export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
+export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
 
-  inputArea = '';
-  outputArea = '';
+  loading = true;
 
   layout: Layout = 'both';
+  dictionaryOpen = false;
 
-  @ViewChild('subtitle_TextArea')
-  private inputAreaElm: ElementRef;
+  warningMessenger$ = new Subject<void>();
+  newDictionaryKeys: string[] = [];
 
   private unsubscriber$ = new Subject<void>();
+  private warningUnsubscriber$ = new Subject<void>();
+  private inputEditor: Quill;
+  private outputEditor: Quill;
 
   constructor(
     private cd: ChangeDetectorRef,
-    private ngZone: NgZone,
-    private crdtTextService: CrdtTextService
-  ) {
-    this.inputArea = this.getInput();
+    private subtitleService: SubtitleService,
+    private ngZone: NgZone
+  ) {}
 
-    const ytext = this.crdtTextService.createText('test', this.inputArea);
-    this.inputArea = ytext || this.inputArea;
-    this.cd.markForCheck();
-
-    this.crdtTextService.registerObserver((txt, delta) => {
-      if (txt === this.inputArea) {
-        return;
-      }
-      const current = this.crdtTextService.applyDeltaToCurrent(delta, {
-        txt: this.inputArea,
-        selectionStart: this.inputAreaElm?.nativeElement?.selectionStart,
-        selectionEnd: this.inputAreaElm?.nativeElement?.selectionEnd,
-      });
-
-      this.inputArea = current.txt;
+  onEditorCreated(event: Quill, type: 'input' | 'output'): void {
+    const text = this.getInput();
+    if (type === 'input') {
+      this.inputEditor = event;
+      this.inputEditor.setText(text);
+    } else if (type === 'output') {
+      this.outputEditor = event;
+    }
+    if (!text) {
+      this.loading = false;
       this.cd.markForCheck();
-
-      if (
-        current.selectionStart !== undefined &&
-        current.selectionEnd !== undefined
-      ) {
-        this.ngZone.onStable
-          .pipe(first(), takeUntil(this.unsubscriber$))
-          .subscribe(() => {
-            this.inputAreaElm.nativeElement.setSelectionRange(
-              current.selectionStart,
-              current.selectionEnd
-            );
-          });
-      }
-    });
+    } else {
+      this.convertSound();
+    }
   }
 
   getInput(): string {
@@ -83,29 +68,66 @@ export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
     return input || '';
   }
 
-  undo(): void {
-    this.crdtTextService.undo();
-  }
-  redo(): void {
-    this.crdtTextService.redo();
-  }
-
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
   }
 
-  ngDoCheck(): void {
-    this.crdtTextService.onTextChange(this.inputArea);
-  }
-
   generateSubtitle(): void {
-    const input = this.inputArea;
+    const input = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     const output = this.formatSubtitle(input);
-    this.outputArea = output;
-    this.cd.markForCheck();
+    this.outputEditor.setText(output);
+  }
+
+  convertSound(): void {
+    this.loading = true;
+    const input = this.inputEditor.getText();
+    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
+    this.subtitleService
+      .textToSoundText(input)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((result) => {
+        Object.values(result.inputUnknownIndexes).forEach(({ start, end }) => {
+          this.inputEditor.formatText(
+            start,
+            end - start,
+            'background-color',
+            'orange'
+          );
+        });
+        this.outputEditor.setText(result.text);
+        const outputText = this.outputEditor.getText();
+        Object.values(result.outputUnknownIndexes).forEach(({ start, end }) => {
+          const uuid = uuidv4();
+          const unknown = outputText.substring(start, end);
+          this.outputEditor.formatText(start, end - start, 'warning', {
+            uuid,
+            unknown,
+          });
+        });
+        result.outputWarningIndexes.forEach(({ start, end }) => {
+          const uuid = uuidv4();
+          const num = parseInt(outputText.substring(start, end), 10);
+          this.outputEditor.formatText(start, end - start, 'warning', {
+            uuid,
+            num,
+          });
+        });
+        this.loading = false;
+        this.cd.markForCheck();
+
+        this.ngZone.onStable
+          .pipe(
+            first(),
+            takeUntil(this.warningUnsubscriber$),
+            takeUntil(this.unsubscriber$)
+          )
+          .subscribe(() => {
+            this.warningMessenger$.next();
+          });
+      });
   }
 
   applyLayout(type: Layout): void {
@@ -113,6 +135,26 @@ export class SubtitleComponent implements OnInit, DoCheck, OnDestroy {
       this.layout = type;
       this.cd.markForCheck();
     }
+  }
+
+  warningChange(event: { uuid: string; num?: string; unknown?: string }): void {
+    if (event.num) {
+      const delta = this.outputEditor.getContents();
+      delta.ops = delta.ops.map((op) => {
+        if (op.attributes?.warning?.uuid !== event.uuid) {
+          return op;
+        }
+        op.insert = event.num;
+        return op;
+      });
+      this.outputEditor.setContents(delta);
+      this.warningMessenger$.next();
+    }
+    if (event.unknown) {
+      this.newDictionaryKeys = [event.unknown];
+      this.dictionaryOpen = true;
+    }
+    this.cd.markForCheck();
   }
 
   private formatSubtitle(input: string): string {
