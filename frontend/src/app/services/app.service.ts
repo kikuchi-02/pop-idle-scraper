@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { interval, Observable } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
@@ -15,6 +17,14 @@ export class AppService {
       `${environment.production ? 'wss' : 'ws'}://${window.location.host}`,
       '__text',
       this.ydoc
+    );
+  }
+
+  wsConnected(): Observable<void> {
+    return interval(300).pipe(
+      filter(() => this.wsProvider.wsconnected),
+      map(() => void 0),
+      first()
     );
   }
 }

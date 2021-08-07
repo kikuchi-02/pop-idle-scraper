@@ -69,23 +69,27 @@ export class EditorService {
     editor: Quill,
     initialContent: DeltaStatic
   ): void {
+    const uuid = this.scriptService.loadingStateChange();
+
     this.editor = editor;
     this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
-    this.ytext = this.appService.ydoc.getText(label);
-    this.undoManager = new UndoManager(this.ytext);
-
-    this.binding = new QuillBinding(
-      this.ytext,
-      editor,
-      this.appService.wsProvider.awareness
-    );
-    // default
-    if (this.editor.getText() === '\n' || scriptId === undefined) {
-      this.editor.setContents(initialContent);
-    }
-    this.initialized$.next();
+    this.appService.wsConnected().subscribe(() => {
+      this.ytext = this.appService.ydoc.getText(label);
+      this.undoManager = new UndoManager(this.ytext);
+      this.binding = new QuillBinding(
+        this.ytext,
+        editor,
+        this.appService.wsProvider.awareness
+      );
+      // default
+      if (this.editor.getText() === '\n' || scriptId === undefined) {
+        this.editor.setContents(initialContent);
+      }
+      this.initialized$.next();
+      this.scriptService.loadingStateChange(uuid);
+    });
   }
 
   onContentChanged(event: ContentChange): void {}
