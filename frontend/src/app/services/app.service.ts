@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { interval, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { Observable, Subscriber } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
@@ -21,10 +20,18 @@ export class AppService {
   }
 
   wsSynced(): Observable<void> {
-    return interval(300).pipe(
-      filter(() => this.wsProvider.synced),
-      map(() => void 0),
-      first()
-    );
+    return new Observable((subscriber: Subscriber<void>) => {
+      if (this.wsProvider.synced) {
+        subscriber.next();
+        subscriber.complete();
+      } else {
+        this.wsProvider.once('wsSynced', (isSynced: boolean) => {
+          if (isSynced) {
+            subscriber.next();
+            subscriber.complete();
+          }
+        });
+      }
+    });
   }
 }
