@@ -1,3 +1,5 @@
+@import '../../../../../styles.scss';
+
 .wrapper {
   position: relative;
 
@@ -30,7 +32,11 @@
 
     &__text {
       padding: 10px;
-      background-color: #fff;
+      background: #fff;
+      &.dark-theme {
+        background: #555;
+      }
+
       border-radius: 30px;
       cursor: pointer;
       &-p {
@@ -97,6 +103,10 @@
       height: 100%;
       width: 100%;
       box-sizing: border-box;
+      &.dark-theme {
+        background: #555;
+        color: $dark-color;
+      }
     }
   }
 }

@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  Input,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -67,6 +68,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('form') formElement: ElementRef;
   @ViewChild('chatMessage') chatMessageElement: ElementRef;
+
+  @Input() darkTheme: boolean;
 
   private unsubscriber$ = new Subject<void>();
   initialized$ = new BehaviorSubject<boolean>(false);

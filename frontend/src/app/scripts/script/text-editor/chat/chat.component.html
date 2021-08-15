@@ -22,7 +22,11 @@
       [formGroup]="chatForm"
       (ngSubmit)="submit()"
     >
-      <textarea class="chat-form__textarea" formControlName="body"></textarea>
+      <textarea
+        class="chat-form__textarea"
+        [class.dark-theme]="darkTheme"
+        formControlName="body"
+      ></textarea>
     </form>
   </div>
 </div>
@@ -39,6 +43,7 @@
     <div class="chat-message__body">
       <div
         class="chat-message__text"
+        [class.dark-theme]="darkTheme"
         [class.chat-message__text--active]="activeMessage === message"
         (click)="messageClick(message)"
       >

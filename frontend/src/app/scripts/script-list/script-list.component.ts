@@ -53,6 +53,9 @@ export class ScriptListComponent implements OnInit, OnDestroy {
   }
 
   deleteScripts(): void {
+    if (this.deleteScriptIds.length === 0) {
+      return;
+    }
     this.scriptListService
       .deleteScripts(this.deleteScriptIds)
       .pipe(takeUntil(this.unsubscriber$))

@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { catchError, first, takeUntil } from 'rxjs/operators';
+import { AppService } from 'src/app/services/app.service';
 import { UserDictionary } from 'src/app/typing';
 import { DictionaryService } from './dictionary.service';
 
@@ -27,6 +28,8 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   errors = new Map<number, string>();
 
+  darkTheme = false;
+
   @ViewChild('form') fromElement: ElementRef;
   @ViewChild('searchInput') searchInputElement: ElementRef;
 
@@ -38,8 +41,16 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
     private cd: ChangeDetectorRef,
     private dictionaryService: DictionaryService,
     private elementRef: ElementRef,
-    private ngZone: NgZone
-  ) {}
+    private ngZone: NgZone,
+    private appService: AppService
+  ) {
+    this.appService.darkTheme$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        this.darkTheme = val;
+        this.cd.markForCheck();
+      });
+  }
 
   ngOnInit(): void {
     this.dictionaryService

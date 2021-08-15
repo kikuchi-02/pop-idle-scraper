@@ -32,7 +32,11 @@ form {
   top: 0;
   z-index: 2;
   box-sizing: border-box;
-  background-color: #fff;
+
+  background: #fff;
+  &.dark-theme {
+    background: $dark-background;
+  }
 }
 
 .editor {
@@ -69,8 +73,14 @@ form {
     .ql-toolbar {
       position: sticky;
       top: $tool-box-height;
-      background: #fff;
       z-index: 1;
+      background: #fff;
+    }
+
+    &.dark-theme {
+      .ql-toolbar {
+        background: $dark-background;
+      }
     }
 
     [data-comment-uuid] {
@@ -113,6 +123,15 @@ form {
 
       &.focused {
         border: 5px solid red;
+      }
+    }
+
+    &.dark-theme {
+      [data-lint-uuid],
+      [data-comment-uuid] {
+        &:hover:after {
+          background-color: $dark-background;
+        }
       }
     }
 

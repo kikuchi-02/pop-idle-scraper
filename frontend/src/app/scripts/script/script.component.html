@@ -1,4 +1,4 @@
-<div class="wrapper" *ngIf="!!script">
+<div class="wrapper" [class.dark-theme]="darkTheme" *ngIf="!!script">
   <div class="tool">
     <form class="tool__item">
       <div class="form__item">
@@ -38,6 +38,16 @@
         To subtitle
       </button>
     </div>
+    <!-- <div class="tool__item">
+      <mat-form-field>
+        <mat-label>status</mat-label>
+        <mat-select [formControl]="statusFormControl">
+          <mat-option *ngFor="let status of statusArray" [value]="status">{{
+            status
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div> -->
     <div class="tool__item tool__item--right" *ngIf="script.updated">
       <p>last update:</p>
       <p>{{ script.updated | date: 'short' }}</p>
@@ -45,7 +55,7 @@
   </div>
 
   <main class="main">
-    <div class="tool-box__wrapper">
+    <div class="tool-box__wrapper" [class.dark-theme]="darkTheme">
       <app-tool-box
         (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
       ></app-tool-box>
@@ -58,16 +68,17 @@
 
       <quill-editor
         class="editor__main"
+        [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event)"
         (onContentChanged)="onContentChanged($event)"
         (onSelectionChanged)="onSelectionChanged($event)"
       ></quill-editor>
 
       <div class="console__wrapper">
-        <app-console></app-console>
+        <app-console [darkTheme]="darkTheme"></app-console>
       </div>
     </div>
-    <app-balloon></app-balloon>
+    <app-balloon [darkTheme]="darkTheme"></app-balloon>
   </main>
 </div>
 <div class="loading-modal" *ngIf="loading">loading</div>

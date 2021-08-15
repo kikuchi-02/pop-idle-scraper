@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subscriber } from 'rxjs';
+import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
@@ -10,6 +10,9 @@ import { Doc } from 'yjs';
 export class AppService {
   public ydoc = new Doc();
   public wsProvider: WebsocketProvider;
+
+  private darkThemeSubject$ = new BehaviorSubject<boolean>(false);
+  public darkTheme$ = this.darkThemeSubject$.asObservable();
 
   constructor() {
     this.wsProvider = new WebsocketProvider(
@@ -33,5 +36,9 @@ export class AppService {
         });
       }
     });
+  }
+
+  setTheme(darkTheme: boolean): void {
+    this.darkThemeSubject$.next(darkTheme);
   }
 }
