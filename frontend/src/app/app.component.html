@@ -2,22 +2,31 @@
   <mat-toolbar color="primary">
     <div class="toolbar-inner">
       <h1><a routerLink="/home">アイドル情報まとめ</a></h1>
-      <div class="toolbar-inner__links">
-        <div class="toolbar-inner__links-link">
-          <a routerLink="/members">members</a>
+      <div class="toolbar-inner__menu">
+        <div class="toolbar-inner__links">
+          <div class="toolbar-inner__links-link">
+            <a routerLink="/members">members</a>
+          </div>
+          <div class="toolbar-inner__links-link">
+            <a routerLink="/google-search">search</a>
+          </div>
+          <div class="toolbar-inner__links-link">
+            <a routerLink="/subtitle">subtitle</a>
+          </div>
+          <div class="toolbar-inner__links-link">
+            <a routerLink="/scripts">scripts</a>
+          </div>
         </div>
-        <div class="toolbar-inner__links-link">
-          <a routerLink="/google-search">search</a>
-        </div>
-        <div class="toolbar-inner__links-link">
-          <a routerLink="/subtitle">subtitle</a>
-        </div>
-        <div class="toolbar-inner__links-link">
-          <a routerLink="/scripts">scripts</a>
+        <div class="toolbar-inner__theme-toggle">
+          <mat-icon class="mr-8">brightness_5</mat-icon>
+          <mat-slide-toggle [formControl]="toggleControl" class="mr-8">
+          </mat-slide-toggle>
+          <mat-icon>bedtime</mat-icon>
         </div>
       </div>
     </div>
   </mat-toolbar>
 </header>
 <router-outlet></router-outlet>
+
 <footer></footer>

@@ -1,19 +1,27 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { DeltaOperation, Script } from '../entity/Script';
+import { Script } from '../entity/Script';
 import { User } from '../entity/User';
+import { DeltaOperation } from '../typing';
 
 export interface ScriptParams {
   id?: number;
   title: string;
   deltaOps: DeltaOperation[];
   author: User;
+  // status: ScriptStatus;
 }
 
 @EntityRepository(Script)
 export class ScriptRepository extends Repository<Script> {
   findBulk() {
     return this.find({
-      select: ['id', 'title', 'created', 'updated'],
+      select: [
+        'id',
+        'title',
+        'created',
+        'updated',
+        /*'status'*/
+      ],
       relations: ['author'],
       order: { updated: 'DESC' },
     });
@@ -30,6 +38,7 @@ export class ScriptRepository extends Repository<Script> {
     script.title = params.title;
     script.deltaOps = params.deltaOps;
     script.author = params.author;
+    // script.status = params.status;
     return this.manager.save(script);
   }
 

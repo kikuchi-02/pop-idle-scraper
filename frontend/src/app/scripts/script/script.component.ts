@@ -28,6 +28,7 @@ import {
   skip,
   takeUntil,
 } from 'rxjs/operators';
+import { AppService } from 'src/app/services/app.service';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
 import { Script } from 'src/app/typing';
 import { ScriptService } from './script.service';
@@ -50,7 +51,12 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   showSubtitleLine = true;
   loading = false;
 
+  darkTheme = false;
+
   titleFormControl = new FormControl('', [Validators.required]);
+  // statusFormControl = new FormControl(ScriptStatus.WIP, [Validators.required]);
+
+  // statusArray = Object.values(ScriptStatus);
 
   @ViewChild(BalloonComponent)
   balloonComponent: BalloonComponent;
@@ -70,8 +76,16 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private scriptService: ScriptService,
     private renderer: Renderer2,
     private editorService: EditorService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private appService: AppService
   ) {
+    this.appService.darkTheme$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        this.darkTheme = val;
+        this.cd.markForCheck();
+      });
+
     this.scriptService.loadingState$
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((state) => {
@@ -94,6 +108,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           this.script = script;
           this.initialScript = this.script.clone();
           this.titleFormControl.setValue(this.script.title);
+          // this.statusFormControl.setValue(this.script.status);
           this.cd.markForCheck();
           this.initialized$.next();
         });
@@ -175,6 +190,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   save(): void {
     this.script.title = this.titleFormControl.value;
+    // this.script.status = this.statusFormControl.value;
     this.script.deltaOps = this.editorService.getDelta();
     if (this.script.deltaOps.length === 0 || !this.script.title) {
       return;

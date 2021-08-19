@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  Input,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -25,6 +26,8 @@ export class ConsoleComponent implements OnInit, OnDestroy {
 
   textLintErrors: TextLintMessageWithUuid[];
   textLintRaisedError = false;
+
+  @Input() darkTheme: boolean;
 
   constructor(
     private scriptService: ScriptService,

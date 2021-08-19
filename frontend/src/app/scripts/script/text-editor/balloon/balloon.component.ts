@@ -4,6 +4,7 @@ import {
   Component,
   HostBinding,
   HostListener,
+  Input,
   OnInit,
 } from '@angular/core';
 import { EditorService } from '../editor.service';
@@ -18,6 +19,8 @@ export class BalloonComponent implements OnInit {
   @HostBinding('style.top') top: string;
   @HostBinding('style.left') left: string;
   @HostBinding('style.display') display = 'none';
+
+  @Input() darkTheme: boolean;
 
   private selection: Selection;
 

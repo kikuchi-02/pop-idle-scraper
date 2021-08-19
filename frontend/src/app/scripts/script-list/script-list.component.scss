@@ -16,16 +16,30 @@
         display: block;
       }
       &__body {
+        width: 100%;
         margin-left: 20px;
+        display: flex;
 
-        &-main {
-          &-author {
-            margin-left: 20px;
-          }
+        &-status {
+          width: 50px;
+          margin-right: 10px;
+        }
+
+        &-title {
+          display: block;
+          width: 150px;
+          overflow-x: hidden;
+        }
+
+        &-author {
+          margin-left: 20px;
         }
 
         &-sub {
+          margin-left: auto;
+          display: flex;
           &-date {
+            width: 200px;
             margin-right: 20px;
           }
         }

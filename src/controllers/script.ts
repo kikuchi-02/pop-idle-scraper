@@ -42,6 +42,7 @@ export const updateScript = async (req: Request, res: Response) => {
     deltaOps: req.body.deltaOps,
     author: req.user,
     id: parseInt(id, 10),
+    // status: req.body.status,
   };
 
   const script = await scriptRepository.updateOrFail(params).catch((e) => {
@@ -63,6 +64,7 @@ export const createScript = async (req: Request, res: Response) => {
     title: req.body.title,
     deltaOps: req.body.deltaOps,
     author: req.user,
+    // status: req.body.status,
   };
 
   const script = await scriptRepository.createAndSave(params).catch((e) => {

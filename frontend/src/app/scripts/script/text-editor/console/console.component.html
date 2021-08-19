@@ -1,6 +1,8 @@
-<div class="wrapper">
+<div class="wrapper" [class.dark-theme]="darkTheme">
   <mat-tab-group mat-stretch-tabs>
-    <mat-tab label="chat"><app-chat></app-chat></mat-tab>
+    <mat-tab label="chat"
+      ><app-chat [darkTheme]="darkTheme"></app-chat
+    ></mat-tab>
     <mat-tab label="textlint">
       <div class="textlint-result">
         <button
@@ -17,7 +19,7 @@
         >
           Remove
         </button>
-        <div class="textlint-result__content">
+        <div class="textlint-result__content" [class.dark-theme]="darkTheme">
           <ng-container *ngIf="!!textLintErrors; else NoResult">
             <ng-container
               *ngIf="textLintErrors.length > 0; else NoTextLintErrors"
