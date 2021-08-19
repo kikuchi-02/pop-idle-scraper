@@ -1,4 +1,7 @@
 import { DeltaOperation } from 'quill';
+// import { ScriptStatus } from '../../../src/typing';
+
+// export { ScriptStatus } from '../../../src/typing';
 
 export interface Post {
   date?: number;
@@ -101,6 +104,7 @@ export class Script {
   created: Date;
   updated: Date;
   author: User;
+  // status: ScriptStatus;
 
   constructor(data: Partial<Script> = {}) {
     Object.assign(this, data);

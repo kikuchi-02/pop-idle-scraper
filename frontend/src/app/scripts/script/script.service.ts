@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -91,6 +89,7 @@ export class ScriptService {
       .put<Partial<Script>>(`api/v1/scripts/${script.id}`, {
         title: script.title,
         deltaOps: script.deltaOps,
+        // status: script.status,
       })
       .pipe(map((newScript) => new Script(newScript)));
   }

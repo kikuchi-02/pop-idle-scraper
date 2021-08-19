@@ -95,3 +95,23 @@ export interface MemberLinks {
   name: string;
   links: string[];
 }
+
+// from quill
+export interface StringMap {
+  [key: string]: any;
+}
+export interface OptionalAttributes {
+  attributes?: StringMap;
+}
+export type DeltaOperation = {
+  insert?: any;
+  delete?: number;
+  retain?: number;
+} & OptionalAttributes;
+
+// export enum ScriptStatus {
+//   DONE = 'done',
+//   WAIT_FOR_REVIEW = 'waitForReview',
+//   REVIEWED = 'reviewed',
+//   WIP = 'wip',
+// }

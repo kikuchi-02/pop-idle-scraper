@@ -7,21 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DeltaOperation } from '../typing';
 import { Message } from './Message';
 import { User } from './User';
-
-// from quill
-export interface StringMap {
-  [key: string]: any;
-}
-export interface OptionalAttributes {
-  attributes?: StringMap;
-}
-export type DeltaOperation = {
-  insert?: any;
-  delete?: number;
-  retain?: number;
-} & OptionalAttributes;
 
 @Entity()
 export class Script {
@@ -48,4 +36,7 @@ export class Script {
 
   @OneToMany((type) => Message, (message) => message.script)
   messages: Message[];
+
+  // @Column({ type: 'enum', enum: ScriptStatus, default: ScriptStatus.WIP })
+  // status: ScriptStatus;
 }
