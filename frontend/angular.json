@@ -32,7 +32,8 @@
               "./node_modules/quill/dist/quill.core.css",
               "./node_modules/quill/dist/quill.bubble.css",
               "./node_modules/quill/dist/quill.snow.css",
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/dark-theme.scss"
             ],
             "scripts": ["./node_modules/quill/dist/quill.min.js"],
             "allowedCommonJsDependencies": ["brace/mode/markdown"]
