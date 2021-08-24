@@ -38,7 +38,7 @@ export class AppService {
     //   }
     // });
 
-    return interval(300).pipe(
+    return interval(100).pipe(
       filter(() => this.wsProvider.synced),
       map(() => void 0),
       first()
