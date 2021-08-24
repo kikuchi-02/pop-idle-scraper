@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { cloneDeep } from 'lodash';
 import {
   ContentChange,
   QuillEditorComponent,
@@ -106,7 +107,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
-          this.initialScript = this.script.clone();
+          this.initialScript = cloneDeep(this.script);
           this.titleFormControl.setValue(this.script.title);
           // this.statusFormControl.setValue(this.script.status);
           this.cd.markForCheck();
@@ -205,7 +206,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
-          this.initialScript = script.clone();
+          this.initialScript = cloneDeep(script);
           this.cd.markForCheck();
         });
     } else {
@@ -214,7 +215,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((script) => {
           this.script = script;
-          this.initialScript = script.clone();
+          this.initialScript = cloneDeep(script);
           this.cd.markForCheck();
 
           this.router.navigate([`../${script.id}`], { relativeTo: this.route });
