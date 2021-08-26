@@ -236,12 +236,10 @@ export class EditorService {
 
   selectionColorUp(): void {
     const selection = this.selectionRange;
-    this.editor.formatText(
-      selection.index,
-      selection.length,
-      'color',
-      this.textColor
-    );
+    const color = ['#000000', '#ffffff'].includes(this.textColor)
+      ? false
+      : this.textColor;
+    this.editor.formatText(selection.index, selection.length, 'color', color);
   }
 
   selectionBackgroundColorUp(): void {

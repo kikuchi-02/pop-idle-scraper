@@ -1,4 +1,6 @@
+import { isEqual } from 'lodash';
 import { DeltaOperation } from 'quill';
+
 // import { ScriptStatus } from '../../../src/typing';
 
 // export { ScriptStatus } from '../../../src/typing';
@@ -110,16 +112,54 @@ export class Script {
     Object.assign(this, data);
   }
 
-  clone(): Script {
-    const clone = Object.assign(
-      Object.create(Object.getPrototypeOf(this)),
-      this
-    );
-    return clone as Script;
-  }
-
   isEqual(anotherScript: Script): boolean {
-    return JSON.stringify(this) === JSON.stringify(anotherScript);
+    if (
+      ['id', 'title', 'created', 'updated'].some(
+        (property) => this[property] !== anotherScript[property]
+      )
+    ) {
+      return false;
+    }
+    if (this.deltaOps.length !== anotherScript.deltaOps.length) {
+      return false;
+    }
+    const isDeltaDifferent = this.deltaOps.some((op, i) => {
+      const another = anotherScript.deltaOps[i];
+      if (
+        !isEqual(op.insert, another.insert) ||
+        !isEqual(op.retain, another.retain) ||
+        !isEqual(op.delete, another.delete)
+      ) {
+        return true;
+      }
+
+      const attribute = op.attributes || {};
+      const anotherAttribute = another.attributes || {};
+
+      if (
+        !isEqual(
+          Object.keys(attribute).sort(),
+          Object.keys(anotherAttribute).sort()
+        )
+      ) {
+        return true;
+      }
+
+      if (
+        Object.keys(attribute)
+          .filter((key) => key !== 'lint')
+          .some((key) => !isEqual(attribute[key], anotherAttribute[key]))
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+    if (isDeltaDifferent) {
+      return false;
+    }
+
+    return true;
   }
 }
 
