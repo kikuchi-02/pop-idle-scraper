@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, interval, Observable } from 'rxjs';
+import { BehaviorSubject, interval, Observable, Subscriber } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { WebsocketProvider } from 'y-websocket';
@@ -37,12 +37,20 @@ export class AppService {
     //     });
     //   }
     // });
-
-    return interval(100).pipe(
-      filter(() => this.wsProvider.synced),
-      map(() => void 0),
-      first()
-    );
+    return new Observable((subscriber: Subscriber<void>) => {
+      if (this.wsProvider.synced) {
+        subscriber.next();
+        subscriber.complete();
+      } else {
+        interval(100)
+          .pipe(
+            filter(() => this.wsProvider.synced),
+            map(() => void 0),
+            first()
+          )
+          .subscribe(subscriber);
+      }
+    });
   }
 
   setTheme(darkTheme: boolean): void {
