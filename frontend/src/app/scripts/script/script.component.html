@@ -57,13 +57,24 @@
   <main class="main">
     <div class="tool-box__wrapper" [class.dark-theme]="darkTheme">
       <app-tool-box
-        (toggleSubtitleButton)="showSubtitleLine = !showSubtitleLine"
+        (toggleSubtitleButton)="
+          showSubtitleLine.toggle = !showSubtitleLine.toggle
+        "
       ></app-tool-box>
     </div>
 
     <div class="editor">
-      <div class="editor__subtitle" *ngIf="showSubtitleLine">
+      <div
+        class="editor__subtitle"
+        *ngIf="showSubtitleLine.toggle && showSubtitleLine.single"
+      >
         <div class="editor__subtitle-line"></div>
+      </div>
+      <div
+        class="editor__subtitle"
+        *ngIf="showSubtitleLine.toggle && showSubtitleLine.double"
+      >
+        <div class="editor__subtitle-double-line"></div>
       </div>
 
       <quill-editor

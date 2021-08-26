@@ -49,7 +49,7 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   blurred = false;
   focused = false;
 
-  showSubtitleLine = true;
+  showSubtitleLine = { toggle: true, single: true, double: true };
   loading = false;
 
   darkTheme = false;
@@ -166,16 +166,28 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
     fromEvent(window, 'resize')
       .pipe(
-        map(() => window.innerWidth),
+        map(
+          () =>
+            this.editorComponent.elementRef.nativeElement.getBoundingClientRect()
+              .width
+        ),
         distinctUntilChanged(),
         debounceTime(300),
         takeUntil(this.unsubscriber$)
       )
       .subscribe((width) => {
-        if (width < 400) {
-          this.showSubtitleLine = false;
-          this.cd.markForCheck();
+        if (width > 900) {
+          this.showSubtitleLine.single = true;
+          this.showSubtitleLine.double = true;
+        } else if (width > 500) {
+          this.showSubtitleLine.single = true;
+          this.showSubtitleLine.double = false;
+        } else {
+          this.showSubtitleLine.single = false;
+          this.showSubtitleLine.double = false;
         }
+
+        this.cd.markForCheck();
       });
   }
 
