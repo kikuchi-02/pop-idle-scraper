@@ -4,19 +4,15 @@
   width: auto;
   max-width: none;
 
-  .tool {
-    &__container {
-      margin: 20px;
-    }
-  }
+  .menu {
+    margin: 0 20px;
 
-  .layout-button {
-    &__container {
-      margin: 20px;
-    }
-    button {
-      width: 300px;
-      height: 50px;
+    &__row {
+      margin: 10px 0;
+
+      button {
+        margin-right: 20px;
+      }
     }
   }
 
@@ -26,10 +22,9 @@
     }
     &__label {
       display: flex;
-      width: 100%;
-
-      &--hide {
-        display: none;
+      &-label {
+        display: flex;
+        width: 100%;
       }
 
       label {
@@ -42,14 +37,13 @@
       display: flex;
       width: 100%;
 
+      max-height: 95vh;
+      overflow: auto;
+
       ::ng-deep .textarea {
         min-height: 1000px;
         // flex-grow: 1;
         width: 50%;
-
-        &--hide {
-          display: none;
-        }
 
         [data-warning-uuid] {
           cursor: pointer;
@@ -63,6 +57,19 @@
         }
       }
     }
+
+    &__subtitle {
+      align-self: stretch;
+      position: relative;
+    }
+
+    &__subtitle-line {
+      position: absolute;
+      left: 420px;
+      width: 3px;
+      height: 100%;
+      background-color: rgba(255, 0, 0, 0.2);
+    }
   }
 }
 .loading-modal {
@@ -75,7 +82,9 @@
   opacity: 0.7;
   z-index: 1000;
 }
-/**
-私の名前は田中です。
-家へ帰る道中。
-*/
+
+.svg__icon {
+  &:hover {
+    color: #3f51b5;
+  }
+}

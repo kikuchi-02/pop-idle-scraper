@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
 import { SharedModule } from '../shared/shared.module';
@@ -35,6 +36,7 @@ Quill.register(WarningBlot);
     QuillModule.forRoot({ modules: { toolbar: false } }),
     OverlayModule,
     MatIconModule,
+    MatSlideToggleModule,
   ],
 })
 export class SubtitleModule {}

@@ -36,7 +36,7 @@
               "src/dark-theme.scss"
             ],
             "scripts": ["./node_modules/quill/dist/quill.min.js"],
-            "allowedCommonJsDependencies": ["brace/mode/markdown"]
+            "allowedCommonJsDependencies": ["lodash"]
           },
           "configurations": {
             "production": {

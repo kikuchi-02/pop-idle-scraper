@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { IpadicFeatures } from 'kuromoji';
 import { defer, Observable, of } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
 import { TokenizeService } from '../services/tokenizer.service';
@@ -110,5 +111,123 @@ export class SubtitleService {
         )
       )
     );
+  }
+
+  splitByNewLine(text: string): Observable<string> {
+    const maxLength = 31;
+    return this.tokenizeService.tokenize(text).pipe(
+      map((features) => {
+        const splittedTokens: string[] = [];
+        let str = '';
+        for (let i = 0; i < features.length; i++) {
+          const feature = features[i];
+          const nextFeature = feature[i + 1];
+          str += feature.surface_form;
+          if (this.splittable(feature, nextFeature)) {
+            splittedTokens.push(str);
+            str = '';
+          }
+        }
+
+        let result = '';
+        let splitted = [];
+        let counter = 0;
+        splittedTokens.forEach((token, i) => {
+          if (counter + token.length > maxLength) {
+            result += splitted.join('');
+            if (!token.startsWith('\n')) {
+              result += '\n';
+            }
+
+            counter = 0;
+            splitted = [];
+          }
+          if (['。', '！', '？', '-'].some((c) => token.endsWith(c))) {
+            result += splitted.join('') + token;
+            if (!(splittedTokens[i + 1] || '').startsWith('\n')) {
+              result += '\n';
+            }
+            counter = 0;
+            splitted = [];
+          } else {
+            splitted.push(token);
+            counter += token.length;
+          }
+        });
+        if (splitted.length > 0) {
+          result += splitted.join('');
+        }
+        result = result.replace(/。\n/g, '。\n\n').replace(/\n{3,}/g, '\n\n');
+        return result;
+      })
+    );
+  }
+
+  extractTags(text: string): Observable<string[]> {
+    text = text.replace(/（[^）]*）/g, '').replace(/☆/g, '');
+    return this.tokenizeService.tokenize(text).pipe(
+      map((features) => {
+        const counter = new Map<string, number>();
+        features
+          .filter(
+            (feature) =>
+              feature.word_type !== 'UNKNOWN' && feature.pos === '名詞'
+          )
+          .forEach((feature) => {
+            const prev = counter.get(feature.basic_form) || 0;
+            counter.set(feature.basic_form, prev + 1);
+          });
+        const tags = [];
+        for (const [tag, count] of counter.entries()) {
+          if (count > 2) {
+            tags.push({ tag, count });
+          }
+        }
+        const popularTags = tags
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 30)
+          .map((tag) => tag.tag);
+        return popularTags;
+      })
+    );
+  }
+
+  private splittable(
+    feature: IpadicFeatures,
+    nextFeature?: IpadicFeatures
+  ): boolean {
+    // if (
+    //   nextFeature !== undefined &&
+    //   nextFeature.surface_form.startsWith('\n')
+    // ) {
+    //   return false;
+    // }
+
+    const extractPos = (ipadicFeature: IpadicFeatures) =>
+      [
+        ipadicFeature.pos,
+        ipadicFeature.pos_detail_1,
+        ipadicFeature.pos_detail_2,
+        ipadicFeature.pos_detail_3,
+      ].filter((p) => p !== '*');
+
+    const pos = extractPos(feature);
+
+    if (['句点', '読点', '係助詞', '並立助詞'].some((p) => pos.includes(p))) {
+      return true;
+    }
+    if (['。', '、', '？', '！'].includes(feature.surface_form)) {
+      return true;
+    }
+
+    const nextPos = nextFeature ? extractPos(feature) : [];
+    if (
+      pos.includes('接続助詞') &&
+      ['句点', '読点', '非自立', '記号'].every((p) => !nextPos.includes(p))
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
