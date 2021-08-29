@@ -141,6 +141,13 @@ export class SubtitleService {
         const context = canvas.getContext('2d');
 
         splittedTokens.forEach((token, i) => {
+          if (token === '\n') {
+            result += splitted.join('') + '\n';
+            counter = [];
+            splitted = [];
+            return;
+          }
+
           const metrics = context.measureText([...counter, token].join(''));
           if (metrics.width > maxWidth) {
             result += splitted.join('');
@@ -205,6 +212,10 @@ export class SubtitleService {
     feature: IpadicFeatures,
     nextFeature?: IpadicFeatures
   ): boolean {
+    if (feature.surface_form === '\n') {
+      return true;
+    }
+
     const extractPos = (ipadicFeature: IpadicFeatures) =>
       [
         ipadicFeature.pos,

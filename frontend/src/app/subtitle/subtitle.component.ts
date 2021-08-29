@@ -18,7 +18,7 @@ interface Srt {
   text: string;
 }
 
-const layouts = ['sound', 'tag', 'srt', 'link'] as const;
+const layouts = ['plain', 'sound', 'tag', 'srt', 'link'] as const;
 type Layout = typeof layouts[number];
 
 @Component({
@@ -36,7 +36,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     return !this.editorInitialized$.getValue() || this.loadingHashSet.size > 0;
   }
 
-  layout: Layout = 'sound';
+  layout: Layout = 'plain';
   dictionaryOpen = false;
 
   warningMessenger$ = new Subject<void>();
@@ -213,10 +213,9 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         SubtitleComponent.subtitleLayoutLocalStorageKey
       ) as Layout;
     }
-    if (!layouts.includes(type)) {
-      return;
+    if (layouts.includes(type)) {
+      this.layout = type;
     }
-    this.layout = type;
     localStorage.setItem(SubtitleComponent.subtitleLayoutLocalStorageKey, type);
     this.refreshOutput();
 
@@ -275,6 +274,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .trim()
       .replace(/（[^）]*）/g, '')
       .replace(/\d\n/g, '\n')
+      .replace(/\d\s\n/g, '\n')
       .replace(/☆/g, '')
       .replace(/【(.*)】/g, (match, p1, offset, str) => p1 + '\n');
 
@@ -284,7 +284,6 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .subscribe((splittedText) => {
         this.inputEditor.setText(splittedText);
 
-        const firstAt = 10005;
         const partials: Srt[] = [];
         let last: string;
         let seqCounter = 0;
@@ -342,6 +341,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           this.outputWarning = Array.from(errors.values()).join('\n');
         }
 
+        const firstAt = 5;
         let result = '';
         let lastTime: number;
         for (let i = 0; i < partials.length; i++) {
@@ -349,18 +349,13 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           const start = lastTime === undefined ? firstAt : lastTime;
           const end = start + srt.duration;
 
-          const startS = String(Math.ceil(start));
-          const endS = String(Math.ceil(end));
-
+          const startS = this.calcSubtitleTime(start);
+          const endS = this.calcSubtitleTime(end);
           const block =
             `${i + 1}\n` +
-            `${('00' + startS.slice(undefined, -4)).slice(-2)}:${(
-              '00' + startS.slice(-4, -2)
-            ).slice(-2)}:${('00' + startS.slice(-2)).slice(-2)},000` +
+            `${startS.hour}:${startS.minute}:${startS.second},000` +
             ' --> ' +
-            `${('00' + endS.slice(undefined, -4)).slice(-2)}:${(
-              '00' + endS.slice(-4, -2)
-            ).slice(-2)}:${('00' + endS.slice(-2)).slice(-2)},000` +
+            `${endS.hour}:${endS.minute}:${endS.second},000` +
             '\n' +
             `${srt.text}` +
             '\n\n';
@@ -404,6 +399,9 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   refreshOutput(): void {
     this.outputWarning = undefined;
     switch (this.layout) {
+      case 'plain':
+        this.outputEditor.setText(this.inputEditor.getText());
+        break;
       case 'sound':
         this.convertSound();
         break;
@@ -445,6 +443,20 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       scroller.scrollTo({ top, behavior: 'smooth' });
       break;
     }
+  }
+
+  private calcSubtitleTime(
+    seconds: number
+  ): { hour: string; minute: string; second: string } {
+    const hour = Math.floor(seconds / 3600);
+    const minute = Math.floor((seconds - hour * 60) / 60);
+    const second = Math.floor(seconds % 60);
+
+    // plus one for davinci
+    const hourS = ('00' + (hour + 1).toString()).slice(-2);
+    const minuteS = ('00' + minute.toString()).slice(-2);
+    const secondS = ('00' + second.toString()).slice(-2);
+    return { hour: hourS, minute: minuteS, second: secondS };
   }
 
   private calcSrt(text1: string, text2?: string): Srt {
