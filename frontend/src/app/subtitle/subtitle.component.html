@@ -30,19 +30,17 @@
       </mat-slide-toggle>
     </div>
     <div class="menu__row">
-      <h3>Layout</h3>
-      <button mat-stroked-button color="primary" (click)="applyLayout('sound')">
-        sound
-      </button>
-      <button mat-stroked-button color="primary" (click)="applyLayout('tag')">
-        tag
-      </button>
-      <button mat-stroked-button color="primary" (click)="applyLayout('srt')">
-        srt
-      </button>
-      <button mat-stroked-button color="primary" (click)="applyLayout('link')">
-        link
-      </button>
+      <h3>Layout: {{ layout }}</h3>
+      <mat-button-toggle-group
+        [ngModel]="layout"
+        (ngModelChange)="applyLayout($event)"
+        aria-label="Font Style"
+      >
+        <mat-button-toggle value="sound">sound</mat-button-toggle>
+        <mat-button-toggle value="tag">tag</mat-button-toggle>
+        <mat-button-toggle value="srt">srt</mat-button-toggle>
+        <mat-button-toggle value="link">link</mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
   </div>
   <div class="input-area">
@@ -50,14 +48,40 @@
       <div class="input-area__label">
         <div class="input-area__label-label">
           <label>input</label>
-          <div class="svg__icon" (click)="refreshInput()">
-            <mat-icon>refresh</mat-icon>
+          <div class="input-area__caution-scroll">
+            <div
+              class="input-area__caution-scroll-button svg__icon"
+              (click)="scrollToCaution('input')"
+            >
+              <mat-icon>arrow_downward</mat-icon>
+            </div>
+          </div>
+          <div class="input-area__label-tool">
+            <div class="svg__icon" (click)="saveInput()">
+              <mat-icon>save</mat-icon>
+            </div>
+            <div class="svg__icon" (click)="refreshInput()">
+              <mat-icon>refresh</mat-icon>
+            </div>
           </div>
         </div>
         <div class="input-area__label-label">
           <label>output</label>
-          <div class="svg__icon" (click)="refreshOutput()">
-            <mat-icon>refresh</mat-icon>
+          <div
+            class="input-area__label-warning"
+            [class.input-area__label-warning--show]="!!outputWarning"
+          >
+            <div class="input-area__label-warning-inner">
+              <mat-icon>warning</mat-icon>
+              <div class="input-area__label-warning-tooltip">
+                {{ outputWarning }}
+              </div>
+            </div>
+          </div>
+          <div class="input-area__label-tool">
+            <div class="svg__icon" (click)="refreshOutput()">
+              <mat-icon>refresh</mat-icon>
+            </div>
           </div>
         </div>
       </div>
@@ -66,6 +90,7 @@
           <div class="input-area__subtitle-line"></div>
         </div>
         <quill-editor
+          [debounceTime]="300"
           class="textarea"
           (onEditorCreated)="onEditorCreated($event, 'input')"
         ></quill-editor>
@@ -73,6 +98,7 @@
           <div class="input-area__subtitle-line"></div>
         </div>
         <quill-editor
+          [debounceTime]="300"
           class="textarea"
           (onEditorCreated)="onEditorCreated($event, 'output')"
         ></quill-editor>

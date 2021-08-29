@@ -58,7 +58,8 @@
     "eslint-config-google": "^0.14.0",
     "eslint-config-prettier": "^8.2.0",
     "prettier": "^2.3.2",
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "wscat": "^5.0.0"
   },
   "engines": {
     "node": "v12.13.1"

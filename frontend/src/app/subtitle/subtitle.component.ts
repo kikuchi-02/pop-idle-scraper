@@ -8,7 +8,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import Quill from 'quill';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SubtitleService } from './subtitle.service';
@@ -29,8 +29,12 @@ type Layout = typeof layouts[number];
 })
 export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
+  static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
 
-  loading = true;
+  private loadingHashSet = new Set<string>();
+  get loading(): boolean {
+    return !this.editorInitialized$.getValue() || this.loadingHashSet.size > 0;
+  }
 
   layout: Layout = 'sound';
   dictionaryOpen = false;
@@ -39,6 +43,9 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   newDictionaryKeys: string[] = [];
 
   showSubtitleLine = true;
+
+  outputWarning = undefined;
+  private editorInitialized$ = new BehaviorSubject<boolean>(false);
 
   private unsubscriber$ = new Subject<void>();
   private warningUnsubscriber$ = new Subject<void>();
@@ -55,11 +62,20 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   onEditorCreated(event: Quill, type: 'input' | 'output'): void {
     if (type === 'input') {
       this.inputEditor = event;
+      if (!this.outputEditor) {
+        return;
+      }
     } else if (type === 'output') {
       this.outputEditor = event;
+      if (!this.inputEditor) {
+        return;
+      }
     }
+
     this.refreshInput();
-    this.loading = false;
+    this.applyLayout();
+
+    this.editorInitialized$.next(true);
     this.cd.markForCheck();
   }
 
@@ -70,56 +86,115 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   convertSound(): void {
-    this.loading = true;
+    const loadingKey = this.setLoading();
     const input = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
-    this.subtitleService
-      .textToSoundText(input)
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((result) => {
-        Object.values(result.inputUnknownIndexes).forEach(({ start, end }) => {
-          this.inputEditor.formatText(
-            start,
-            end - start,
-            'background-color',
-            'orange'
+    this.ngZone.runOutsideAngular(() => {
+      this.subtitleService
+        .textToSoundText(input)
+        .pipe(takeUntil(this.unsubscriber$))
+        .subscribe((result) => {
+          Object.values(result.inputUnknownIndexes).forEach(
+            ({ start, end }) => {
+              this.inputEditor.formatText(
+                start,
+                end - start,
+                'background-color',
+                'orange'
+              );
+            }
           );
-        });
-        this.outputEditor.setText(result.text);
-        const outputText = this.outputEditor.getText();
-        Object.values(result.outputUnknownIndexes).forEach(({ start, end }) => {
-          const uuid = uuidv4();
-          const unknown = outputText.substring(start, end);
-          this.outputEditor.formatText(start, end - start, 'warning', {
-            uuid,
-            unknown,
+          this.outputEditor.setText(result.text);
+          const outputText = this.outputEditor.getText();
+          Object.values(result.outputUnknownIndexes).forEach(
+            ({ start, end }) => {
+              const uuid = uuidv4();
+              const unknown = outputText.substring(start, end);
+              this.outputEditor.formatText(start, end - start, 'warning', {
+                uuid,
+                unknown,
+              });
+            }
+          );
+          result.outputWarningIndexes.forEach(({ start, end }) => {
+            const uuid = uuidv4();
+            const num = parseInt(outputText.substring(start, end), 10);
+            this.outputEditor.formatText(start, end - start, 'warning', {
+              uuid,
+              num,
+            });
           });
-        });
-        result.outputWarningIndexes.forEach(({ start, end }) => {
-          const uuid = uuidv4();
-          const num = parseInt(outputText.substring(start, end), 10);
-          this.outputEditor.formatText(start, end - start, 'warning', {
-            uuid,
-            num,
-          });
-        });
-        this.loading = false;
-        this.cd.markForCheck();
+          // this.outputEditor.setText(result.text);
+          // const outputText = this.outputEditor.getText();
 
-        this.ngZone.onStable
-          .pipe(
-            first(),
-            takeUntil(this.warningUnsubscriber$),
-            takeUntil(this.unsubscriber$)
-          )
-          .subscribe(() => {
-            this.warningMessenger$.next();
-          });
-      });
+          // const inputUnknownDelta = new Delta();
+          // const inputUnknownIndexes = Object.values(
+          //   result.inputUnknownIndexes
+          // ).sort((a, b) => a.start - b.start);
+          // for (let i = 0; i < inputUnknownIndexes.length; i++) {
+          //   const { start, end } = inputUnknownIndexes[i];
+          //   if (i === 0) {
+          //     inputUnknownDelta.retain(start);
+          //   } else {
+          //     inputUnknownDelta.retain(start - inputUnknownIndexes[i - 1].end);
+          //   }
+          //   inputUnknownDelta.retain(end - start, { caution: 'unknown' });
+          // }
+          // this.inputEditor.updateContents(inputUnknownDelta);
+
+          // const outputUnknownDelta = new Delta();
+          // const outputUnknownIndexes = Object.values(
+          //   result.outputUnknownIndexes
+          // ).sort((a, b) => a.start - b.start);
+          // for (let i = 0; i < outputUnknownIndexes.length; i++) {
+          //   const { start, end } = outputUnknownIndexes[i];
+          //   if (i === 0) {
+          //     outputUnknownDelta.retain(start);
+          //   } else {
+          //     outputUnknownDelta.retain(end - outputUnknownIndexes[i - 1].end);
+          //   }
+          //   const uuid = uuidv4();
+          //   const unknown = outputText.substring(start, end);
+          //   outputUnknownDelta.retain(end - start, {
+          //     warning: { uuid, unknown },
+          //   });
+          // }
+          // this.outputEditor.updateContents(outputUnknownDelta);
+
+          // const outputWarningDelta = new Delta();
+          // for (let i = 0; i < result.outputWarningIndexes.length; i++) {
+          //   const { start, end } = result.outputWarningIndexes[i];
+          //   if (i === 0) {
+          //     outputWarningDelta.retain(start);
+          //   } else {
+          //     outputWarningDelta.retain(
+          //       end - result.outputWarningIndexes[i - 1].end
+          //     );
+          //   }
+          //   const uuid = uuidv4();
+          //   const num = parseInt(outputText.substring(start, end), 10);
+          //   outputWarningDelta.retain(end - start, { warning: { uuid, num } });
+          // }
+          // this.outputEditor.updateContents(outputWarningDelta);
+
+          this.resolveLoading(loadingKey);
+          this.cd.markForCheck();
+
+          this.ngZone.onStable
+            .pipe(
+              first(),
+              takeUntil(this.warningUnsubscriber$),
+              takeUntil(this.unsubscriber$)
+            )
+            .subscribe(() => {
+              this.warningMessenger$.next();
+            });
+        });
+    });
   }
 
   extractTags(): void {
-    this.loading = true;
+    const uuid = this.setLoading();
     const input = this.inputEditor.getText();
     this.subtitleService
       .extractTags(input)
@@ -127,16 +202,22 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .subscribe((tags) => {
         const text = tags.map((tag) => `#${tag}`).join(' ');
         this.outputEditor.setText(text);
-        this.loading = false;
+        this.resolveLoading(uuid);
         this.cd.markForCheck();
       });
   }
 
-  applyLayout(type: Layout): void {
+  applyLayout(type?: Layout): void {
+    if (!type) {
+      type = localStorage.getItem(
+        SubtitleComponent.subtitleLayoutLocalStorageKey
+      ) as Layout;
+    }
     if (!layouts.includes(type)) {
       return;
     }
     this.layout = type;
+    localStorage.setItem(SubtitleComponent.subtitleLayoutLocalStorageKey, type);
     this.refreshOutput();
 
     this.cd.markForCheck();
@@ -188,7 +269,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   subtitleToSrt(): void {
-    this.loading = true;
+    const loadingKey = this.setLoading();
     const input = this.inputEditor
       .getText()
       .trim()
@@ -208,20 +289,34 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         let last: string;
         let seqCounter = 0;
         let textIndex = 0;
-        let error = false;
+        const errors = new Set();
+
+        const canvas = this.renderer.createElement('canvas');
+        const context = canvas.getContext('2d');
 
         const splitted = splittedText.split('\n');
         for (const text of splitted) {
+          const metrics = context.measureText(text);
+          if (metrics.width > 310) {
+            this.inputEditor.formatText(
+              textIndex,
+              text.length,
+              'caution',
+              'too long sentence, cannot be splitted'
+            );
+            errors.add('Too long sentences');
+          }
+
           seqCounter++;
           if (text !== '' && text !== '。') {
             if (seqCounter > 2) {
-              error = true;
               this.inputEditor.formatText(
                 textIndex,
                 text.length,
-                'background-color',
-                '#FFAF7A'
+                'caution',
+                'The sentence continues for more than three lines.'
               );
+              errors.add('Sentences continue for more than three lines.');
             }
             if (last !== undefined) {
               partials.push(this.calcSrt(last, text));
@@ -243,13 +338,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           partials.push(this.calcSrt(last));
         }
 
-        if (error) {
-          this.outputEditor.setText(
-            'The sentence continues for more than three lines.'
-          );
-          this.loading = false;
-          this.cd.markForCheck();
-          return;
+        if (errors.size > 0) {
+          this.outputWarning = Array.from(errors.values()).join('\n');
         }
 
         let result = '';
@@ -279,7 +369,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           lastTime = end;
         }
         this.outputEditor.setText(result);
-        this.loading = false;
+        this.resolveLoading(loadingKey);
         this.cd.markForCheck();
       });
   }
@@ -306,8 +396,13 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     );
     this.inputEditor.setText(input || '');
   }
+  saveInput(): void {
+    const content = this.inputEditor.getText();
+    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, content);
+  }
 
   refreshOutput(): void {
+    this.outputWarning = undefined;
     switch (this.layout) {
       case 'sound':
         this.convertSound();
@@ -323,6 +418,32 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         break;
       default:
         throw new Error(`not implemented this type ${this.layout}`);
+    }
+  }
+
+  scrollToCaution(side: 'input' | 'output'): void {
+    const scrollers = document.querySelectorAll('.ql-editor');
+    const scroller = side === 'input' ? scrollers[0] : scrollers[1];
+
+    const scrollTop = scroller.scrollTop;
+
+    const cautionElements = document.querySelectorAll('[data-caution]');
+    let find = false;
+    for (const element of Array.from(cautionElements)) {
+      const top = (element as any).offsetTop - 200;
+      if (top > scrollTop) {
+        scroller.scrollTo({ top, behavior: 'smooth' });
+        find = true;
+        break;
+      }
+    }
+    if (find) {
+      return;
+    }
+    for (const element of Array.from(cautionElements)) {
+      const top = Math.max((element as any).offsetTop - 200, 0);
+      scroller.scrollTo({ top, behavior: 'smooth' });
+      break;
     }
   }
 
@@ -343,5 +464,14 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     );
     text = `<b>${text1}</b>\n<b>${text2}</b>`;
     return { duration, text };
+  }
+
+  private setLoading(): string {
+    const uuid = uuidv4();
+    this.loadingHashSet.add(uuid);
+    return uuid;
+  }
+  private resolveLoading(uuid: string): void {
+    this.loadingHashSet.delete(uuid);
   }
 }

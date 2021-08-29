@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { IpadicFeatures } from 'kuromoji';
 import { defer, Observable, of } from 'rxjs';
 import { first, map, mergeMap } from 'rxjs/operators';
@@ -16,10 +16,15 @@ interface SoundText {
   providedIn: 'root',
 })
 export class SubtitleService {
+  private renderer: Renderer2;
+
   constructor(
     private tokenizeService: TokenizeService,
-    private dictionaryService: DictionaryService
-  ) {}
+    private dictionaryService: DictionaryService,
+    rendererFactory: RendererFactory2
+  ) {
+    this.renderer = rendererFactory.createRenderer(null, null);
+  }
 
   textToSoundText(text: string): Observable<SoundText> {
     text = text.replace(/（[^）]*）/g, '');
@@ -114,14 +119,14 @@ export class SubtitleService {
   }
 
   splitByNewLine(text: string): Observable<string> {
-    const maxLength = 31;
+    const maxWidth = 310;
     return this.tokenizeService.tokenize(text).pipe(
       map((features) => {
         const splittedTokens: string[] = [];
         let str = '';
         for (let i = 0; i < features.length; i++) {
           const feature = features[i];
-          const nextFeature = feature[i + 1];
+          const nextFeature = features[i + 1];
           str += feature.surface_form;
           if (this.splittable(feature, nextFeature)) {
             splittedTokens.push(str);
@@ -131,15 +136,19 @@ export class SubtitleService {
 
         let result = '';
         let splitted = [];
-        let counter = 0;
+        let counter = [];
+        const canvas = this.renderer.createElement('canvas');
+        const context = canvas.getContext('2d');
+
         splittedTokens.forEach((token, i) => {
-          if (counter + token.length > maxLength) {
+          const metrics = context.measureText([...counter, token].join(''));
+          if (metrics.width > maxWidth) {
             result += splitted.join('');
             if (!token.startsWith('\n')) {
               result += '\n';
             }
 
-            counter = 0;
+            counter = [];
             splitted = [];
           }
           if (['。', '！', '？', '-'].some((c) => token.endsWith(c))) {
@@ -147,11 +156,11 @@ export class SubtitleService {
             if (!(splittedTokens[i + 1] || '').startsWith('\n')) {
               result += '\n';
             }
-            counter = 0;
+            counter = [];
             splitted = [];
           } else {
             splitted.push(token);
-            counter += token.length;
+            counter.push(token);
           }
         });
         if (splitted.length > 0) {
@@ -196,13 +205,6 @@ export class SubtitleService {
     feature: IpadicFeatures,
     nextFeature?: IpadicFeatures
   ): boolean {
-    // if (
-    //   nextFeature !== undefined &&
-    //   nextFeature.surface_form.startsWith('\n')
-    // ) {
-    //   return false;
-    // }
-
     const extractPos = (ipadicFeature: IpadicFeatures) =>
       [
         ipadicFeature.pos,
@@ -212,22 +214,23 @@ export class SubtitleService {
       ].filter((p) => p !== '*');
 
     const pos = extractPos(feature);
+    const nextPos = nextFeature ? extractPos(nextFeature) : [];
 
-    if (['句点', '読点', '係助詞', '並立助詞'].some((p) => pos.includes(p))) {
-      return true;
-    }
-    if (['。', '、', '？', '！'].includes(feature.surface_form)) {
-      return true;
-    }
+    const splitPos = ['句点', '読点', '並立助詞', '係助詞', '連語', '接続助詞'];
+    const nextUnsplittable = [...splitPos, '非自立', '助動詞'];
 
-    const nextPos = nextFeature ? extractPos(feature) : [];
-    if (
-      pos.includes('接続助詞') &&
-      ['句点', '読点', '非自立', '記号'].every((p) => !nextPos.includes(p))
-    ) {
-      return true;
-    }
+    const splitCharacters = ['。', '、', '？', '！'];
 
-    return false;
+    const isNextSplit =
+      nextFeature &&
+      (splitCharacters.includes(nextFeature.surface_form) ||
+        nextUnsplittable.some((p) => nextPos.includes(p)));
+
+    const splittable =
+      (splitPos.some((p) => pos.includes(p)) ||
+        splitCharacters.includes(feature.surface_form)) &&
+      !isNextSplit;
+
+    return splittable;
   }
 }
