@@ -293,6 +293,15 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
         const splitted = splittedText.split('\n');
         for (const text of splitted) {
+          if (text.length > 31) {
+            this.inputEditor.formatText(
+              textIndex,
+              text.length,
+              'caution',
+              'cannot be splitted'
+            );
+          }
+
           seqCounter++;
           if (text !== '' && text !== '。') {
             if (seqCounter > 2) {

@@ -121,7 +121,7 @@ export class SubtitleService {
         let str = '';
         for (let i = 0; i < features.length; i++) {
           const feature = features[i];
-          const nextFeature = feature[i + 1];
+          const nextFeature = features[i + 1];
           str += feature.surface_form;
           if (this.splittable(feature, nextFeature)) {
             splittedTokens.push(str);
@@ -196,13 +196,6 @@ export class SubtitleService {
     feature: IpadicFeatures,
     nextFeature?: IpadicFeatures
   ): boolean {
-    // if (
-    //   nextFeature !== undefined &&
-    //   nextFeature.surface_form.startsWith('\n')
-    // ) {
-    //   return false;
-    // }
-
     const extractPos = (ipadicFeature: IpadicFeatures) =>
       [
         ipadicFeature.pos,
@@ -212,22 +205,23 @@ export class SubtitleService {
       ].filter((p) => p !== '*');
 
     const pos = extractPos(feature);
+    const nextPos = nextFeature ? extractPos(nextFeature) : [];
 
-    if (['句点', '読点', '係助詞', '並立助詞'].some((p) => pos.includes(p))) {
-      return true;
-    }
-    if (['。', '、', '？', '！'].includes(feature.surface_form)) {
-      return true;
-    }
+    const splitPos = ['句点', '読点', '並立助詞', '係助詞', '連語', '接続助詞'];
+    const nextUnsplittable = [...splitPos, '非自立', '助動詞'];
 
-    const nextPos = nextFeature ? extractPos(feature) : [];
-    if (
-      pos.includes('接続助詞') &&
-      ['句点', '読点', '非自立', '記号'].every((p) => !nextPos.includes(p))
-    ) {
-      return true;
-    }
+    const splitCharacters = ['。', '、', '？', '！'];
 
-    return false;
+    const isNextSplit =
+      nextFeature &&
+      (splitCharacters.includes(nextFeature.surface_form) ||
+        nextUnsplittable.some((p) => nextPos.includes(p)));
+
+    const splittable =
+      (splitPos.some((p) => pos.includes(p)) ||
+        splitCharacters.includes(feature.surface_form)) &&
+      !isNextSplit;
+
+    return splittable;
   }
 }
