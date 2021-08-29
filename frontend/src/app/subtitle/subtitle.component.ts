@@ -289,29 +289,34 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         let last: string;
         let seqCounter = 0;
         let textIndex = 0;
-        let error = false;
+        const errors = new Set();
+
+        const canvas = this.renderer.createElement('canvas');
+        const context = canvas.getContext('2d');
 
         const splitted = splittedText.split('\n');
         for (const text of splitted) {
-          if (text.length > 31) {
+          const metrics = context.measureText(text);
+          if (metrics.width > 310) {
             this.inputEditor.formatText(
               textIndex,
               text.length,
               'caution',
-              'cannot be splitted'
+              'too long sentence, cannot be splitted'
             );
+            errors.add('Too long sentences');
           }
 
           seqCounter++;
           if (text !== '' && text !== '。') {
             if (seqCounter > 2) {
-              error = true;
               this.inputEditor.formatText(
                 textIndex,
                 text.length,
                 'caution',
                 'The sentence continues for more than three lines.'
               );
+              errors.add('Sentences continue for more than three lines.');
             }
             if (last !== undefined) {
               partials.push(this.calcSrt(last, text));
@@ -333,9 +338,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           partials.push(this.calcSrt(last));
         }
 
-        if (error) {
-          this.outputWarning =
-            'The sentence continues for more than three lines.';
+        if (errors.size > 0) {
+          this.outputWarning = Array.from(errors.values()).join('\n');
         }
 
         let result = '';
