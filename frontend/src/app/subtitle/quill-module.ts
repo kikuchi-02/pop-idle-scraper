@@ -70,3 +70,33 @@ export class WarningBlot extends Inline {
     }
   }
 }
+
+export class CautionBlot extends Inline {
+  static blotName = 'caution';
+  static tagName = 'span';
+
+  static create(value: string): Node {
+    const node = super.create();
+    if (value) {
+      node.setAttribute('data-caution', value);
+    }
+    return node;
+  }
+
+  static formats(node: any): string {
+    const value = node.getAttribute('data-caution');
+    return value;
+  }
+
+  format(name: string, value: string): void {
+    if (name === 'caution') {
+      if (value) {
+        this.domNode.setAttribute('data-caution', value);
+      } else {
+        this.domNode.removeAttribute('data-caution');
+      }
+    } else {
+      super.format(name, value);
+    }
+  }
+}
