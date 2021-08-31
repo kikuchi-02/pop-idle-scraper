@@ -44,10 +44,6 @@ export class EditorService {
   private textColor: string;
   private backgroundColor: string;
 
-  public get wsConnected(): boolean {
-    return this.appService.wsProvider.wsconnected;
-  }
-
   public commentSubject$ = new Subject<string>();
   public focusChatMessage$ = new Subject<string>();
 
@@ -78,19 +74,26 @@ export class EditorService {
 
     this.ytext = this.appService.ydoc.getText(label);
     this.undoManager = new UndoManager(this.ytext);
-    this.binding = new QuillBinding(
-      this.ytext,
-      editor,
-      this.appService.wsProvider.awareness
-    );
-    this.appService.wsSynced().subscribe(() => {
-      // default
-      if (this.editor.getText() === '\n' || scriptId === undefined) {
-        this.editor.setContents(initialContent);
-      }
+
+    if (this.appService.useWs) {
+      this.binding = new QuillBinding(
+        this.ytext,
+        editor,
+        this.appService.wsProvider.awareness
+      );
+      this.appService.wsSynced().subscribe(() => {
+        // default
+        if (this.editor.getText() === '\n' || scriptId === undefined) {
+          this.editor.setContents(initialContent);
+        }
+        this.initialized$.next();
+        this.scriptService.loadingStateChange(uuid);
+      });
+    } else {
+      this.editor.setContents(initialContent);
       this.initialized$.next();
       this.scriptService.loadingStateChange(uuid);
-    });
+    }
   }
 
   onContentChanged(event: ContentChange): void {}

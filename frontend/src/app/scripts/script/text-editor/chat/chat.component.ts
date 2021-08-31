@@ -195,17 +195,34 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  messageClick(message: Message): void {
+  messageClick(message: Message, state?: 'open' | 'close'): void {
     const uuid = message.uuid;
-    if (message.expanded) {
+
+    let open: boolean;
+    switch (state) {
+      case 'open':
+        open = true;
+        break;
+      case 'close':
+        open = false;
+        break;
+      default:
+        break;
+    }
+
+    if (!!open && open === message.expanded) {
+      return;
+    }
+    open = !message.expanded;
+
+    if (open) {
+      message.expanded = true;
+      this.activeMessage = message;
+      this.formElement.nativeElement.querySelector('textarea').focus();
+    } else {
       this.activeMessage = undefined;
       message.expanded = false;
       this.cd.markForCheck();
-    } else {
-      message.expanded = true;
-
-      this.activeMessage = message;
-      this.formElement.nativeElement.querySelector('textarea').focus();
     }
 
     if (uuid) {

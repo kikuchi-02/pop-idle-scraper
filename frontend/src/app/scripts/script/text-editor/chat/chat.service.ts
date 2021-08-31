@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { defer, Observable, of, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, mergeMap } from 'rxjs/operators';
 import { AppService } from 'src/app/services/app.service';
 import { Message } from 'src/app/typing';
@@ -19,7 +19,13 @@ export class ChatService {
       subject.next(array);
     });
     subject.next(this.yarray.toArray());
-    return this.appService.wsSynced().pipe(
+
+    return defer(() => {
+      if (!this.appService.useWs) {
+        return of(true);
+      }
+      return this.appService.wsSynced();
+    }).pipe(
       mergeMap(() => subject.asObservable()),
       distinctUntilChanged()
     );

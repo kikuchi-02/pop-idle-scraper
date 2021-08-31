@@ -45,7 +45,7 @@
         class="chat-message__text"
         [class.dark-theme]="darkTheme"
         [class.chat-message__text--active]="activeMessage === message"
-        (click)="messageClick(message)"
+        (click)="messageClick(message, 'open')"
       >
         <p class="chat-message__text-p">{{ message.body }}</p>
       </div>

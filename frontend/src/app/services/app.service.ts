@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, interval, Observable, Subscriber } from 'rxjs';
+import {
+  BehaviorSubject,
+  interval,
+  Observable,
+  Subscriber,
+  throwError,
+} from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { WebsocketProvider } from 'y-websocket';
@@ -15,15 +21,24 @@ export class AppService {
   private darkThemeSubject$ = new BehaviorSubject<boolean>(false);
   public darkTheme$ = this.darkThemeSubject$.asObservable();
 
+  get useWs(): boolean {
+    return environment.USE_WS;
+  }
+
   constructor() {
-    this.wsProvider = new WebsocketProvider(
-      `${environment.production ? 'wss' : 'ws'}://${window.location.host}`,
-      '__text',
-      this.ydoc
-    );
+    if (this.useWs) {
+      this.wsProvider = new WebsocketProvider(
+        `${environment.production ? 'wss' : 'ws'}://${window.location.host}`,
+        '__text',
+        this.ydoc
+      );
+    }
   }
 
   wsSynced(): Observable<void> {
+    if (!this.useWs) {
+      return throwError('ws is off');
+    }
     // return new Observable((subscriber: Subscriber<void>) => {
     //   if (this.wsProvider.synced) {
     //     subscriber.next();
