@@ -68,7 +68,6 @@ export class EditorService {
     const uuid = this.scriptService.loadingStateChange();
 
     this.editor = editor;
-    this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
 

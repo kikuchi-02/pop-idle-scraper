@@ -261,6 +261,11 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   scrollTop(): void {
     window.scroll({ top: 0, behavior: 'smooth' });
+
+    const scrolbar = this.editorComponent.elementRef.nativeElement.querySelector(
+      '.ql-editor'
+    );
+    scrolbar.scrollTop = { top: 0, behavior: 'smooth' };
   }
 
   navigateSubtitle(): void {
