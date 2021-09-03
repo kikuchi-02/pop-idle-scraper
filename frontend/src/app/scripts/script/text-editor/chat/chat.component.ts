@@ -280,4 +280,28 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cd.markForCheck();
       });
   }
+
+  deleteMessage(message: Message): void {
+    const delMsg = (msgs: Message[]): void => {
+      msgs.forEach((msg, i) => {
+        if (msg.id === message.id) {
+          msgs.splice(i, 1);
+          return;
+        }
+
+        if (msg.children) {
+          delMsg(msg.children);
+        }
+      });
+    };
+
+    delMsg(this.messages);
+
+    this.chatService
+      .deleteMessage(message.id)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe(() => {
+        this.cd.markForCheck();
+      });
+  }
 }

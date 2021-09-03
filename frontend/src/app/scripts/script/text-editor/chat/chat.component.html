@@ -65,6 +65,12 @@
         <span class="chat-message__sub-created">{{
           message.created | date: 'short'
         }}</span>
+        <button
+          class="chat-message__sub-delete svg__icon"
+          (click)="deleteMessage(message)"
+        >
+          <mat-icon>inventory_2</mat-icon>
+        </button>
       </div>
     </div>
   </div>

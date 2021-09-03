@@ -20,7 +20,7 @@ export class ScriptRepository extends Repository<Script> {
         'title',
         'created',
         'updated',
-        /*'status'*/
+        /* 'status'*/
       ],
       relations: ['author'],
       order: { updated: 'DESC' },
