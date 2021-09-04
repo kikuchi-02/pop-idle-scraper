@@ -49,8 +49,12 @@
       </mat-form-field>
     </div> -->
     <div class="tool__item tool__item--right" *ngIf="script.updated">
-      <p>last update:</p>
-      <p>{{ script.updated | date: 'short' }}</p>
+      <p>last update: {{ script.updated | date: 'short' }}</p>
+    </div>
+    <div class="tool__item tool__item--right" *ngIf="script.updated">
+      <button mat-raised-button color="primary" (click)="openHistoryDialog()">
+        Histories({{ script.revisions.length }})
+      </button>
     </div>
   </div>
 

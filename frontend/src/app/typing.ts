@@ -99,6 +99,14 @@ export interface User {
   email: string;
 }
 
+export interface ScriptRevision {
+  id: number;
+  scriptId: number;
+  title: string;
+  created: Date;
+  deltaOps: DeltaOperation[];
+}
+
 export class Script {
   id: number;
   title = '';
@@ -107,6 +115,7 @@ export class Script {
   updated: Date;
   author: User;
   // status: ScriptStatus;
+  revisions: ScriptRevision[] = [];
 
   constructor(data: Partial<Script> = {}) {
     Object.assign(this, data);

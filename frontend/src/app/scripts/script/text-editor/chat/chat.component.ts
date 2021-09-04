@@ -24,7 +24,6 @@ import {
 } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { Message } from 'src/app/typing';
-import { ScriptService } from '../../script.service';
 import { EditorService } from '../editor.service';
 import { ChatService } from './chat.service';
 
@@ -79,8 +78,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     private authenticationService: AuthenticationService,
     private route: ActivatedRoute,
     private chatService: ChatService,
-    private editorService: EditorService,
-    private scriptService: ScriptService
+    private editorService: EditorService
   ) {
     this.route.paramMap
       .pipe(

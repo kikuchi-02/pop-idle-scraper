@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +26,7 @@ import { ScriptComponent } from './script/script.component';
 import { BalloonComponent } from './script/text-editor/balloon/balloon.component';
 import { ChatComponent } from './script/text-editor/chat/chat.component';
 import { ConsoleComponent } from './script/text-editor/console/console.component';
+import { HistoryComponent } from './script/text-editor/history/history.component';
 import { ToolBoxComponent } from './script/text-editor/tool-box/tool-box.component';
 import { ScriptsRoutingModule } from './scripts-routing.module';
 
@@ -39,6 +42,7 @@ Quill.register('modules/cursors', QuillCursors);
     ScriptComponent,
     ScriptListComponent,
     ChatComponent,
+    HistoryComponent,
   ],
   imports: [
     CommonModule,
@@ -55,6 +59,8 @@ Quill.register('modules/cursors', QuillCursors);
     MatIconModule,
     MatSelectModule,
     MatExpansionModule,
+    MatDialogModule,
+    MatButtonToggleModule,
     QuillModule.forRoot({
       modules: {
         cursors: true,

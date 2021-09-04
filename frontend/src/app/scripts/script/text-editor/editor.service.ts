@@ -105,6 +105,12 @@ export class EditorService {
     return this.editor.getContents().ops;
   }
 
+  setDelta(deltaOps: DeltaOperation[]): void {
+    const content = this.editor.getContents();
+    content.ops = deltaOps;
+    this.editor.setContents(content);
+  }
+
   undo(): void {
     this.checkInitialized();
     this.undoManager.undo();
@@ -319,6 +325,7 @@ export class EditorService {
       .map((delta) => delta.insert)
       .join();
   }
+
   applySelectionCommentMessage(uuid: string, message: string): void {
     const contents = this.editor.getContents();
     contents.ops = contents.ops.map((op) => {
