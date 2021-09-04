@@ -7,8 +7,8 @@ import { DictionaryService } from './dictionary/dictionary.service';
 
 interface SoundText {
   text: string;
-  inputUnknownIndexes: { [key: string]: { start: number; end: number } };
-  outputUnknownIndexes: { [key: string]: { start: number; end: number } };
+  inputUnknownIndexes: { word: string; start: number; end: number }[];
+  outputUnknownIndexes: { word: string; start: number; end: number }[];
   outputWarningIndexes: { start: number; end: number }[];
 }
 
@@ -46,8 +46,8 @@ export class SubtitleService {
       mergeMap((dictionaryMap) =>
         this.tokenizeService.tokenize(text).pipe(
           map((tokens) => {
-            const inputUnknownIndexes = {};
-            const outputUnknownIndexes = {};
+            const inputUnknownIndexes = [];
+            const outputUnknownIndexes = [];
             const outputWarningIndexes = [];
             const result = [];
             let inputIndex = 0;
@@ -93,15 +93,17 @@ export class SubtitleService {
                 outputLength = token.pronunciation.length;
               } else {
                 result.push(token.surface_form);
-                inputUnknownIndexes[token.surface_form] = {
+                inputUnknownIndexes.push({
+                  word: token.surface_form,
                   start: inputIndex,
                   end: inputIndex + inputLength,
-                };
+                });
                 outputLength = token.surface_form.length;
-                outputUnknownIndexes[token.surface_form] = {
+                outputUnknownIndexes.push({
+                  word: token.surface_form,
                   start: outputIndex,
                   end: outputIndex + outputLength,
-                };
+                });
               }
               inputIndex += token.surface_form.length;
               outputIndex += outputLength;

@@ -272,10 +272,12 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   navigateSubtitle(): void {
-    const div = this.renderer.createElement('div');
-    div.innerHTML = this.script.deltaOps.map((delta) => delta.insert).join('');
-
-    const textContent = this.editorService.getText();
+    const textContent = this.editorService.getDelta().reduce((acc, curr) => {
+      if (!curr.attributes?.strike) {
+        acc += curr.insert;
+      }
+      return acc;
+    }, '');
 
     const subtitleKey = SubtitleComponent.subtitleLocalStorageKey;
     localStorage.setItem(subtitleKey, textContent);
