@@ -13,6 +13,9 @@ import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { SubtitleService } from './subtitle.service';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const Delta = Quill.import('delta');
+
 interface Srt {
   duration: number;
   text: string;
@@ -94,88 +97,38 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         .textToSoundText(input)
         .pipe(takeUntil(this.unsubscriber$))
         .subscribe((result) => {
-          Object.values(result.inputUnknownIndexes).forEach(
-            ({ start, end }) => {
-              this.inputEditor.formatText(
-                start,
-                end - start,
-                'background-color',
-                'orange'
-              );
-            }
-          );
+          const inputDelta = new Delta();
+          let lastIndex = 0;
+          result.inputUnknownIndexes.forEach(({ word, start, end }) => {
+            inputDelta.retain(start - lastIndex);
+            inputDelta.retain(end - start, { 'background-color': 'orange' });
+            lastIndex = end;
+          });
+          this.inputEditor.updateContents(inputDelta);
+
           this.outputEditor.setText(result.text);
+          const outputDelta1 = new Delta();
+          let lastOutputIndex1 = 0;
           const outputText = this.outputEditor.getText();
-          Object.values(result.outputUnknownIndexes).forEach(
-            ({ start, end }) => {
-              const uuid = uuidv4();
-              const unknown = outputText.substring(start, end);
-              this.outputEditor.formatText(start, end - start, 'warning', {
-                uuid,
-                unknown,
-              });
-            }
-          );
+          result.outputUnknownIndexes.forEach(({ word, start, end }) => {
+            const uuid = uuidv4();
+            const unknown = outputText.substring(start, end);
+            outputDelta1.retain(start - lastOutputIndex1);
+            outputDelta1.retain(end - start, { warning: { uuid, unknown } });
+            lastOutputIndex1 = end;
+          });
+          this.outputEditor.updateContents(outputDelta1);
+
+          const outputDelta2 = new Delta();
+          let lastOutputIndex2 = 0;
           result.outputWarningIndexes.forEach(({ start, end }) => {
             const uuid = uuidv4();
             const num = parseInt(outputText.substring(start, end), 10);
-            this.outputEditor.formatText(start, end - start, 'warning', {
-              uuid,
-              num,
-            });
+            outputDelta2.retain(start - lastOutputIndex2);
+            outputDelta2.retain(end - start, { warning: { uuid, num } });
+            lastOutputIndex2 = end;
           });
-          // this.outputEditor.setText(result.text);
-          // const outputText = this.outputEditor.getText();
-
-          // const inputUnknownDelta = new Delta();
-          // const inputUnknownIndexes = Object.values(
-          //   result.inputUnknownIndexes
-          // ).sort((a, b) => a.start - b.start);
-          // for (let i = 0; i < inputUnknownIndexes.length; i++) {
-          //   const { start, end } = inputUnknownIndexes[i];
-          //   if (i === 0) {
-          //     inputUnknownDelta.retain(start);
-          //   } else {
-          //     inputUnknownDelta.retain(start - inputUnknownIndexes[i - 1].end);
-          //   }
-          //   inputUnknownDelta.retain(end - start, { caution: 'unknown' });
-          // }
-          // this.inputEditor.updateContents(inputUnknownDelta);
-
-          // const outputUnknownDelta = new Delta();
-          // const outputUnknownIndexes = Object.values(
-          //   result.outputUnknownIndexes
-          // ).sort((a, b) => a.start - b.start);
-          // for (let i = 0; i < outputUnknownIndexes.length; i++) {
-          //   const { start, end } = outputUnknownIndexes[i];
-          //   if (i === 0) {
-          //     outputUnknownDelta.retain(start);
-          //   } else {
-          //     outputUnknownDelta.retain(end - outputUnknownIndexes[i - 1].end);
-          //   }
-          //   const uuid = uuidv4();
-          //   const unknown = outputText.substring(start, end);
-          //   outputUnknownDelta.retain(end - start, {
-          //     warning: { uuid, unknown },
-          //   });
-          // }
-          // this.outputEditor.updateContents(outputUnknownDelta);
-
-          // const outputWarningDelta = new Delta();
-          // for (let i = 0; i < result.outputWarningIndexes.length; i++) {
-          //   const { start, end } = result.outputWarningIndexes[i];
-          //   if (i === 0) {
-          //     outputWarningDelta.retain(start);
-          //   } else {
-          //     outputWarningDelta.retain(
-          //       end - result.outputWarningIndexes[i - 1].end
-          //     );
-          //   }
-          //   const uuid = uuidv4();
-          //   const num = parseInt(outputText.substring(start, end), 10);
-          //   outputWarningDelta.retain(end - start, { warning: { uuid, num } });
-          // }
-          // this.outputEditor.updateContents(outputWarningDelta);
+          this.outputEditor.updateContents(outputDelta2);
 
           this.resolveLoading(loadingKey);
           this.cd.markForCheck();
@@ -275,7 +228,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .replace(/（[^）]*）/g, '')
       .replace(/\d\n/g, '\n')
       .replace(/\d\s\n/g, '\n')
-      .replace(/☆/g, '')
+      // .replace(/☆/g, '')
       .replace(/【(.*)】/g, (match, p1, offset, str) => p1 + '\n');
 
     this.subtitleService
@@ -287,34 +240,28 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         const partials: Srt[] = [];
         let last: string;
         let seqCounter = 0;
-        let textIndex = 0;
         const errors = new Set();
 
         const canvas = this.renderer.createElement('canvas');
         const context = canvas.getContext('2d');
 
+        const delta = new Delta();
+
         const splitted = splittedText.split('\n');
         for (const text of splitted) {
           const metrics = context.measureText(text);
+
+          const attrs: { caution?: string } = {};
           if (metrics.width > 310) {
-            this.inputEditor.formatText(
-              textIndex,
-              text.length,
-              'caution',
-              'too long sentence, cannot be splitted'
-            );
+            attrs.caution = 'too long sentence, cannot be splitted';
             errors.add('Too long sentences');
           }
 
           seqCounter++;
           if (text !== '' && text !== '。') {
             if (seqCounter > 2) {
-              this.inputEditor.formatText(
-                textIndex,
-                text.length,
-                'caution',
-                'The sentence continues for more than three lines.'
-              );
+              attrs.caution =
+                'The sentence continues for more than three lines';
               errors.add('Sentences continue for more than three lines.');
             }
             if (last !== undefined) {
@@ -331,8 +278,10 @@ export class SubtitleComponent implements OnInit, OnDestroy {
             }
           }
           // length plus new line character
-          textIndex += text.length + 1;
+          delta.retain(text.length + 1, attrs);
         }
+        this.inputEditor.updateContents(delta);
+
         if (last !== undefined) {
           partials.push(this.calcSrt(last));
         }
@@ -485,5 +434,6 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
   private resolveLoading(uuid: string): void {
     this.loadingHashSet.delete(uuid);
+    this.cd.detectChanges();
   }
 }

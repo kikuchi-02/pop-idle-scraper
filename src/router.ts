@@ -46,6 +46,8 @@ export const setRoutes = (app: Express) => {
 
   routeV1.get('/messages', verifyToken, messageController.readMessage);
   routeV1.post('/messages', verifyToken, messageController.createMessage);
+  routeV1.delete('/messages', verifyToken, messageController.deleteMessages);
+  routeV1.delete('/messages/:id', verifyToken, messageController.deleteMessage);
 
   routeV1.post('/textlint', verifyToken, textlintController.postTextLint);
 

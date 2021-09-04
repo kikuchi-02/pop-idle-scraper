@@ -45,3 +45,39 @@ export const createMessage = async (req: Request, res: Response) => {
   res.status(201).json(messages);
   return;
 };
+
+export const deleteMessages = async (req: Request, res: Response) => {
+  const ids = req.query.id as string[];
+  if (!ids) {
+    res.status(403).send('id is required');
+    return;
+  }
+
+  const messageRepository = getCustomRepository(MessageRepository);
+  try {
+    await messageRepository.deleteBulk(ids);
+  } catch (err) {
+    res.status(403).send('Invalid id');
+    return;
+  }
+  res.status(200).end();
+  return;
+};
+
+export const deleteMessage = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  if (!id) {
+    res.status(403).send('id is required');
+    return;
+  }
+
+  const messageRepository = getCustomRepository(MessageRepository);
+  try {
+    await messageRepository.deleteRecursiveById(parseInt(id, 10));
+  } catch (err) {
+    res.status(403).send('Invalid id');
+    return;
+  }
+  res.status(200).end();
+  return;
+};

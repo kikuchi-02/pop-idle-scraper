@@ -1,0 +1,22 @@
+.history-wrapper {
+  display: flex;
+
+  .history-sidebar {
+    text-align: center;
+    width: 150px;
+    padding: 15px;
+
+    &-date {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  ::ng-deep .editor {
+    .ql-container {
+      overflow: auto;
+      height: 60vh;
+      width: 600px;
+    }
+  }
+}

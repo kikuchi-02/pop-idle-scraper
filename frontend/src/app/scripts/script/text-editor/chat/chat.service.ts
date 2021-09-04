@@ -52,4 +52,13 @@ export class ChatService {
   postMessage(message: Message): Observable<Message> {
     return this.http.post<Message>(`api/v1/messages`, message);
   }
+
+  deleteMessage(id: number): Observable<void> {
+    return this.http.delete<void>(`api/v1/messages/${id}`);
+  }
+
+  deleteMessages(ids: number[]): Observable<void> {
+    const query = ids.map((id) => `id[]=${id}`).join('&');
+    return this.http.delete<void>(`api/v1/messages?${query}`);
+  }
 }

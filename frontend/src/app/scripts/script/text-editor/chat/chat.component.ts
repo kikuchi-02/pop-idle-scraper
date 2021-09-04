@@ -24,7 +24,6 @@ import {
 } from 'rxjs/operators';
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { Message } from 'src/app/typing';
-import { ScriptService } from '../../script.service';
 import { EditorService } from '../editor.service';
 import { ChatService } from './chat.service';
 
@@ -79,8 +78,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     private authenticationService: AuthenticationService,
     private route: ActivatedRoute,
     private chatService: ChatService,
-    private editorService: EditorService,
-    private scriptService: ScriptService
+    private editorService: EditorService
   ) {
     this.route.paramMap
       .pipe(
@@ -277,6 +275,30 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selected.text = undefined;
         }
         this.chatForm.reset();
+        this.cd.markForCheck();
+      });
+  }
+
+  deleteMessage(message: Message): void {
+    const delMsg = (msgs: Message[]): void => {
+      msgs.forEach((msg, i) => {
+        if (msg.id === message.id) {
+          msgs.splice(i, 1);
+          return;
+        }
+
+        if (msg.children) {
+          delMsg(msg.children);
+        }
+      });
+    };
+
+    delMsg(this.messages);
+
+    this.chatService
+      .deleteMessage(message.id)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe(() => {
         this.cd.markForCheck();
       });
   }

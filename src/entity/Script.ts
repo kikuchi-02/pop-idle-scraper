@@ -39,4 +39,30 @@ export class Script {
 
   // @Column({ type: 'enum', enum: ScriptStatus, default: ScriptStatus.WIP })
   // status: ScriptStatus;
+
+  @OneToMany((type) => ScriptRevision, (revision) => revision.script)
+  revisions: ScriptRevision[];
+}
+
+// https://kaustavdm.in/versioning-content-postgresql/
+
+@Entity()
+export class ScriptRevision {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne((type) => Script, (script) => script.revisions, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  script: Script;
+
+  @Column()
+  title: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  created: Date;
+
+  @Column({ type: 'json', default: [] })
+  deltaOps: DeltaOperation[];
 }

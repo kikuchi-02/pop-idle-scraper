@@ -1,6 +1,7 @@
 import { Color } from '@angular-material-components/color-picker';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   OnDestroy,
@@ -35,6 +36,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   backgroundColorCtr = new FormControl();
   color: ThemePalette = 'primary';
 
+  wordCount = 0;
+
   @Output() toggleSubtitleButton = new EventEmitter<void>();
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
@@ -47,7 +50,8 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   constructor(
     private scriptService: ScriptService,
     private editorService: EditorService,
-    private tokenizeService: TokenizeService
+    private tokenizeService: TokenizeService,
+    private cd: ChangeDetectorRef
   ) {
     const highlightValue = localStorage.getItem(this.toolBoxHighlightKey);
     if (highlightValue) {
@@ -101,6 +105,13 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         backgroundColorGba[2]
       )
     );
+
+    this.editorService.wordCounter$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((wordCount) => {
+        this.wordCount = wordCount;
+        this.cd.markForCheck();
+      });
   }
 
   ngOnInit(): void {}

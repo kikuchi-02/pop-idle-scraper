@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ContentChange, Range, SelectionChange } from 'ngx-quill';
-import { DeltaOperation, DeltaStatic, Quill } from 'quill';
+import Quill, { DeltaOperation, DeltaStatic } from 'quill';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { auditTime, first, map, mergeMap } from 'rxjs/operators';
 import { TokenizeService } from 'src/app/services/tokenizer.service';
 import { Message } from 'src/app/typing';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,6 +10,9 @@ import { QuillBinding } from 'y-quill';
 import { Text, UndoManager } from 'yjs';
 import { AppService } from '../../../services/app.service';
 import { ScriptService } from '../script.service';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const Delta = Quill.import('delta');
 
 export interface TextLintMessageWithUuid {
   type: string;
@@ -54,6 +57,14 @@ export class EditorService {
 
   public initialized$ = new ReplaySubject<void>(1);
 
+  private textChanged$ = new Subject<string>();
+  public wordCounter$ = this.initialized$.pipe(
+    first(),
+    mergeMap(() => this.textChanged$),
+    auditTime(300),
+    map(() => this.editor.getText().length)
+  );
+
   constructor(
     private appService: AppService,
     private scriptService: ScriptService,
@@ -68,7 +79,6 @@ export class EditorService {
     const uuid = this.scriptService.loadingStateChange();
 
     this.editor = editor;
-    this.editor.getModule('text-marking');
 
     const label = `script-${scriptId}`;
 
@@ -96,7 +106,9 @@ export class EditorService {
     }
   }
 
-  onContentChanged(event: ContentChange): void {}
+  onContentChanged(event: ContentChange): void {
+    this.textChanged$.next();
+  }
 
   getText(): string {
     return this.editor.getText();
@@ -104,6 +116,12 @@ export class EditorService {
 
   getDelta(): DeltaOperation[] {
     return this.editor.getContents().ops;
+  }
+
+  setDelta(deltaOps: DeltaOperation[]): void {
+    const content = this.editor.getContents();
+    content.ops = deltaOps;
+    this.editor.setContents(content);
   }
 
   undo(): void {
@@ -286,26 +304,39 @@ export class EditorService {
   }
 
   initialComments(messages: Message[]): Message[] {
-    const uuids = messages.reduce((acc, message, index) => {
-      acc[message.uuid] = index;
-      return acc;
-    }, {});
-    const contents = this.editor.getContents();
+    const messageUuids = new Map<string, Message>();
+    messages.forEach((message) => {
+      messageUuids.set(message.uuid, message);
+    });
 
-    contents.ops = contents.ops.map((op) => {
-      if (!op.attributes?.comment?.uuid) {
+    const delta = new Delta();
+    const contents = this.editor.getContents();
+    const text = this.editor.getText();
+    let index = 0;
+    contents.ops.forEach((op) => {
+      const uuid = op.attributes?.comment?.uuid;
+      const length = op.insert.length;
+
+      if (!uuid) {
+        delta.retain(length);
+        index += length;
         return;
       }
-      const index = uuids[op.attributes.comment.uuid];
-      if (index) {
-        messages[index].selectedText =
-          (messages[index].selectedText || '') + op.insert;
-        op.attributes.comment.message = messages[index].body;
+
+      if (messageUuids.has(uuid)) {
+        const message = messageUuids.get(uuid);
+        message.selectedText = message.selectedText || op.insert;
+        delta.retain(length, { comment: { uuid, message: message.body } });
       } else {
-        delete op.attributes.comment;
+        const attrs = op.attributes;
+        delete attrs.comment;
+        delta.delete(length);
+        const sub = text.slice(index, index + length);
+        delta.insert(sub, attrs);
       }
-      return op;
+      index += length;
     });
+    this.editor.updateContents(delta);
     return messages;
   }
 
@@ -320,63 +351,80 @@ export class EditorService {
       .map((delta) => delta.insert)
       .join();
   }
+
   applySelectionCommentMessage(uuid: string, message: string): void {
     const contents = this.editor.getContents();
-    contents.ops = contents.ops.map((op) => {
+    const delta = new Delta();
+    contents.ops.forEach((op) => {
+      const length = op.insert.length;
       if (op.attributes?.comment?.uuid === uuid) {
-        op.attributes.comment.message = message;
+        delta.retain(length, { comment: { uuid, message } });
+      } else {
+        delta.retain(length);
       }
-      return op;
     });
-    this.editor.setContents(contents);
+
+    this.editor.updateContents(delta);
   }
 
   applyTextLintResult(result: TextlintResultWithUUid): TextlintResultWithUUid {
     const text = this.editor.getText();
     const splitted = text.split('\n');
 
-    const accumulated = splitted.reduce((previous, current, index) => {
+    const accumulated = splitted.reduce((previous, current, i) => {
       let start = 0;
-      if (index > 0) {
-        start += previous[index - 1].end + 1;
+      if (i > 0) {
+        start += previous[i - 1].end + 1;
       }
       const end = start + current.length;
       previous.push({ start, end });
       return previous;
     }, []);
 
+    const delta = new Delta();
+    let index = 0;
     result.messages = (result as TextlintResultWithUUid).messages.map((msg) => {
       msg.uuid = uuidv4();
       const targetIndexes = accumulated[msg.line - 1];
-      this.editor.formatText(
-        targetIndexes.start,
-        targetIndexes.end - targetIndexes.start,
-        'lint',
-        { uuid: msg.uuid, message: msg.message }
-      );
+      delta.retain(targetIndexes.start - index);
+      delta.retain(targetIndexes.end - targetIndexes.start, {
+        lint: {
+          uuid: msg.uuid,
+          message: msg.message,
+        },
+      });
+      index = targetIndexes.end;
 
       const endIndex = Math.min(targetIndexes.end, targetIndexes.start + 10);
       msg.target = text.slice(targetIndexes.start, endIndex) + '..';
 
       return msg;
     });
+    this.editor.updateContents(delta);
 
     return result;
   }
 
   removeTextLintResult(): void {
     const contents = this.editor.getContents();
-    let find = false;
-    contents.ops = contents.ops.map((op) => {
+    const text = this.editor.getText();
+    const delta = new Delta();
+
+    let index = 0;
+    contents.ops.forEach((op) => {
+      const length = op.insert.length;
       if (op.attributes?.lint) {
-        find = true;
-        delete op.attributes.lint;
+        const attrs = op.attributes;
+        delete attrs.lint;
+        delta.delete(length);
+        const sub = text.slice(index, index + length);
+        delta.insert(sub, attrs);
+      } else {
+        delta.retain(length);
       }
-      return op;
+      index += length;
     });
-    if (find) {
-      this.editor.setContents(contents);
-    }
+    this.editor.updateContents(delta);
   }
 
   focusTextLintMessage(message: TextLintMessageWithUuid): void {

@@ -10,6 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { cloneDeep } from 'lodash';
 import {
@@ -31,10 +32,11 @@ import {
 } from 'rxjs/operators';
 import { AppService } from 'src/app/services/app.service';
 import { SubtitleComponent } from 'src/app/subtitle/subtitle.component';
-import { Script } from 'src/app/typing';
+import { Script, ScriptRevision } from 'src/app/typing';
 import { ScriptService } from './script.service';
 import { BalloonComponent } from './text-editor/balloon/balloon.component';
 import { EditorService } from './text-editor/editor.service';
+import { HistoryComponent } from './text-editor/history/history.component';
 
 @Component({
   selector: 'app-script',
@@ -78,7 +80,8 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
     private renderer: Renderer2,
     private editorService: EditorService,
     private elementRef: ElementRef,
-    private appService: AppService
+    private appService: AppService,
+    private dialog: MatDialog
   ) {
     this.appService.darkTheme$
       .pipe(takeUntil(this.unsubscriber$))
@@ -261,13 +264,20 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
 
   scrollTop(): void {
     window.scroll({ top: 0, behavior: 'smooth' });
+
+    const scrolbar = this.editorComponent.elementRef.nativeElement.querySelector(
+      '.ql-editor'
+    );
+    scrolbar.scrollTop = { top: 0, behavior: 'smooth' };
   }
 
   navigateSubtitle(): void {
-    const div = this.renderer.createElement('div');
-    div.innerHTML = this.script.deltaOps.map((delta) => delta.insert).join('');
-
-    const textContent = this.editorService.getText();
+    const textContent = this.editorService.getDelta().reduce((acc, curr) => {
+      if (!curr.attributes?.strike) {
+        acc += curr.insert;
+      }
+      return acc;
+    }, '');
 
     const subtitleKey = SubtitleComponent.subtitleLocalStorageKey;
     localStorage.setItem(subtitleKey, textContent);
@@ -279,6 +289,23 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   redo(): void {
     this.editorService.redo();
+  }
+
+  openHistoryDialog(): void {
+    const dialogRef = this.dialog.open(HistoryComponent, {
+      data: {
+        script: this.script,
+        darkTheme: this.darkTheme,
+      },
+      height: '80vh',
+      width: '80vh',
+    });
+
+    dialogRef.afterClosed().subscribe((revision: ScriptRevision) => {
+      if (revision) {
+        this.editorService.setDelta(revision.deltaOps);
+      }
+    });
   }
 
   private registerEditorEventListener(): void {

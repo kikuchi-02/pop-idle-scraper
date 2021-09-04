@@ -68,8 +68,6 @@ form {
   }
 
   ::ng-deep &__main {
-    min-height: 600px;
-    width: 100%;
     @include mq('sm') {
       flex: 70%;
       width: auto;
@@ -83,6 +81,10 @@ form {
       top: $tool-box-height;
       z-index: 1;
       background: #fff;
+    }
+
+    .ql-container {
+      height: calc(100vh - #{$tool-box-height} * 2);
     }
 
     &.dark-theme {

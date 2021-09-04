@@ -46,4 +46,24 @@ export class MessageRepository extends Repository<Message> {
     }
     return this.manager.save(message);
   }
+
+  deleteRecursiveById(id: number) {
+    return this.manager.query(
+      `
+      with recursive tmp as (
+        select id, "parentId" from message where id = $1
+        union all
+        select message.id, message."parentId" from message
+        inner join tmp on tmp.id = message."parentId"
+      )
+      delete from message
+      where message.id in (select id from tmp)
+    `,
+      [id]
+    );
+  }
+
+  deleteBulk(ids: number[] | string[]) {
+    return this.delete(ids);
+  }
 }
