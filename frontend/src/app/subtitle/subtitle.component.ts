@@ -228,7 +228,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .replace(/（[^）]*）/g, '')
       .replace(/\d\n/g, '\n')
       .replace(/\d\s\n/g, '\n')
-      .replace(/☆/g, '')
+      // .replace(/☆/g, '')
       .replace(/【(.*)】/g, (match, p1, offset, str) => p1 + '\n');
 
     this.subtitleService
