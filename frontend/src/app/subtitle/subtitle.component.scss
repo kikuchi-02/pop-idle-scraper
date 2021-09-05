@@ -135,7 +135,7 @@
 
 ::ng-deep span[data-caution] {
   position: relative;
-  background-color: orange;
+  border-bottom: dotted 2px orange;
 
   &:hover:after {
     content: attr(data-caution) '';
