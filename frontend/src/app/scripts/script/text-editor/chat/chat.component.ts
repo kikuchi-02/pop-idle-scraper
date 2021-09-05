@@ -194,8 +194,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   messageClick(message: Message, state?: 'open' | 'close'): void {
-    const uuid = message.uuid;
-
     let open: boolean;
     switch (state) {
       case 'open':
@@ -205,13 +203,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         open = false;
         break;
       default:
+        open = !message.expanded;
         break;
     }
-
-    if (!!open && open === message.expanded) {
-      return;
-    }
-    open = !message.expanded;
 
     if (open) {
       message.expanded = true;
@@ -223,6 +217,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cd.markForCheck();
     }
 
+    const uuid = message.uuid;
     if (uuid) {
       this.editorService.selectionCommentFocused(uuid);
       this.selected.text = this.editorService.selectionCommentText(uuid);

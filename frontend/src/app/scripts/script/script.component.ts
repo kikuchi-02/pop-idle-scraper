@@ -365,10 +365,13 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
         this.renderer.addClass(targetElm, 'focused');
-        const rect = targetElm.getBoundingClientRect();
-        const offset = 300;
-        const y = rect.y + window.scrollY - offset;
-        window.scroll({
+        const offset = 200;
+
+        const scroller = this.editorComponent.elementRef.nativeElement.querySelector(
+          '.ql-editor'
+        );
+        const y = targetElm.offsetTop + scroller.offsetTop - offset;
+        scroller.scroll({
           top: y < offset ? 0 : y,
           behavior: 'smooth',
         });
