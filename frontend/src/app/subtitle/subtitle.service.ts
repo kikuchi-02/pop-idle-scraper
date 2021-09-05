@@ -120,7 +120,7 @@ export class SubtitleService {
     );
   }
 
-  splitByNewLine(text: string): Observable<string> {
+  splitByNewLine(text: string): Observable<string[]> {
     const maxWidth = 310;
     return this.tokenizeService.tokenize(text).pipe(
       map((features) => {
@@ -131,52 +131,65 @@ export class SubtitleService {
           const nextFeature = features[i + 1];
           str += feature.surface_form;
           if (this.splittable(feature, nextFeature)) {
-            splittedTokens.push(str);
+            str = str.replace(/。/g, '。\n').replace(/☆/g, '\n☆\n\n\n');
+            if (str === '\n') {
+              splittedTokens.push('');
+            } else {
+              splittedTokens.push(...str.split('\n'));
+            }
             str = '';
           }
         }
+        if (str) {
+          splittedTokens.push(str);
+        }
 
-        let result = '';
-        let splitted = [];
-        let counter = [];
+        const lines = [];
+        const splitted = [];
         const canvas = this.renderer.createElement('canvas');
         const context = canvas.getContext('2d');
 
+        let newLineCounter = 0;
+
         splittedTokens.forEach((token, i) => {
-          if (token === '\n') {
-            result += splitted.join('') + '\n';
-            counter = [];
-            splitted = [];
+          if (!token) {
+            if (newLineCounter < 1) {
+              if (splitted.length > 0) {
+                lines.push(splitted.join(''));
+                splitted.length = 0;
+              }
+            } else if (newLineCounter < 2) {
+              lines.push('');
+            }
+            newLineCounter++;
+            return;
+          }
+          newLineCounter = 0;
+
+          const metrics = context.measureText([...splitted, token].join(''));
+          if (metrics.width > maxWidth) {
+            if (splitted.length > 0) {
+              lines.push(splitted.join(''));
+              splitted.length = 0;
+              splitted.push(token);
+            } else {
+              lines.push(token);
+            }
             return;
           }
 
-          const metrics = context.measureText([...counter, token].join(''));
-          if (metrics.width > maxWidth) {
-            result += splitted.join('');
-            if (!token.startsWith('\n')) {
-              result += '\n';
-            }
-
-            counter = [];
-            splitted = [];
-          }
           if (['。', '！', '？', '-'].some((c) => token.endsWith(c))) {
-            result += splitted.join('') + token;
-            if (!(splittedTokens[i + 1] || '').startsWith('\n')) {
-              result += '\n';
-            }
-            counter = [];
-            splitted = [];
-          } else {
-            splitted.push(token);
-            counter.push(token);
+            lines.push(splitted.join('') + token);
+            splitted.length = 0;
+            return;
           }
+
+          splitted.push(token);
         });
         if (splitted.length > 0) {
-          result += splitted.join('');
+          lines.push(splitted.join(''));
         }
-        result = result.replace(/。\n/g, '。\n\n').replace(/\n{3,}/g, '\n\n');
-        return result;
+        return lines;
       })
     );
   }

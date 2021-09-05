@@ -226,16 +226,14 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .getText()
       .trim()
       .replace(/（[^）]*）/g, '')
-      .replace(/\d\n/g, '\n')
-      .replace(/\d\s\n/g, '\n')
-      // .replace(/☆/g, '')
+      .replace(/\d.?\s?\n/g, '\n')
       .replace(/【(.*)】/g, (match, p1, offset, str) => p1 + '\n');
 
     this.subtitleService
       .splitByNewLine(input)
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((splittedText) => {
-        this.inputEditor.setText(splittedText);
+      .subscribe((lines) => {
+        this.inputEditor.setText(lines.join('\n'));
 
         const partials: Srt[] = [];
         let last: string;
@@ -247,8 +245,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
         const delta = new Delta();
 
-        const splitted = splittedText.split('\n');
-        for (const text of splitted) {
+        for (const text of lines) {
           const metrics = context.measureText(text);
 
           const attrs: { caution?: string } = {};
@@ -416,7 +413,13 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     let text: string;
 
     if (!text2) {
-      duration = (text1.length / maxLength) * baseTime;
+      if (text1 === '☆') {
+        duration = 2;
+      } else {
+        duration = Math.ceil((text1.length / maxLength) * baseTime);
+        duration = Math.max(duration, 2);
+        duration = Math.min(duration, 15);
+      }
       text = `<b>${text1}</b>`;
       return { duration, text };
     }
