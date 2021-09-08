@@ -1,8 +1,6 @@
 !.gitkeep
 
-package-lock.json
 node_modules
 scraped/*
 env.json
 cache/*
-build
