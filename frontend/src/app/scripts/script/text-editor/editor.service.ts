@@ -62,7 +62,7 @@ export class EditorService {
     first(),
     mergeMap(() => this.textChanged$),
     auditTime(300),
-    map(() => this.editor.getText().length)
+    map(() => this.editor.getText().trim().length)
   );
 
   constructor(
@@ -76,7 +76,7 @@ export class EditorService {
     editor: Quill,
     initialContent: DeltaStatic
   ): void {
-    const uuid = this.scriptService.loadingStateChange();
+    const uuid = this.appService.setLoading();
 
     this.editor = editor;
 
@@ -97,12 +97,12 @@ export class EditorService {
           this.editor.setContents(initialContent);
         }
         this.initialized$.next();
-        this.scriptService.loadingStateChange(uuid);
+        this.appService.resolveLoading(uuid);
       });
     } else {
       this.editor.setContents(initialContent);
       this.initialized$.next();
-      this.scriptService.loadingStateChange(uuid);
+      this.appService.resolveLoading(uuid);
     }
   }
 
@@ -369,37 +369,56 @@ export class EditorService {
 
   applyTextLintResult(result: TextlintResultWithUUid): TextlintResultWithUUid {
     const text = this.editor.getText();
-    const splitted = text.split('\n');
-
-    const accumulated = splitted.reduce((previous, current, i) => {
-      let start = 0;
-      if (i > 0) {
-        start += previous[i - 1].end + 1;
-      }
-      const end = start + current.length;
-      previous.push({ start, end });
-      return previous;
-    }, []);
+    const lines = text.split('\n');
 
     const delta = new Delta();
-    let index = 0;
-    result.messages = (result as TextlintResultWithUUid).messages.map((msg) => {
-      msg.uuid = uuidv4();
-      const targetIndexes = accumulated[msg.line - 1];
-      delta.retain(targetIndexes.start - index);
-      delta.retain(targetIndexes.end - targetIndexes.start, {
-        lint: {
-          uuid: msg.uuid,
-          message: msg.message,
-        },
-      });
-      index = targetIndexes.end;
 
-      const endIndex = Math.min(targetIndexes.end, targetIndexes.start + 10);
-      msg.target = text.slice(targetIndexes.start, endIndex) + '..';
+    let lineCounter = 0;
+    let messageCounter = 0;
+    let characterIndex = 0;
 
-      return msg;
-    });
+    while (
+      lineCounter < lines.length &&
+      messageCounter < result.messages.length
+    ) {
+      const msg = result.messages[messageCounter];
+      const line = lines[lineCounter];
+      // length with new line character length
+      const lineEndIndex = characterIndex + line.length + 1;
+
+      // msg指している内容が、前のlineの時はmessageのtargetだけ入力して進める。
+      if (msg.index < characterIndex) {
+        msg.target = lines[lineCounter - 1].slice(0, 10) + '..';
+        messageCounter++;
+        continue;
+      }
+
+      // msgがlineの中にあれば、errorsの中に入れる。
+      if (characterIndex <= msg.index && msg.index < lineEndIndex) {
+        msg.uuid = uuidv4();
+        msg.target = line.slice(0, 10) + '..';
+        delta.retain(line.length + 1, {
+          lint: {
+            uuid: msg.uuid,
+            message: msg.message,
+          },
+        });
+        messageCounter++;
+
+        lineCounter++;
+        characterIndex += line.length + 1;
+        continue;
+      }
+
+      // msgが先のlineの内容を指している時は、lineCounterのみ進める。
+      if (lineEndIndex <= msg.index) {
+        lineCounter++;
+        delta.retain(line.length + 1);
+        // length with new line character length
+        characterIndex += line.length + 1;
+      }
+    }
+
     this.editor.updateContents(delta);
 
     return result;

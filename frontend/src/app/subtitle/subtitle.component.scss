@@ -3,29 +3,47 @@
   @include wrapper;
   width: auto;
   max-width: none;
+  height: calc(100% - #{$header-height});
 
   .menu {
-    margin: 0 20px;
+    display: flex;
+    height: 110px;
 
-    &__row {
-      margin: 10px 0;
+    &__tool {
+      margin: 10px 40px 10px 0;
 
       button {
+        width: 100px;
         margin-right: 20px;
+      }
+    }
+
+    &__layout {
+      margin: 10px 0;
+
+      ::ng-deep .mat-button-toggle-group {
+        .mat-button-toggle {
+          width: 70px;
+        }
       }
     }
   }
 
   .input-area {
-    &__container {
-      margin: 20px;
-    }
+    height: calc(100% - 110px);
+    padding: 10px 0;
+    box-sizing: border-box;
+    overflow: hidden;
+
     &__label {
       display: flex;
       width: 100%;
+      height: 30px;
+
       &-label {
         display: flex;
         width: 50%;
+        padding: 0px 10px;
       }
 
       &-warning {
@@ -76,11 +94,11 @@
       display: flex;
       width: 100%;
 
-      max-height: 95vh;
+      max-height: calc(100% - 30px);
       overflow: auto;
 
       ::ng-deep .textarea {
-        min-height: 1000px;
+        min-height: 600px;
         // flex-grow: 1;
         width: 50%;
         .ql-editor {
@@ -115,16 +133,6 @@
       background-color: rgba(255, 0, 0, 0.2);
     }
   }
-}
-.loading-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 150px;
-  color: red;
-  opacity: 0.7;
-  z-index: 1000;
 }
 
 .svg__icon {

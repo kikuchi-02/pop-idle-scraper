@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
+import { AppService } from 'src/app/services/app.service';
 import { ScriptService } from '../../script.service';
 import {
   EditorService,
@@ -30,6 +31,7 @@ export class ConsoleComponent implements OnInit, OnDestroy {
   @Input() darkTheme: boolean;
 
   constructor(
+    private appService: AppService,
     private scriptService: ScriptService,
     private cd: ChangeDetectorRef,
     private editorService: EditorService
@@ -54,7 +56,7 @@ export class ConsoleComponent implements OnInit, OnDestroy {
     }
     this.removeOldLint();
 
-    const uuid = this.scriptService.loadingStateChange();
+    const uuid = this.appService.setLoading();
     this.scriptService
       .textLint(text)
       .pipe(takeUntil(this.unsubscriber$))
@@ -63,13 +65,13 @@ export class ConsoleComponent implements OnInit, OnDestroy {
           const formatted = this.editorService.applyTextLintResult(result);
           this.textLintErrors = formatted.messages;
           this.cd.markForCheck();
-          this.scriptService.loadingStateChange(uuid);
+          this.appService.resolveLoading(uuid);
         },
         (err) => {
           this.textLintRaisedError = true;
           this.textLintErrors = undefined;
           this.cd.markForCheck();
-          this.scriptService.loadingStateChange(uuid);
+          this.appService.resolveLoading(uuid);
         }
       );
   }

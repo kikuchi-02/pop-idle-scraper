@@ -1,3 +1,5 @@
+@import '../styles.scss';
+
 h1 {
   text-align: center;
   a {
@@ -6,6 +8,8 @@ h1 {
 }
 
 header {
+  height: $header-height;
+
   .toolbar-inner {
     max-width: 1000px;
     width: 100%;
@@ -35,5 +39,26 @@ header {
       display: flex;
     }
   }
-  margin-bottom: 30px;
+}
+
+.loading-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.32);
+
+  &__content {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 150px;
+    color: red;
+    opacity: 0.7;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }

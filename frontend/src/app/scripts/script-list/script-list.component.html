@@ -1,8 +1,14 @@
 <div class="wrapper">
-  <a [routerLink]="'new'" mat-stroked-button color="primary">new script</a>
-  <button mat-stroked-button color="primary" (click)="deleteScripts()">
-    Bulk Delete
-  </button>
+  <mat-paginator
+    (page)="handlePageEvent($event)"
+    [length]="length"
+    [pageSize]="pageSize"
+    [showFirstLastButtons]="true"
+    [pageSizeOptions]="pageSizeOptions"
+    [pageIndex]="pageIndex"
+    aria-label="Select page"
+  >
+  </mat-paginator>
 
   <ul class="list">
     <li *ngFor="let script of scripts" class="list-detail">
@@ -31,4 +37,13 @@
       </div>
     </li>
   </ul>
+
+  <div class="buttons">
+    <button mat-stroked-button color="primary" (click)="newScript()">
+      new script
+    </button>
+    <button mat-stroked-button color="primary" (click)="deleteScripts()">
+      delete
+    </button>
+  </div>
 </div>

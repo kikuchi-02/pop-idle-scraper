@@ -2,6 +2,7 @@
 
 .google-search_Wrapper {
   @include wrapper;
+  margin-top: 20px;
 }
 .google_search {
   &-input {

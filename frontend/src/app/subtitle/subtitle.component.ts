@@ -11,6 +11,7 @@ import Quill from 'quill';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import { AppService } from '../services/app.service';
 import { SubtitleService } from './subtitle.service';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -34,10 +35,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
   static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
 
-  private loadingHashSet = new Set<string>();
-  get loading(): boolean {
-    return !this.editorInitialized$.getValue() || this.loadingHashSet.size > 0;
-  }
+  loading = false;
 
   layout: Layout = 'plain';
   dictionaryOpen = false;
@@ -56,6 +54,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   private outputEditor: Quill;
 
   constructor(
+    private appService: AppService,
     private cd: ChangeDetectorRef,
     private subtitleService: SubtitleService,
     private ngZone: NgZone,
@@ -75,7 +74,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.refreshInput();
+    this.initialInput();
     this.applyLayout();
 
     this.editorInitialized$.next(true);
@@ -89,7 +88,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   convertSound(): void {
-    const loadingKey = this.setLoading();
+    const loadingKey = this.appService.setLoading();
     const input = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     this.ngZone.runOutsideAngular(() => {
@@ -130,7 +129,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           });
           this.outputEditor.updateContents(outputDelta2);
 
-          this.resolveLoading(loadingKey);
+          this.appService.resolveLoading(loadingKey);
           this.cd.markForCheck();
 
           this.ngZone.onStable
@@ -147,7 +146,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   extractTags(): void {
-    const uuid = this.setLoading();
+    const uuid = this.appService.setLoading();
     const input = this.inputEditor.getText();
     this.subtitleService
       .extractTags(input)
@@ -155,7 +154,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .subscribe((tags) => {
         const text = tags.map((tag) => `#${tag}`).join(' ');
         this.outputEditor.setText(text);
-        this.resolveLoading(uuid);
+        this.appService.resolveLoading(uuid);
         this.cd.markForCheck();
       });
   }
@@ -166,10 +165,15 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         SubtitleComponent.subtitleLayoutLocalStorageKey
       ) as Layout;
     }
+    if (type === this.layout) {
+      return;
+    }
+
     if (layouts.includes(type)) {
       this.layout = type;
     }
     localStorage.setItem(SubtitleComponent.subtitleLayoutLocalStorageKey, type);
+    this.refreshInput();
     this.refreshOutput();
 
     this.cd.markForCheck();
@@ -221,7 +225,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   subtitleToSrt(): void {
-    const loadingKey = this.setLoading();
+    const loadingKey = this.appService.setLoading();
     const input = this.inputEditor
       .getText()
       .trim()
@@ -310,7 +314,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           lastTime = end;
         }
         this.outputEditor.setText(result);
-        this.resolveLoading(loadingKey);
+        this.appService.resolveLoading(loadingKey);
         this.cd.markForCheck();
       });
   }
@@ -331,12 +335,18 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     this.outputEditor.setText(result);
   }
 
-  refreshInput(): void {
+  initialInput(): void {
     const input = localStorage.getItem(
       SubtitleComponent.subtitleLocalStorageKey
     );
     this.inputEditor.setText(input || '');
   }
+
+  refreshInput(): void {
+    const text = this.inputEditor.getText();
+    this.inputEditor.setText(text);
+  }
+
   saveInput(): void {
     const content = this.inputEditor.getText();
     localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, content);
@@ -428,15 +438,5 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     );
     text = `<b>${text1}</b>\n<b>${text2}</b>`;
     return { duration, text };
-  }
-
-  private setLoading(): string {
-    const uuid = uuidv4();
-    this.loadingHashSet.add(uuid);
-    return uuid;
-  }
-  private resolveLoading(uuid: string): void {
-    this.loadingHashSet.delete(uuid);
-    this.cd.detectChanges();
   }
 }

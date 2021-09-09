@@ -76,8 +76,10 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
         catchError(() => undefined),
         takeUntil(this.unsubscriber$)
       )
-      .subscribe(() => {
-        this.unsubscriber$.next();
+      .subscribe({
+        complete: () => {
+          this.unsubscriber$.next();
+        },
       });
   }
 

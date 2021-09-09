@@ -1,6 +1,6 @@
 <div class="wrapper">
   <div class="menu">
-    <div class="menu__row">
+    <div class="menu__tool">
       <h3>Tool</h3>
       <button
         (click)="dictionaryOpen = !dictionaryOpen"
@@ -29,7 +29,7 @@
         line
       </mat-slide-toggle>
     </div>
-    <div class="menu__row">
+    <div class="menu__layout">
       <h3>Layout: {{ layout }}</h3>
       <mat-button-toggle-group
         [ngModel]="layout"
@@ -45,65 +45,63 @@
     </div>
   </div>
   <div class="input-area">
-    <div class="input-area__container">
-      <div class="input-area__label">
-        <div class="input-area__label-label">
-          <label>input</label>
-          <div class="input-area__caution-scroll">
-            <div
-              class="input-area__caution-scroll-button svg__icon"
-              (click)="scrollToCaution('input')"
-            >
-              <mat-icon>arrow_downward</mat-icon>
-            </div>
-          </div>
-          <div class="input-area__label-tool">
-            <div class="svg__icon" (click)="saveInput()">
-              <mat-icon>save</mat-icon>
-            </div>
-            <div class="svg__icon" (click)="refreshInput()">
-              <mat-icon>refresh</mat-icon>
-            </div>
-          </div>
-        </div>
-        <div class="input-area__label-label">
-          <label>output</label>
+    <div class="input-area__label">
+      <div class="input-area__label-label">
+        <label>input</label>
+        <div class="input-area__caution-scroll">
           <div
-            class="input-area__label-warning"
-            [class.input-area__label-warning--show]="!!outputWarning"
+            class="input-area__caution-scroll-button svg__icon"
+            (click)="scrollToCaution('input')"
           >
-            <div class="input-area__label-warning-inner">
-              <mat-icon>warning</mat-icon>
-              <div class="input-area__label-warning-tooltip">
-                {{ outputWarning }}
-              </div>
-            </div>
+            <mat-icon>arrow_downward</mat-icon>
           </div>
-          <div class="input-area__label-tool">
-            <div class="svg__icon" (click)="refreshOutput()">
-              <mat-icon>refresh</mat-icon>
-            </div>
+        </div>
+        <div class="input-area__label-tool">
+          <div class="svg__icon" (click)="saveInput()">
+            <mat-icon>save</mat-icon>
+          </div>
+          <div class="svg__icon" (click)="refreshInput()">
+            <mat-icon>refresh</mat-icon>
           </div>
         </div>
       </div>
-      <div class="input-area__textarea">
-        <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-          <div class="input-area__subtitle-line"></div>
+      <div class="input-area__label-label">
+        <label>output</label>
+        <div
+          class="input-area__label-warning"
+          [class.input-area__label-warning--show]="!!outputWarning"
+        >
+          <div class="input-area__label-warning-inner">
+            <mat-icon>warning</mat-icon>
+            <div class="input-area__label-warning-tooltip">
+              {{ outputWarning }}
+            </div>
+          </div>
         </div>
-        <quill-editor
-          [debounceTime]="300"
-          class="textarea"
-          (onEditorCreated)="onEditorCreated($event, 'input')"
-        ></quill-editor>
-        <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-          <div class="input-area__subtitle-line"></div>
+        <div class="input-area__label-tool">
+          <div class="svg__icon" (click)="refreshOutput()">
+            <mat-icon>refresh</mat-icon>
+          </div>
         </div>
-        <quill-editor
-          [debounceTime]="300"
-          class="textarea"
-          (onEditorCreated)="onEditorCreated($event, 'output')"
-        ></quill-editor>
       </div>
+    </div>
+    <div class="input-area__textarea">
+      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
+        <div class="input-area__subtitle-line"></div>
+      </div>
+      <quill-editor
+        [debounceTime]="300"
+        class="textarea"
+        (onEditorCreated)="onEditorCreated($event, 'input')"
+      ></quill-editor>
+      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
+        <div class="input-area__subtitle-line"></div>
+      </div>
+      <quill-editor
+        [debounceTime]="300"
+        class="textarea"
+        (onEditorCreated)="onEditorCreated($event, 'output')"
+      ></quill-editor>
     </div>
   </div>
 </div>
@@ -112,8 +110,6 @@
   [messenger$]="warningMessenger$"
   (warningChange)="warningChange($event)"
 ></app-warning-ballon>
-
-<div class="loading-modal" *ngIf="loading">loading</div>
 
 <ng-template
   cdkConnectedOverlay

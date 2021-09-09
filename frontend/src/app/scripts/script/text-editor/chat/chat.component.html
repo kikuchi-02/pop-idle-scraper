@@ -1,5 +1,5 @@
 <div class="wrapper">
-  <ng-container *ngIf="initialized$ | async; else loadingTmp">
+  <ng-container *ngIf="initialized$ | async">
     <div class="chat-messages" #chatMessage>
       <ng-container *ngFor="let message of messages">
         <ng-container
@@ -85,5 +85,3 @@
     </ng-container>
   </div>
 </ng-template>
-
-<ng-template #loadingTmp>loading</ng-template>

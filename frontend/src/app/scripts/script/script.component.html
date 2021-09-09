@@ -25,14 +25,14 @@
         <mat-icon class="svg__icon">content_copy</mat-icon>
       </div>
     </div>
-    <div class="tool__item">
+    <!-- <div class="tool__item">
       <div (click)="undo()">
         <mat-icon class="svg__icon">undo</mat-icon>
       </div>
     </div>
     <div class="tool__item">
       <div (click)="redo()"><mat-icon class="svg__icon">redo</mat-icon></div>
-    </div>
+    </div> -->
     <div class="tool__item">
       <button mat-raised-button color="primary" (click)="navigateSubtitle()">
         To subtitle
@@ -96,7 +96,6 @@
     <app-balloon [darkTheme]="darkTheme"></app-balloon>
   </main>
 </div>
-<div class="loading-modal" *ngIf="loading">loading</div>
 
 <div class="scroller">
   <button mat-raised-button color="primary" (click)="scrollTop()">↑</button>

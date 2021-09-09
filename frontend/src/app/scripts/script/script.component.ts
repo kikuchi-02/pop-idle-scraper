@@ -52,7 +52,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   focused = false;
 
   showSubtitleLine = { toggle: true, single: true, double: true };
-  loading = false;
 
   darkTheme = false;
 
@@ -87,13 +86,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((val) => {
         this.darkTheme = val;
-        this.cd.markForCheck();
-      });
-
-    this.scriptService.loadingState$
-      .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((state) => {
-        this.loading = state;
         this.cd.markForCheck();
       });
 

@@ -6,8 +6,9 @@ import {
   Subscriber,
   throwError,
 } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { v4 as uuidv4 } from 'uuid';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
 
@@ -20,6 +21,10 @@ export class AppService {
 
   private darkThemeSubject$ = new BehaviorSubject<boolean>(false);
   public darkTheme$ = this.darkThemeSubject$.asObservable();
+
+  private loadingSubject$ = new BehaviorSubject<boolean>(false);
+  private loadingHashSet = new Set<string>();
+  public loading$ = this.loadingSubject$.pipe(distinctUntilChanged());
 
   get useWs(): boolean {
     return environment.USE_WS;
@@ -70,5 +75,19 @@ export class AppService {
 
   setTheme(darkTheme: boolean): void {
     this.darkThemeSubject$.next(darkTheme);
+  }
+
+  setLoading(): string {
+    const uuid = uuidv4();
+    this.loadingHashSet.add(uuid);
+    this.loadingSubject$.next(true);
+    return uuid;
+  }
+
+  resolveLoading(uuid: string): void {
+    this.loadingHashSet.delete(uuid);
+    if (this.loadingHashSet.size === 0) {
+      this.loadingSubject$.next(false);
+    }
   }
 }

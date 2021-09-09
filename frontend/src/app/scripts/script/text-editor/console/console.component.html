@@ -4,22 +4,20 @@
       ><app-chat [darkTheme]="darkTheme"></app-chat
     ></mat-tab>
     <mat-tab label="textlint">
-      <div class="textlint-result">
-        <button
-          type="button"
-          class="textlint-result__button textlint-result__show-button"
-          (click)="textLint()"
-        >
-          Refresh
-        </button>
-        <button
-          type="button"
-          class="textlint-result__button textlint-result__remove-button"
-          (click)="removeOldLint()"
-        >
-          Remove
-        </button>
-        <div class="textlint-result__content" [class.dark-theme]="darkTheme">
+      <div class="textlint">
+        <div class="textlint-header">
+          <button type="button" class="textlint__button" (click)="textLint()">
+            Refresh
+          </button>
+          <button
+            type="button"
+            class="textlint__button"
+            (click)="removeOldLint()"
+          >
+            Remove
+          </button>
+        </div>
+        <div class="textlint__content" [class.dark-theme]="darkTheme">
           <ng-container *ngIf="!!textLintErrors; else NoResult">
             <ng-container
               *ngIf="textLintErrors.length > 0; else NoTextLintErrors"

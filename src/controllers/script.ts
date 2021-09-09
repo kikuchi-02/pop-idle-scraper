@@ -3,11 +3,32 @@ import { getCustomRepository } from 'typeorm';
 import { ScriptRepository } from '../repositories/script';
 
 export const readScripts = async (req: Request, res: Response) => {
-  const page = req.query.page;
+  let pageIndex: number;
+  try {
+    pageIndex = parseInt(req.query.pageIndex as string, 10);
+  } catch (e) {
+    res.status(403).send('invalid pageIndex');
+    return;
+  }
+  let pageSize: number;
+  try {
+    pageSize = parseInt(req.query.pageSize as string, 10);
+  } catch (e) {
+    res.status(403).send('invalid pageSize');
+    return;
+  }
 
   const scriptRepository = getCustomRepository(ScriptRepository);
-  const posts = await scriptRepository.findBulk();
-  res.json(posts);
+  const [posts, count] = await scriptRepository.findPagination(
+    pageIndex,
+    pageSize
+  );
+  res.json({
+    data: posts,
+    length: count,
+    pageIndex,
+    pageSize,
+  });
   return;
 };
 

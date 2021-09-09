@@ -26,6 +26,23 @@ export class ScriptRepository extends Repository<Script> {
       order: { updated: 'DESC' },
     });
   }
+
+  findPagination(pageIndex: number, pageSize: number) {
+    return this.findAndCount({
+      select: [
+        'id',
+        'title',
+        'created',
+        'updated',
+        /* 'status'*/
+      ],
+      relations: ['author'],
+      order: { updated: 'DESC' },
+      take: pageSize,
+      skip: pageIndex * pageSize,
+    });
+  }
+
   findById(id: number) {
     return this.createQueryBuilder('script')
       .leftJoinAndSelect('script.revisions', 'script_revision')

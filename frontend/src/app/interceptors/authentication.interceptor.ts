@@ -49,6 +49,7 @@ export class AuthenticationInterceptor implements HttpInterceptor {
             })
           );
         }
+        this.authenticationService.redirectUrl = this.router.url;
         this.router.navigate(['/login'], { replaceUrl: true });
         return throwError(err);
       })
