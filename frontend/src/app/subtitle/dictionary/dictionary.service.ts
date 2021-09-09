@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { UserDictionary } from 'src/app/typing';
 
@@ -21,7 +21,7 @@ export class DictionaryService {
 
   getUserDictionary(): Observable<UserDictionary> {
     return this.http
-      .get<{ dictionary: UserDictionary }>('api/v1/dictionary')
+      .get<{ dictionary: UserDictionary }>('api/v2/dictionary')
       .pipe(
         map((response) => {
           this.userDictionary = JSON.parse(JSON.stringify(response.dictionary));
@@ -76,8 +76,12 @@ export class DictionaryService {
       }
     });
 
+    if (requestData.length === 0) {
+      return EMPTY;
+    }
+
     return this.http
-      .put<{ dictionary: UserDictionary }>('api/v1/dictionary', {
+      .put<{ dictionary: UserDictionary }>('api/v2/dictionary', {
         dictionary: requestData,
       })
       .pipe(

@@ -15,7 +15,6 @@ export class WordInformationRepository extends Repository<WordInformation> {
   }
 
   async bulkUpdate(dictionary: WordInformationParams[]) {
-    console.log({ dictionary });
     const deleteWordIds = dictionary
       .filter((word) => word.change && word.change === 'delete')
       .map((word) => word.id);
