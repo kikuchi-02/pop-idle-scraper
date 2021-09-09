@@ -1,10 +1,15 @@
 @import '../../../styles.scss';
 
-$tool-box-height: 60px;
+.wrapper {
+  height: calc(100% - #{$header-height});
+}
 
 .tool {
   display: flex;
   flex-wrap: wrap;
+  height: 70px;
+  padding: 10px;
+  box-sizing: border-box;
 
   &__item {
     margin-right: 20px;
@@ -15,6 +20,12 @@ $tool-box-height: 60px;
   }
 }
 
+main {
+  height: calc(100% - 70px);
+  box-sizing: border-box;
+  padding: 10px;
+}
+
 form {
   display: flex;
   .form__item {
@@ -22,9 +33,7 @@ form {
   }
 }
 
-.wrapper {
-  margin: 10px;
-}
+$tool-box-height: 60px;
 
 .tool-box__wrapper {
   height: $tool-box-height;
@@ -42,6 +51,8 @@ form {
 .editor {
   display: flex;
   flex-wrap: wrap;
+  height: calc(100% - #{$tool-box-height});
+
   @include mq('sm') {
     flex-wrap: nowrap;
   }
@@ -68,6 +79,9 @@ form {
   }
 
   ::ng-deep &__main {
+    height: 100%;
+    overflow: hidden;
+
     @include mq('sm') {
       flex: 70%;
       width: auto;
@@ -77,14 +91,15 @@ form {
     white-space: pre-line;
 
     .ql-toolbar {
-      position: sticky;
-      top: $tool-box-height;
+      height: 43px;
+      position: relative;
       z-index: 1;
       background: #fff;
     }
 
     .ql-container {
-      height: calc(100vh - #{$tool-box-height} * 2);
+      max-height: calc(100% - 43px);
+      overflow: auto;
     }
 
     &.dark-theme {
@@ -200,8 +215,6 @@ form {
       flex: 30%;
       width: auto;
       height: 100%;
-      position: sticky;
-      top: $tool-box-height;
     }
   }
 }

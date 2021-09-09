@@ -1,3 +1,5 @@
+@import '../styles.scss';
+
 h1 {
   text-align: center;
   a {
@@ -6,6 +8,8 @@ h1 {
 }
 
 header {
+  height: $header-height;
+
   .toolbar-inner {
     max-width: 1000px;
     width: 100%;
@@ -35,5 +39,4 @@ header {
       display: flex;
     }
   }
-  margin-bottom: 30px;
 }

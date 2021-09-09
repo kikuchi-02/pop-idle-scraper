@@ -1,6 +1,7 @@
 @import '../../styles.scss';
 .member_Wrapper {
   @include wrapper;
+  margin-top: 20px;
 }
 
 .table-section {

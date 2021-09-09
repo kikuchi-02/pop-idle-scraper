@@ -1,6 +1,22 @@
 .wrapper {
   border: 1px solid #000;
   padding: 5px;
+  height: 100%;
+  box-sizing: border-box;
+
+  ::ng-deep .mat-tab-group {
+    height: 100%;
+    mat-tab-header {
+      height: 50px;
+    }
+    .mat-tab-body-wrapper {
+      height: calc(100% - 50px);
+    }
+
+    app-chat {
+      height: 100%;
+    }
+  }
 
   &:not(.dark-theme) {
     background-color: #dcdde0;

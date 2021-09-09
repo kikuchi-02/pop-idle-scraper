@@ -1,13 +1,14 @@
 @import '../../../../../styles.scss';
 
 .wrapper {
-  position: relative;
+  // position: relative;
+  height: 100%;
 
   .chat-messages {
-    max-height: calc(100vh - 250px);
-    margin-top: 10px;
+    max-height: calc(100% - 80px);
     overflow: auto;
-    padding-bottom: 100px;
+    box-sizing: border-box;
+    padding-top: 20px;
   }
 
   .chat-message {
