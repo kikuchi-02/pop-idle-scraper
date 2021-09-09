@@ -22,12 +22,14 @@
     background-color: #dcdde0;
   }
 
-  .textlint-result {
+  .textlint {
+    &-header {
+      height: 50px;
+    }
     &__button {
       background-color: #777;
       color: white;
       cursor: pointer;
-      padding: 18px;
       border: none;
       text-align: left;
       outline: none;
@@ -35,17 +37,15 @@
       &:hover {
         background-color: #555;
       }
-    }
-    &__show-button {
       width: 50%;
-    }
-    &__remove-button {
-      width: 50%;
+      padding: 10px;
+      box-sizing: border-box;
     }
 
     &__content {
       padding: 0 18px;
-      overflow: hidden;
+      overflow: auto;
+      height: calc(100% - 50px);
 
       &:not(.dark-theme) {
         background: #f1f1f1;
