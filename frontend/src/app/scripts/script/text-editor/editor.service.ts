@@ -76,7 +76,7 @@ export class EditorService {
     editor: Quill,
     initialContent: DeltaStatic
   ): void {
-    const uuid = this.scriptService.loadingStateChange();
+    const uuid = this.appService.setLoading();
 
     this.editor = editor;
 
@@ -97,12 +97,12 @@ export class EditorService {
           this.editor.setContents(initialContent);
         }
         this.initialized$.next();
-        this.scriptService.loadingStateChange(uuid);
+        this.appService.resolveLoading(uuid);
       });
     } else {
       this.editor.setContents(initialContent);
       this.initialized$.next();
-      this.scriptService.loadingStateChange(uuid);
+      this.appService.resolveLoading(uuid);
     }
   }
 

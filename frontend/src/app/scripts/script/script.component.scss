@@ -218,16 +218,6 @@ $tool-box-height: 60px;
     }
   }
 }
-.loading-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 150px;
-  color: red;
-  opacity: 0.7;
-  z-index: 1000;
-}
 
 .scroller {
   position: fixed;

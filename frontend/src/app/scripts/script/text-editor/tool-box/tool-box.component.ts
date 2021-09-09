@@ -12,6 +12,7 @@ import { FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { AppService } from 'src/app/services/app.service';
 import { TokenizeService } from 'src/app/services/tokenizer.service';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
@@ -48,6 +49,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
   private unsubscriber$ = new Subject<void>();
 
   constructor(
+    private appService: AppService,
     private scriptService: ScriptService,
     private editorService: EditorService,
     private tokenizeService: TokenizeService,
@@ -135,7 +137,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
     if (words.length === 0) {
       return;
     }
-    const uuid = this.scriptService.loadingStateChange();
+    const uuid = this.appService.setLoading();
 
     forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
@@ -156,10 +158,10 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (baseForms) => {
-          this.scriptService.loadingStateChange(uuid);
+          this.appService.resolveLoading(uuid);
         },
         (error) => {
-          this.scriptService.loadingStateChange(uuid);
+          this.appService.resolveLoading(uuid);
         }
       );
   }
@@ -169,7 +171,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const uuid = this.scriptService.loadingStateChange();
+    const uuid = this.appService.setLoading();
 
     forkJoin(words.map((word: string) => this.tokenizeService.tokenize(word)))
       .pipe(
@@ -186,7 +188,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
         if (baseForms.length > 0) {
           this.editorService.underline(baseForms);
         }
-        this.scriptService.loadingStateChange(uuid);
+        this.appService.resolveLoading(uuid);
       });
   }
 
