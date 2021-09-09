@@ -115,3 +115,10 @@ export type DeltaOperation = {
 //   REVIEWED = 'reviewed',
 //   WIP = 'wip',
 // }
+
+export interface PaginationResponse<T> {
+  data: T[];
+  length: number;
+  pageIndex: number;
+  pageSize: number;
+}

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Script } from 'src/app/typing';
+import { PaginationResponse, Script } from 'src/app/typing';
 
 @Injectable({
   providedIn: 'root',
@@ -9,8 +9,13 @@ import { Script } from 'src/app/typing';
 export class ScriptListService {
   constructor(private http: HttpClient) {}
 
-  getScripts(page: number): Observable<Script[]> {
-    return this.http.get<Script[]>(`api/v1/scripts?page=${page}`);
+  getScripts(
+    pageIndex = 0,
+    pageSize = 10
+  ): Observable<PaginationResponse<Script>> {
+    return this.http.get<PaginationResponse<Script>>(
+      `api/v1/scripts?pageIndex=${pageIndex}&pageSize=${pageSize}`
+    );
   }
 
   deleteScripts(ids: number[]): Observable<void> {

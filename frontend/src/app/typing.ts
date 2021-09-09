@@ -1,10 +1,6 @@
 import { isEqual } from 'lodash';
 import { DeltaOperation } from 'quill';
 
-// import { ScriptStatus } from '../../../src/typing';
-
-// export { ScriptStatus } from '../../../src/typing';
-
 export interface Post {
   date?: number;
   title?: string;
@@ -192,3 +188,10 @@ export interface WordDetail {
 }
 
 export type UserDictionary = WordDetail[];
+
+export interface PaginationResponse<T> {
+  data: T[];
+  length: number;
+  pageIndex: number;
+  pageSize: number;
+}

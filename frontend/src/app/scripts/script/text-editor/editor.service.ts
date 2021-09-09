@@ -62,7 +62,7 @@ export class EditorService {
     first(),
     mergeMap(() => this.textChanged$),
     auditTime(300),
-    map(() => this.editor.getText().length)
+    map(() => this.editor.getText().trim().length)
   );
 
   constructor(
