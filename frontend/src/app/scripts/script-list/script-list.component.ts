@@ -23,7 +23,7 @@ export class ScriptListComponent implements OnInit, OnDestroy {
 
   deleteScriptIds: number[] = [];
 
-  length: number;
+  count: number;
   pageSize: number;
   pageIndex: number;
   pageSizeOptions = [10, 30, 60];
@@ -43,7 +43,7 @@ export class ScriptListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((paginationResult) => {
         this.scripts$.next(paginationResult.data);
-        this.length = paginationResult.length;
+        this.count = paginationResult.count;
         this.pageIndex = paginationResult.pageIndex;
         this.pageSize = paginationResult.pageSize;
 
@@ -92,7 +92,7 @@ export class ScriptListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((paginationResult) => {
         this.scripts$.next(paginationResult.data);
-        this.length = paginationResult.length;
+        this.count = paginationResult.count;
         this.pageIndex = paginationResult.pageIndex;
         this.pageSize = paginationResult.pageSize;
 

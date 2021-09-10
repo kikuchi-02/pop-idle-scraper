@@ -56,14 +56,14 @@
             <mat-icon>arrow_downward</mat-icon>
           </div>
         </div>
-        <div class="input-area__label-tool">
+        <!-- <div class="input-area__label-tool">
           <div class="svg__icon" (click)="saveInput()">
             <mat-icon>save</mat-icon>
           </div>
           <div class="svg__icon" (click)="refreshInput()">
             <mat-icon>refresh</mat-icon>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="input-area__label-label">
         <label>output</label>
@@ -92,6 +92,7 @@
       <quill-editor
         [debounceTime]="300"
         class="textarea"
+        [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'input')"
       ></quill-editor>
       <div class="input-area__subtitle" *ngIf="showSubtitleLine">
@@ -100,6 +101,7 @@
       <quill-editor
         [debounceTime]="300"
         class="textarea"
+        [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'output')"
       ></quill-editor>
     </div>

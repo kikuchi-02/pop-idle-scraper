@@ -45,6 +45,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   showSubtitleLine = true;
 
+  darkTheme = false;
+
   outputWarning = undefined;
   private editorInitialized$ = new BehaviorSubject<boolean>(false);
 
@@ -59,7 +61,14 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     private subtitleService: SubtitleService,
     private ngZone: NgZone,
     private renderer: Renderer2
-  ) {}
+  ) {
+    this.appService.darkTheme$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        this.darkTheme = val;
+        this.cd.markForCheck();
+      });
+  }
 
   onEditorCreated(event: Quill, type: 'input' | 'output'): void {
     if (type === 'input') {

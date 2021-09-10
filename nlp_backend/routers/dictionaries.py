@@ -1,4 +1,5 @@
 from itertools import chain
+from typing import Optional
 
 from fastapi import APIRouter, Body
 from models import DictionaryBody, WordInformation
@@ -9,32 +10,61 @@ router = APIRouter()
 
 
 @router.get("/dictionary")
-def get_dictionary():
-    with get_cursor() as cursor:
-        cursor.execute('SELECT * FROM "word_information"')
-        rows = cursor.fetchall()
-        columns = [col[0] for col in cursor.description]
-        dictionary = [
-            WordInformation(**{key: value for key, value in zip(columns, row)})
-            for row in rows
-        ]
+def get_dictionary(
+    pageIndex: int = 0, pageSize: int = 10, search: Optional[str] = None
+):
+    if search is not None:
+        with get_cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT COUNT(*) FROM "word_information" WHERE "word" LIKE %s
+                """,
+                (f"%{search}%",),
+            )
+            count = cursor.fetchone()[0]
 
-    return {"dictionary": dictionary}
+            cursor.execute(
+                """
+                SELECT * FROM "word_information" WHERE "word" LIKE %s ORDER BY id DESC LIMIT %s OFFSET %s
+                """,
+                (f"%{search}%", pageSize, pageSize * pageIndex),
+            )
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+    else:
+        with get_cursor() as cursor:
+            cursor.execute('SELECT COUNT(*) FROM "word_information"')
+            count = cursor.fetchone()[0]
+
+            cursor.execute(
+                cursor.mogrify(
+                    'SELECT * FROM "word_information" ORDER BY id DESC LIMIT %s OFFSET %s',
+                    (pageSize, pageSize * pageIndex),
+                )
+            )
+            rows = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+
+    dictionary = [
+        WordInformation(**{key: value for key, value in zip(columns, row)})
+        for row in rows
+    ]
+
+    return {
+        "data": dictionary,
+        "count": count,
+        "pageIndex": pageIndex,
+        "pageSize": pageSize,
+    }
 
 
 @router.put("/dictionary")
 def put_dictionary(body: DictionaryBody = Body(..., embedded=True)):
-    delete_ids = []
+    delete_ids = body.deleteIds
     create_or_update_words = []
-    for token in body.dictionary:
-        if token.change == "delete" and token.id is not None:
-            delete_ids.append(token.id)
-        elif (
-            token.change in ["create", "update"]
-            and token.word is not None
-            and token.pronunciation is not None
-        ):
-            create_or_update_words.append((token.word, token.pronunciation))
+
+    for word in [*body.newWords, *body.updateWords]:
+        create_or_update_words.append((word.word, word.pronunciation))
 
     if delete_ids or create_or_update_words:
         with get_cursor() as cursor:
@@ -68,5 +98,3 @@ def put_dictionary(body: DictionaryBody = Body(..., embedded=True)):
 
     if delete_ids or create_or_update_words:
         refresh_tokenizer(dictionary)
-
-    return {"dictionary": dictionary}

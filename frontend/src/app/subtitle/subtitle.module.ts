@@ -7,6 +7,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
@@ -40,6 +41,7 @@ Quill.register(CautionBlot);
     MatIconModule,
     MatSlideToggleModule,
     MatButtonToggleModule,
+    MatPaginatorModule,
   ],
 })
 export class SubtitleModule {}

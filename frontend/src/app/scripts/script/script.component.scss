@@ -158,6 +158,11 @@ $tool-box-height: 60px;
           background-color: $dark-background;
         }
       }
+
+      .ql-blank::before {
+        color: $dark-color;
+        opacity: 0.6;
+      }
     }
 
     .ql-editor {
