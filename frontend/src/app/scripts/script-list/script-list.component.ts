@@ -35,7 +35,9 @@ export class ScriptListComponent implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private router: Router,
     private route: ActivatedRoute
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.scriptListService
       .getScripts()
       .pipe(takeUntil(this.unsubscriber$))
@@ -48,8 +50,6 @@ export class ScriptListComponent implements OnInit, OnDestroy {
         this.cd.markForCheck();
       });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
