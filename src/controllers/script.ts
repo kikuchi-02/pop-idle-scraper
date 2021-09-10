@@ -25,7 +25,7 @@ export const readScripts = async (req: Request, res: Response) => {
   );
   res.json({
     data: posts,
-    length: count,
+    count,
     pageIndex,
     pageSize,
   });
