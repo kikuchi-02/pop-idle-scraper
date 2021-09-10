@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Script } from 'src/app/typing';
 import { ScriptListService } from './script-list.service';
@@ -19,7 +19,7 @@ import { ScriptListService } from './script-list.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScriptListComponent implements OnInit, OnDestroy {
-  scripts: Script[];
+  scripts$ = new BehaviorSubject<Script[]>([]);
 
   deleteScriptIds: number[] = [];
 
@@ -40,7 +40,7 @@ export class ScriptListComponent implements OnInit, OnDestroy {
       .getScripts()
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((paginationResult) => {
-        this.scripts = paginationResult.data;
+        this.scripts$.next(paginationResult.data);
         this.length = paginationResult.length;
         this.pageIndex = paginationResult.pageIndex;
         this.pageSize = paginationResult.pageSize;
@@ -77,9 +77,10 @@ export class ScriptListComponent implements OnInit, OnDestroy {
       .deleteScripts(this.deleteScriptIds)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe(() => {
-        this.scripts = this.scripts.filter(
-          (script) => !this.deleteScriptIds.includes(script.id)
-        );
+        const scripts = this.scripts$
+          .getValue()
+          .filter((script) => !this.deleteScriptIds.includes(script.id));
+        this.scripts$.next(scripts);
         this.deleteScriptIds = [];
         this.cd.markForCheck();
       });
@@ -90,7 +91,7 @@ export class ScriptListComponent implements OnInit, OnDestroy {
       .getScripts(pageEvent.pageIndex, pageEvent.pageSize)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((paginationResult) => {
-        this.scripts = paginationResult.data;
+        this.scripts$.next(paginationResult.data);
         this.length = paginationResult.length;
         this.pageIndex = paginationResult.pageIndex;
         this.pageSize = paginationResult.pageSize;
