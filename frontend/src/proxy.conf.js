@@ -20,12 +20,12 @@ const PROXY_CONFIG = [
   //   secure: false,
   //   ws: true,
   // },
-  // {
-  //   context: ['/__text'],
-  //   target: 'http://localhost:1234',
-  //   secure: false,
-  //   ws: true,
-  // },
+  {
+    context: ['/__text'],
+    target: 'http://localhost:1234',
+    secure: false,
+    ws: true,
+  },
 ];
 
 module.exports = PROXY_CONFIG;
