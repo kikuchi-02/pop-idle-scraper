@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   WS_PORT: 8081,
-  USE_WS: false,
+  USE_WS: true,
 };
 
 /*

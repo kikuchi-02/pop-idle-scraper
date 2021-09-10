@@ -31,7 +31,11 @@ export class AppService {
   }
 
   constructor() {
-    if (this.useWs) {
+    this.reconnect();
+  }
+
+  reconnect(): void {
+    if (this.useWs && (!this.wsProvider || !this.wsProvider.wsconnected)) {
       this.wsProvider = new WebsocketProvider(
         `${environment.production ? 'wss' : 'ws'}://${window.location.host}`,
         '__text',

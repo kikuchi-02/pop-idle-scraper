@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  USE_WS: false,
+  USE_WS: true,
 };

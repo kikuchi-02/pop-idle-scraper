@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { User } from '../typing';
+import { AppService } from './app.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +26,11 @@ export class AuthenticationService {
   public redirectUrl: string;
   public user: User;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private appService: AppService
+  ) {}
 
   login(email: string, password: string): Observable<void> {
     return this.http
@@ -54,6 +59,7 @@ export class AuthenticationService {
           }
         ),
         tap(() => {
+          this.appService.reconnect();
           if (this.redirectUrl) {
             this.router.navigate([this.redirectUrl]);
             this.redirectUrl = null;
