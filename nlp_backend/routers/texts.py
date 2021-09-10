@@ -24,7 +24,8 @@ def splittable(token: Token, next_token=None) -> bool:
     split_characters = ["。", "、", "？", "！"]
 
     is_next_split = next_token is not None and (
-        next_token.surface in split_characters or any((p in next_pos for p in next_pos))
+        next_token.surface in split_characters
+        or any((p in next_unsplittable for p in next_pos))
     )
 
     splittable = (
@@ -48,7 +49,7 @@ def split_by_new_line(body: ScriptBody = Body(..., embedded=True)):
         if splittable(token, next_token):
             str = str.replace("。", "。\n").replace("☆", "\n☆\n\n\n")
             if str == "\n":
-                splitted_token.push("")
+                splitted_token.append("")
             else:
                 splitted_token.extend(str.split("\n"))
             str = ""

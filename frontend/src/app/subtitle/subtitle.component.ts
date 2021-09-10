@@ -45,6 +45,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   showSubtitleLine = true;
 
+  darkTheme = false;
+
   outputWarning = undefined;
   private editorInitialized$ = new BehaviorSubject<boolean>(false);
 
@@ -59,7 +61,14 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     private subtitleService: SubtitleService,
     private ngZone: NgZone,
     private renderer: Renderer2
-  ) {}
+  ) {
+    this.appService.darkTheme$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        this.darkTheme = val;
+        this.cd.markForCheck();
+      });
+  }
 
   onEditorCreated(event: Quill, type: 'input' | 'output'): void {
     if (type === 'input') {
@@ -259,11 +268,21 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           }
 
           seqCounter++;
-          if (text !== '' && text !== '。') {
+          if (text === '' || text === '。') {
+            seqCounter = 0;
+            if (last !== undefined) {
+              partials.push(this.calcSrt(last));
+              last = undefined;
+            }
+          } else {
             if (seqCounter > 2) {
-              attrs.caution =
-                'The sentence continues for more than three lines';
-              errors.add('Sentences continue for more than three lines.');
+              // attrs.caution =
+              //   'The sentence continues for more than three lines';
+              // errors.add('Sentences continue for more than three lines.');
+
+              // 3行目には改行入れる。
+              delta.insert('\n');
+              seqCounter = 0;
             }
             if (last !== undefined) {
               partials.push(this.calcSrt(last, text));
@@ -271,13 +290,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
             } else {
               last = text;
             }
-          } else {
-            seqCounter = 0;
-            if (last !== undefined) {
-              partials.push(this.calcSrt(last));
-              last = undefined;
-            }
           }
+
           // length plus new line character
           delta.retain(text.length + 1, attrs);
         }

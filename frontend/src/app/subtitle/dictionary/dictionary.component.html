@@ -1,63 +1,101 @@
 <div class="wrapper" [class.dark-theme]="darkTheme">
-  <div class="form">
-    <input
-      [disabled]="true"
-      #searchInput
-      type="text"
-      [(ngModel)]="text"
-      placeholder="keyword"
-      class="form__input"
-    />
-    <button type="button" (click)="add()">add</button>
+  <div class="header">
+    <form (ngSubmit)="search()">
+      <mat-form-field>
+        <mat-label>search</mat-label>
+        <input matInput type="text" [formControl]="textForm" />
+        <button
+          type="button"
+          mat-button
+          *ngIf="textForm.value"
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="textForm.reset()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <button type="submit" mat-stroked-button color="primary">submit</button>
+    </form>
+    <button type="button" (click)="add()" mat-stroked-button color="primary">
+      add
+    </button>
+
+    <div
+      class="header__save"
+      type="button"
+      (click)="save()"
+      mat-stroked-button
+      color="primary"
+    >
+      <mat-icon class="svg__icon">save</mat-icon>
+    </div>
   </div>
+
+  <div class="inner inner__new">
+    <ng-container
+      *ngTemplateOutlet="table; context: { words: newDictionary }"
+    ></ng-container>
+  </div>
+
+  <mat-paginator
+    (page)="handlePageEvent($event)"
+    [length]="count"
+    [pageSize]="pageSize"
+    [showFirstLastButtons]="true"
+    [pageSizeOptions]="pageSizeOptions"
+    [pageIndex]="pageIndex"
+    aria-label="Select page"
+  >
+  </mat-paginator>
   <div class="inner">
-    <table>
-      <thead>
-        <tr>
-          <th *ngFor="let col of ['word', 'pronunciation']">
-            {{ col }}
-            <!-- <button (click)="sort(col)">sort</button> -->
-          </th>
-          <th></th>
-        </tr>
-      </thead>
-      <ng-container *ngIf="!!dictionary; else yetInitialized">
-        <tbody>
-          <tr *ngFor="let row of dictionary; index as index">
-            <td>
-              <div
-                class="dictionary__word"
-                contenteditable="true"
-                [textContent]="row.word"
-                (input)="onInput(index, $event, 'word')"
-              ></div>
-            </td>
-            <td>
-              <div
-                class="dictionary__pronunciation"
-                contenteditable="true"
-                [textContent]="row.pronunciation"
-                (input)="onInput(index, $event, 'pronunciation')"
-              ></div>
-              <p
-                class="dictionary__pronunciation--error"
-                *ngIf="errors.has(index)"
-              >
-                {{ errors.get(index) }}
-              </p>
-            </td>
-            <td>
-              <div
-                class="dictionary__icon dictionary__icon-delete"
-                (click)="dictionary.splice(index, 1)"
-              >
-                <mat-icon>close</mat-icon>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </ng-container>
-      <ng-template #yetInitialized></ng-template>
-    </table>
+    <ng-container
+      *ngTemplateOutlet="table; context: { words: dictionary }"
+    ></ng-container>
   </div>
 </div>
+
+<ng-template #table let-words="words">
+  <table>
+    <thead>
+      <tr>
+        <th *ngFor="let col of ['word', 'pronunciation']">
+          {{ col }}
+          <!-- <button (click)="sort(col)">sort</button> -->
+        </th>
+      </tr>
+    </thead>
+    <ng-container *ngIf="!!words">
+      <tbody>
+        <tr *ngFor="let row of words; index as index">
+          <td>
+            <div
+              class="dictionary__word"
+              contenteditable="true"
+              [textContent]="row.word"
+              (input)="onInput(row, $event, 'word')"
+            ></div>
+          </td>
+          <td>
+            <div
+              class="dictionary__pronunciation"
+              contenteditable="true"
+              [textContent]="row.pronunciation"
+              (input)="onInput(row, $event, 'pronunciation')"
+            ></div>
+            <p class="dictionary__pronunciation--error" *ngIf="!!row.error">
+              {{ row.error }}
+            </p>
+            <div
+              class="dictionary__icon dictionary__icon-delete dark-theme"
+              (click)="deleteWord(row, index)"
+            >
+              <mat-icon>close</mat-icon>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </ng-container>
+  </table>
+</ng-template>

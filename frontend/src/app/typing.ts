@@ -185,13 +185,15 @@ export interface WordDetail {
   id: number;
   word: string;
   pronunciation: string;
+
+  error?: string;
 }
 
 export type UserDictionary = WordDetail[];
 
 export interface PaginationResponse<T> {
   data: T[];
-  length: number;
+  count: number;
   pageIndex: number;
   pageSize: number;
 }

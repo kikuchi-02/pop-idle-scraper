@@ -19,11 +19,12 @@ class WordInformation(BaseModel):
 
 class WordInformationBody(WordInformation):
     id: Optional[int]
-    change: Optional[Literal["create", "update", "delete"]] = None
 
 
 class DictionaryBody(BaseModel):
-    dictionary: List[WordInformationBody]
+    newWords: List[WordInformationBody]
+    updateWords: List[WordInformationBody]
+    deleteIds: List[int]
 
 
 class ScriptBody(BaseModel):

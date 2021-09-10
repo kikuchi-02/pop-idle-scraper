@@ -107,6 +107,13 @@
           }
         }
 
+        &.dark-theme {
+          .ql-blank::before {
+            color: $dark-color;
+            opacity: 0.6;
+          }
+        }
+
         [data-warning-uuid] {
           cursor: pointer;
         }

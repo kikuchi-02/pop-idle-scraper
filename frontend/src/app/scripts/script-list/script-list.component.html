@@ -1,7 +1,7 @@
 <div class="wrapper">
   <mat-paginator
     (page)="handlePageEvent($event)"
-    [length]="length"
+    [length]="count"
     [pageSize]="pageSize"
     [showFirstLastButtons]="true"
     [pageSizeOptions]="pageSizeOptions"
@@ -11,7 +11,7 @@
   </mat-paginator>
 
   <ul class="list">
-    <li *ngFor="let script of scripts" class="list-detail">
+    <li *ngFor="let script of scripts$ | async" class="list-detail">
       <input
         class="list-detail__checkbox"
         type="checkbox"
