@@ -59,7 +59,7 @@ export class AuthenticationService {
           }
         ),
         tap(() => {
-          this.appService.reconnect();
+          this.appService.wsReconnect();
           if (this.redirectUrl) {
             this.router.navigate([this.redirectUrl]);
             this.redirectUrl = null;
@@ -96,6 +96,7 @@ export class AuthenticationService {
             this.access = access;
             this.refresh = refresh;
             this.user = user;
+            this.appService.wsReconnect();
 
             return of(void 0);
           }
