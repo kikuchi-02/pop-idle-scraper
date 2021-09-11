@@ -4,11 +4,7 @@
 
 name: Node.js CI
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: workflow_dispatch
 
 jobs:
   build:
@@ -21,14 +17,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Create Branch
-        id: create_branch
-        env:
-          TZ: 'Asia/Tokyo'
-        run: |
-          BRANCH_NAME="release"
-          git checkout -b "$BRANCH_NAME"
-          git push -fu origin "$BRANCH_NAME"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -45,13 +33,6 @@ jobs:
       #     npm run build
       #   working-directory: ./
       # - run: npm test
-      - name: Commit
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "build"
-          git push
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -61,20 +42,20 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy with rsync
         run: |
-          rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deploy --include "frontend/dist/***" --exclude "frontend/*"
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cp ./env.json ./deploy/'
+          rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/sample --include "frontend/dist/***" --exclude "frontend/*"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cp ./env.json ./sample/'
       - name: Install dependencies
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./deploy && npm i --production'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '/home/kikuchi/.pyenv/shims/pip install -r ./deploy/nlp_backend/requirements/prod.txt'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./sample && npm i --production'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '/home/kikuchi/.pyenv/shims/pip install -r ./sample/nlp_backend/requirements/prod.txt'
       # - name: Run migrations
       #   run: |
       #     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'pg_dump pop_idle | gzip > "`date +"%Y%m%d"`.dump.gz"'
-      #     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./deploy/ && npm run migrate'
+      #     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./sample/ && npm run migrate'
       - name: Restart nginx
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo systemctl restart nginx'
       - name: Restart supervisor
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl reread'
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl update'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl restart main:'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl restart sample:'

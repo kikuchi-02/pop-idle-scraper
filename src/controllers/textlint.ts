@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { TextLintEngine } from 'textlint';
+
 const textLintEngine = new TextLintEngine();
 
 export const postTextLint = async (req: Request, res: Response) => {

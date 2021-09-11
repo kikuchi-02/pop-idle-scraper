@@ -143,7 +143,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       .pipe(
         map((tokensArray) => {
           const baseForms: string[] = tokensArray.map(
-            (tokens) => tokens[0].basic_form
+            (tokens) => tokens[0].base_form
           );
           const noBaseForms = baseForms.filter((baseForm) => baseForm === '*');
           if (noBaseForms.length > 0) {
@@ -177,7 +177,7 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
       .pipe(
         map((tokensArray) => {
           const baseForms: string[] = tokensArray
-            .map((tokens) => tokens[0].basic_form)
+            .map((tokens) => tokens[0].base_form)
             .filter((baseForm) => baseForm !== '*');
           return baseForms;
         }),

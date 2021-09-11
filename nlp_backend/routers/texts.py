@@ -148,3 +148,13 @@ def extract_tags(body: ScriptBody = Body(..., embedded=True)):
     )
     counter = Counter(tokens)
     return dict(counter.most_common(30))
+
+
+@router.post("/tokenize")
+def tokenize(body: ScriptBody = Body(..., embedded=True)):
+    tokenizer = get_tokenizer()
+    tokens = [
+        {"surface": token.surface, "base_form": token.base_form}
+        for token in tokenizer.tokenize(body.text)
+    ]
+    return tokens
