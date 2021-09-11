@@ -1,8 +1,14 @@
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict
 
 from pydantic import BaseSettings
+
+
+@lru_cache()
+def get_settings():
+    return Settings()
 
 
 def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:

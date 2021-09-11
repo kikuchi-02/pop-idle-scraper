@@ -4,16 +4,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
-from config import Settings
+from config import Settings, get_settings
 from models import User
 from services import get_cursor
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-@lru_cache()
-def get_settings():
-    return Settings()
 
 
 def get_user(user_id: str) -> User:

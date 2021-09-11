@@ -185,16 +185,15 @@ export class EditorService {
     const text = this.editor.getText();
     return this.tokenizeService.tokenize(text).pipe(
       map((tokens) => {
+        const delta = new Delta();
         tokens.forEach((token) => {
-          if (baseForms.includes(token.basic_form)) {
-            this.editor.formatText(
-              token.word_position - 1,
-              token.surface_form.length,
-              'background-color',
-              color
-            );
+          if (baseForms.includes(token.base_form)) {
+            delta.retain(token.surface.length, { 'background-color': color });
+          } else {
+            delta.retain(token.surface.length);
           }
         });
+        this.editor.updateContents(delta);
       })
     );
   }

@@ -197,3 +197,8 @@ export interface PaginationResponse<T> {
   pageIndex: number;
   pageSize: number;
 }
+
+export interface Token {
+  surface: string;
+  base_form: string;
+}

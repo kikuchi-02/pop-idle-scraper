@@ -6,7 +6,6 @@ import * as messageController from './controllers/message';
 import * as scraperController from './controllers/scrape';
 import * as scriptController from './controllers/script';
 import * as textlintController from './controllers/textlint';
-import * as tokenController from './controllers/token';
 import * as twitterController from './controllers/twitter';
 import { verifyToken } from './middleware/authentication';
 
@@ -41,8 +40,6 @@ export const setRoutes = (app: Express) => {
   routeV1.post('/scripts', verifyToken, scriptController.createScript);
   routeV1.delete('/scripts', verifyToken, scriptController.deleteScripts);
   routeV1.delete('/scripts/:id', verifyToken, scriptController.deleteScript);
-
-  routeV1.post('/tokenize', verifyToken, tokenController.postTokenize);
 
   routeV1.get('/messages', verifyToken, messageController.readMessage);
   routeV1.post('/messages', verifyToken, messageController.createMessage);
