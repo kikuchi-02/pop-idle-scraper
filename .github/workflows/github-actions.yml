@@ -78,4 +78,4 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl reread'
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl update'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl restart all'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'sudo supervisorctl restart main:'

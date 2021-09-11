@@ -1,7 +1,7 @@
 pandas==1.2.4
-Janome==0.4.1
-pydantic==1.8.2
-typing_extensions==3.10.0.0
 jose==1.0.0
-psycopg2-binary==2.8.4
+typing_extensions==3.10.0.0
+pydantic==1.8.2
+psycopg2==2.9.1
+Janome==0.4.1
 fastapi==0.68.1
