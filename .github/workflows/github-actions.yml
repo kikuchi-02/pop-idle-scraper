@@ -61,12 +61,11 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy with rsync
         run: |
-          rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deploy
+          rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/deploy --include "frontend/dist/***" --exclude "frontend/*"
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cp ./env.json ./deploy/'
       - name: Install dependencies
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./deploy && npm i --production'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ./deploy/frontend/ && npm i --production'
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '/home/kikuchi/.pyenv/shims/pip install -r ./deploy/nlp_backend/requirements/prod.txt'
       # - name: Run migrations
       #   run: |
