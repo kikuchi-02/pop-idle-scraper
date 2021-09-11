@@ -20,14 +20,17 @@ def refresh_tokenizer(dictionary: List[WordInformation] = None):
                 WordInformation(**{key: value for key, value in zip(columns, row)})
                 for row in rows
             ]
-    # 東京スカイツリー,カスタム名詞,トウキョウスカイツリー
-    udic_path = os.path.join(os.getcwd(), "data", "udic.csv")
-    with open(udic_path, "w") as f:
-        f.writelines(
-            (f"{token.word},カスタム名詞,{token.pronunciation}\n" for token in dictionary)
-        )
 
-    _tokenizer = Tokenizer(udic=udic_path, udic_type="simpledic")
+    if dictionary:
+        # 東京スカイツリー,カスタム名詞,トウキョウスカイツリー
+        udic_path = os.path.join(os.getcwd(), "data", "udic.csv")
+        with open(udic_path, "w") as f:
+            f.writelines(
+                (f"{token.word},カスタム名詞,{token.pronunciation}\n" for token in dictionary)
+            )
+        _tokenizer = Tokenizer(udic=udic_path, udic_type="simpledic")
+    else:
+        _tokenizer = Tokenizer()
 
 
 def get_tokenizer():
