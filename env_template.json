@@ -1,0 +1,28 @@
+{
+  "TWITTER": {
+    "API_KEY": "",
+    "API_SECRET_KEY": "",
+    "BEARER_TOKEN": "",
+    "ACCESS_TOKEN": "",
+    "ACCESS_TOKEN_SECRET": ""
+  },
+  "LINE": {
+    "CHANNEL_ACCESS_TOKEN": ""
+  },
+  "DISCORD": {
+    "URL": ""
+  },
+  "REDIS": {
+    "HOST": "",
+    "PORT": 0
+  },
+  "SALT_ROUND": 0,
+  "DATABASE": {
+    "NAME": "",
+    "HOST": "",
+    "PORT": 0,
+    "USER": "",
+    "PASSWORD": ""
+  },
+  "SECRET": ""
+}
