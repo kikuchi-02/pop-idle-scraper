@@ -11,10 +11,12 @@
 
   <div class="chat-form">
     <p class="chat-form__status">
-      <ng-container *ngIf="selected.text">
+      <ng-container *ngIf="!!activeMessage"
+        >Reply: {{ activeMessage.body.slice(0, 10) + '..' }}</ng-container
+      >
+      <ng-container *ngIf="!!selected.text && !activeMessage">
         Target: {{ selected.text }}
       </ng-container>
-      <ng-container *ngIf="!!activeMessage">Reply: </ng-container>
     </p>
     <form
       #form
@@ -35,6 +37,9 @@
   <div class="chat-message">
     <div
       class="chat-message__expand-icon"
+      [class.chat-message__expand-icon--has-children]="
+        (message.children?.length || 0) > 0
+      "
       [class.chat-message__expand-icon--expanded]="message.expanded"
       (click)="messageClick(message)"
     >
@@ -57,20 +62,19 @@
         }}
       </p>
       <div class="chat-message__sub">
-        <span class="chat-message__sub-reply">{{
-          message.children?.length || 0
-        }}</span>
+        <span
+          class="chat-message__sub-reply"
+          *ngIf="(message.children?.length || 0) > 0"
+          >{{ message.children?.length || 0 }}</span
+        >
 
         <span class="chat-message__sub-author">{{ message.author.name }}</span>
         <span class="chat-message__sub-created">{{
           message.created | date: 'short'
         }}</span>
-        <button
-          class="chat-message__sub-delete svg__icon"
-          (click)="deleteMessage(message)"
-        >
-          <mat-icon>inventory_2</mat-icon>
-        </button>
+        <div class="chat-message__sub-delete" (click)="deleteMessage(message)">
+          <mat-icon class="svg__icon">inventory_2</mat-icon>
+        </div>
       </div>
     </div>
   </div>

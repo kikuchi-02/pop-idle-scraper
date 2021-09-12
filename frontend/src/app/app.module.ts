@@ -2,7 +2,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +29,9 @@ import { SharedModule } from './shared/shared.module';
     MatIconModule,
     MatSlideToggleModule,
     ReactiveFormsModule,
+    MatMenuModule,
+    MatProgressBarModule,
+    MatSnackBarModule,
   ],
   providers: [UtilService, httpInterceptorProviders, AppService],
   bootstrap: [AppComponent],

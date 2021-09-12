@@ -19,6 +19,10 @@
       &--expanded {
         transform: rotate(90deg);
       }
+      visibility: hidden;
+      &--has-children {
+        visibility: visible;
+      }
     }
 
     &__body {
@@ -26,7 +30,6 @@
     }
 
     &__selected-text {
-      color: #6c6c6c;
       font-size: 10px;
       margin: 3px 0px 3px 30px;
     }
@@ -54,7 +57,6 @@
     &__sub {
       text-align: right;
       font-size: 10px;
-      color: #6c6c6e;
       align-items: center;
 
       &-reply {
@@ -65,7 +67,9 @@
         height: 15px;
 
         background: #fff;
-        color: #666;
+        color: blue;
+        font-weight: bold;
+
         text-align: center;
       }
 
@@ -76,9 +80,8 @@
         margin-right: 20px;
       }
       &-delete {
+        display: inline-block;
         margin-right: 5px;
-        background-color: transparent;
-        border: none;
       }
     }
 

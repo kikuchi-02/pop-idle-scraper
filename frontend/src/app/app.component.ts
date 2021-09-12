@@ -8,10 +8,14 @@ import {
   Renderer2,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AppService } from './services/app.service';
+import { AuthenticationService } from './services/authentication.service';
+import { User } from './typing';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +28,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   loading = false;
 
+  get user(): User {
+    return this.authenticationService.user;
+  }
+
   private themeKey = 'theme-key';
   private unsubscriber$ = new Subject();
 
@@ -32,7 +40,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private overlayContainer: OverlayContainer,
     private renderer: Renderer2,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private authenticationService: AuthenticationService,
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.titleService.setTitle('アイドル情報まとめ');
   }
@@ -65,5 +76,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
+  }
+
+  login(): void {
+    this.authenticationService.redirectUrl = this.router.url;
+    this.router.navigate(['/login']);
+  }
+
+  logout(): void {
+    this.authenticationService.logout();
+    this.snackBar.open('Success', 'Logout', { duration: 3000 });
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   }
 }
