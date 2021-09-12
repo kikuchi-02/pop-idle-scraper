@@ -17,11 +17,35 @@
             <a routerLink="/scripts">scripts</a>
           </div>
         </div>
-        <div class="toolbar-inner__theme-toggle">
-          <mat-icon class="mr-8">brightness_5</mat-icon>
-          <mat-slide-toggle [formControl]="toggleControl" class="mr-8">
-          </mat-slide-toggle>
-          <mat-icon>bedtime</mat-icon>
+        <div class="toolbar-inner__right">
+          <div *ngIf="!!user" class="toolbar-inner__user">
+            user: {{ user.name }}
+          </div>
+          <div class="toolbar-inner__account">
+            <div
+              class="toolbar-inner__account-trigger"
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+            >
+              <mat-icon>account_circle</mat-icon>
+            </div>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item [disabled]="!!user" (click)="login()">
+                <mat-icon>login</mat-icon>
+                <span>Login</span>
+              </button>
+              <button mat-menu-item [disabled]="!user" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+              </button>
+            </mat-menu>
+          </div>
+          <div class="toolbar-inner__theme-toggle">
+            <mat-icon class="mr-8">brightness_5</mat-icon>
+            <mat-slide-toggle [formControl]="toggleControl" class="mr-8">
+            </mat-slide-toggle>
+            <mat-icon>bedtime</mat-icon>
+          </div>
         </div>
       </div>
     </div>
@@ -30,7 +54,11 @@
 <router-outlet></router-outlet>
 
 <div class="loading-modal" *ngIf="loading">
-  <div class="loading-modal__content">loading</div>
+  <mat-progress-bar
+    color="primary"
+    mode="indeterminate"
+    class="loading-modal__content"
+  ></mat-progress-bar>
 </div>
 
 <footer></footer>

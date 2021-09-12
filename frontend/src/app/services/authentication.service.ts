@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
@@ -29,7 +30,8 @@ export class AuthenticationService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private appService: AppService
+    private appService: AppService,
+    private snackBar: MatSnackBar
   ) {}
 
   login(email: string, password: string): Observable<void> {
@@ -61,11 +63,12 @@ export class AuthenticationService {
         tap(() => {
           this.appService.wsReconnect();
           if (this.redirectUrl) {
-            this.router.navigate([this.redirectUrl]);
+            this.router.navigate([this.redirectUrl], { replaceUrl: true });
             this.redirectUrl = null;
           } else {
-            this.router.navigate(['/']);
+            this.router.navigate(['/'], { replaceUrl: true });
           }
+          this.snackBar.open('Success', 'Login', { duration: 3000 });
         })
       );
   }
