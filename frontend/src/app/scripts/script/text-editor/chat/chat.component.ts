@@ -233,13 +233,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.chatForm.valid || this.disabled) {
       return;
     }
+    const [parentIndex, parentMessage] = this.findTopMessage(
+      this.messages,
+      this.activeMessage?.id
+    );
 
     const msg: Message = {
       body: this.chatForm.get('body').value,
       author: this.authenticationService.user,
       scriptId: this.scriptId,
-      uuid: this.selected.uuid,
-      parentId: this.activeMessage?.id,
+      uuid: this.selected.uuid || parentMessage?.uuid,
+      parentId: parentMessage?.id,
     };
     this.chatService
       .postMessage(msg)
@@ -247,16 +251,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((message) => {
         message.selectedText = this.selected.text;
 
-        if (this.activeMessage?.id) {
-          const parent = this.messages.findIndex(
-            (parentMessage) => parentMessage.id === this.activeMessage.id
-          );
-          if (this.messages[parent].children) {
-            this.messages[parent].children.push(message);
+        if (parentIndex) {
+          if (this.messages[parentIndex].children) {
+            this.messages[parentIndex].children.push(message);
           } else {
-            this.messages[parent].children = [message];
+            this.messages[parentIndex].children = [message];
           }
-          this.chatService.spliceArray(parent, 1, this.messages[parent]);
+          this.chatService.spliceArray(
+            parentIndex,
+            1,
+            this.messages[parentIndex]
+          );
         } else {
           this.chatService.pushArray(message);
         }
@@ -296,5 +301,30 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(() => {
         this.cd.markForCheck();
       });
+  }
+
+  private findTopMessage(
+    messages: Message[],
+    targetId: number
+  ): [number, Message] {
+    if (!messages || targetId === undefined) {
+      return [undefined, undefined];
+    }
+
+    const includeTarget = (message: Message): boolean => {
+      if (message.id === targetId) {
+        return true;
+      }
+      if (message.children) {
+        return message.children.some((child) => includeTarget(child));
+      }
+    };
+
+    for (let i = 0; i < messages.length; i++) {
+      if (includeTarget(messages[i])) {
+        return [i, messages[i]];
+      }
+    }
+    return [undefined, undefined];
   }
 }
