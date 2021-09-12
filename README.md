@@ -5,6 +5,18 @@ Dark mode is also supported.
 
 ![](./Pop-idle-text-editor.jpg)
 
+## Demo
+
+http://sample-pop-idle.ddnsfree.com/
+
+user
+
+```
+name: sample_user
+email: sample@example.com
+password: 0uxPf02jgF
+```
+
 ## Dependencies
 
 - Python 3.7.5
