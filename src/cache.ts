@@ -1,9 +1,9 @@
 import { readFileSync, writeFile } from 'fs';
 import { join } from 'path';
-import { CacheValue } from './typing';
 import { ClientOpts, createClient, RedisClient } from 'redis';
-import { ENV_SETTINGS } from './conf';
 import { promisify } from 'util';
+import { ENV_SETTINGS } from './conf';
+import { CacheValue } from './typing';
 
 export class Cacher<T> {
   private cacheFilePath: string;
@@ -79,30 +79,30 @@ export class Cacher<T> {
     const cacheStr = JSON.stringify(this.cacheValue);
     if (!this.redisUnavailable) {
       await this.redisConnect().then((redisClient) => {
-        // if (!expireDate) {
-        return promisify(redisClient.set).bind(redisClient)(
-          this.redisKey,
-          cacheStr
-        );
-        // } else {
-        //   const expirationSeconds = Math.floor(
-        //     expireDate.getTime() - Date.now() / 1000
-        //   );
-        //   return new Promise((resolve, reject) => {
-        //     redisClient.set(
-        //       this.redisKey,
-        //       cacheStr,
-        //       'EX',
-        //       expirationSeconds,
-        //       (err, reply) => {
-        //         if (err) {
-        //           reject(err);
-        //         }
-        //         resolve(reply);
-        //       }
-        //     );
-        //   });
-        // }
+        if (!expireDate) {
+          return promisify(redisClient.set).bind(redisClient)(
+            this.redisKey,
+            cacheStr
+          );
+        } else {
+          const expirationSeconds = Math.floor(
+            (expireDate.getTime() - Date.now()) / 1000
+          );
+          return new Promise((resolve, reject) => {
+            redisClient.set(
+              this.redisKey,
+              cacheStr,
+              'EX',
+              expirationSeconds,
+              (err, reply) => {
+                if (err) {
+                  reject(err);
+                }
+                resolve(reply);
+              }
+            );
+          });
+        }
       });
     }
 

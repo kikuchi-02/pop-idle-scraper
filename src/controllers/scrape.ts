@@ -34,7 +34,7 @@ export const getSite = async (req: Request, res: Response) => {
         return result;
       }
 
-      const value = await scrape2(kinds[0] as SiteName);
+      const value = await scrape2(kind as SiteName);
       if (!value) {
         return result;
       }
