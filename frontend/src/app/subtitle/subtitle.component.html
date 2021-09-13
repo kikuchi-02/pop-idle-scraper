@@ -2,24 +2,40 @@
   <div class="menu">
     <div class="menu__tool">
       <h3>Tool</h3>
-      <button
-        (click)="dictionaryOpen = !dictionaryOpen"
-        type="button"
-        cdkOverlayOrigin
-        #trigger="cdkOverlayOrigin"
-        mat-raised-button
-        color="primary"
-      >
-        dictionary
-      </button>
+      <div class="menu__tool-wrapper">
+        <div class="menu__dictionary">
+          <button
+            (click)="dictionaryOpen = !dictionaryOpen"
+            type="button"
+            cdkOverlayOrigin
+            #trigger="cdkOverlayOrigin"
+            mat-raised-button
+            color="primary"
+          >
+            Dictionary
+          </button>
+        </div>
 
-      <mat-slide-toggle
-        color="primary"
-        [checked]="showSubtitleLine.toggle"
-        (toggleChange)="showSubtitleLine.toggle = !showSubtitleLine.toggle"
-      >
-        line
-      </mat-slide-toggle>
+        <div class="menu__subtitle">
+          <h4>Subtitle</h4>
+          <mat-slider
+            [(ngModel)]="subtitleWidth"
+            color="primary"
+            thumbLabel
+          ></mat-slider>
+        </div>
+
+        <div class="menu__font">
+          <mat-form-field appearance="fill">
+            <mat-label>Font</mat-label>
+            <mat-select [(ngModel)]="font" name="font">
+              <mat-option *ngFor="let font of fonts" [value]="font">
+                {{ font }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
     </div>
     <div class="menu__layout">
       <h3>Layout: {{ layout }}</h3>
@@ -59,11 +75,13 @@
       </div>
       <div
         class="editor__subtitle-line"
-        *ngIf="showSubtitleLine.toggle && showSubtitleLine.width"
+        [style.visibility]="showSubtitleLine ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPx"
       ></div>
       <quill-editor
         [debounceTime]="300"
         class="textarea"
+        [styles]="{ 'font-family': font }"
         [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'input')"
       ></quill-editor>
@@ -93,11 +111,14 @@
       </div>
       <div
         class="editor__subtitle-line"
-        *ngIf="showSubtitleLine.toggle && showSubtitleLine.width"
+        [style.visibility]="showSubtitleLine ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPx"
       ></div>
       <quill-editor
+        placeholder=""
         [debounceTime]="300"
         class="textarea"
+        [styles]="{ 'font-family': font }"
         [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'output')"
       ></quill-editor>

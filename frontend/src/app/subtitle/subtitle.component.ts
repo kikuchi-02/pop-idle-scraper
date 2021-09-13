@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -11,14 +10,8 @@ import {
 } from '@angular/core';
 import { QuillEditorComponent } from 'ngx-quill';
 import Quill from 'quill';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  first,
-  map,
-  takeUntil,
-} from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { AppService } from '../services/app.service';
 import { SubtitleService } from './subtitle.service';
@@ -40,7 +33,7 @@ type Layout = typeof layouts[number];
   styleUrls: ['./subtitle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SubtitleComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
   static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
 
@@ -52,11 +45,45 @@ export class SubtitleComponent implements OnInit, OnDestroy, AfterViewInit {
   warningMessenger$ = new Subject<void>();
   newDictionaryKeys: string[] = [];
 
-  showSubtitleLine = { toggle: true, width: true };
+  get subtitleWidth(): number {
+    return this.appService.subtitleWidth;
+  }
+  set subtitleWidth(v: number) {
+    this.appService.subtitleWidth = v;
+  }
+
+  get subtitleLineLeftPx(): number {
+    return (this.subtitleWidth / 100) * 310 * 2 + 15;
+  }
 
   @ViewChild(QuillEditorComponent) quillEditor: QuillEditorComponent;
 
+  get showSubtitleLine(): boolean {
+    if (!this.quillEditor) {
+      return false;
+    }
+    const editorWidth = this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
+      .width;
+    return this.subtitleLineLeftPx + 15 < editorWidth;
+  }
+
   darkTheme = false;
+
+  fonts = this.appService.availableFonts;
+  get font(): string {
+    return this.appService.font;
+  }
+  set font(v: string) {
+    this.appService.font = v;
+  }
+
+  get editorWidth(): number {
+    if (this.quillEditor) {
+      return this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
+        .width;
+    }
+    return 0;
+  }
 
   outputWarning = undefined;
   private editorInitialized$ = new BehaviorSubject<boolean>(false);
@@ -107,33 +134,9 @@ export class SubtitleComponent implements OnInit, OnDestroy, AfterViewInit {
     this.unsubscriber$.next();
   }
 
-  ngAfterViewInit(): void {
-    fromEvent(window, 'resize')
-      .pipe(
-        map(
-          () =>
-            this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
-              .width
-        ),
-        distinctUntilChanged(),
-        debounceTime(300),
-        takeUntil(this.unsubscriber$)
-      )
-      .subscribe((width) => {
-        console.log({ width });
-        if (width > 400 + 15) {
-          this.showSubtitleLine.width = true;
-        } else {
-          this.showSubtitleLine.width = false;
-        }
-        this.cd.markForCheck();
-      });
-  }
-
   convertSound(): void {
     const loadingKey = this.appService.setLoading();
     const input = this.inputEditor.getText();
-    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     this.ngZone.runOutsideAngular(() => {
       this.subtitleService
         .textToSoundText(input)
@@ -395,7 +398,8 @@ export class SubtitleComponent implements OnInit, OnDestroy, AfterViewInit {
       this.inputEditor.setText(
         'これはサンプルの文章です。\n' +
           'この工程では、"/subtitle"で文章を変換し、"softalk"に入力用の文章へ変換したり、字幕を生成します。\n' +
-          'output欄の色がついている文字をクリックすることで、ユーザー辞書への登録も可能です。\n\n' +
+          'ターゲットが"sound"の時はoutput欄の色がついている文字をクリックすることで、ユーザー辞書への登録も可能です。\n\n' +
+          'ターゲットが"srt"の時は字幕入力形式に変換します。\n\n' +
           'https://w.atwiki.jp/softalk/\n'
       );
     }
