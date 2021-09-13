@@ -57,7 +57,8 @@ def split_by_new_line(body: ScriptBody = Body(..., embedded=True)):
         token = next_token
 
     if str != "":
-        splitted_token.append(str)
+        str = str.replace("。", "。\n").replace("☆", "\n☆\n\n\n")
+        splitted_token.extend(str.split("\n"))
     return splitted_token
 
 
