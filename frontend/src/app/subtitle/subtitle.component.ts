@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -6,10 +7,18 @@ import {
   OnDestroy,
   OnInit,
   Renderer2,
+  ViewChild,
 } from '@angular/core';
+import { QuillEditorComponent } from 'ngx-quill';
 import Quill from 'quill';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  first,
+  map,
+  takeUntil,
+} from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { AppService } from '../services/app.service';
 import { SubtitleService } from './subtitle.service';
@@ -31,7 +40,7 @@ type Layout = typeof layouts[number];
   styleUrls: ['./subtitle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SubtitleComponent implements OnInit, OnDestroy {
+export class SubtitleComponent implements OnInit, OnDestroy, AfterViewInit {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
   static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
 
@@ -43,7 +52,9 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   warningMessenger$ = new Subject<void>();
   newDictionaryKeys: string[] = [];
 
-  showSubtitleLine = true;
+  showSubtitleLine = { toggle: true, width: true };
+
+  @ViewChild(QuillEditorComponent) quillEditor: QuillEditorComponent;
 
   darkTheme = false;
 
@@ -94,6 +105,29 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscriber$.next();
+  }
+
+  ngAfterViewInit(): void {
+    fromEvent(window, 'resize')
+      .pipe(
+        map(
+          () =>
+            this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
+              .width
+        ),
+        distinctUntilChanged(),
+        debounceTime(300),
+        takeUntil(this.unsubscriber$)
+      )
+      .subscribe((width) => {
+        console.log({ width });
+        if (width > 400 + 15) {
+          this.showSubtitleLine.width = true;
+        } else {
+          this.showSubtitleLine.width = false;
+        }
+        this.cd.markForCheck();
+      });
   }
 
   convertSound(): void {
@@ -258,7 +292,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
         const delta = new Delta();
 
-        for (const text of lines) {
+        for (const line of lines) {
+          const text = line.trim();
           const metrics = context.measureText(text);
 
           const attrs: { caution?: string } = {};
@@ -353,7 +388,17 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     const input = localStorage.getItem(
       SubtitleComponent.subtitleLocalStorageKey
     );
-    this.inputEditor.setText(input || '');
+
+    if (input) {
+      this.inputEditor.setText(input);
+    } else {
+      this.inputEditor.setText(
+        'これはサンプルの文章です。\n' +
+          'この工程では、"/subtitle"で文章を変換し、"softalk"に入力用の文章へ変換したり、字幕を生成します。\n' +
+          'output欄の色がついている文字をクリックすることで、ユーザー辞書への登録も可能です。\n\n' +
+          'https://w.atwiki.jp/softalk/\n'
+      );
+    }
   }
 
   refreshInput(): void {

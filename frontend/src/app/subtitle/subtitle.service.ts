@@ -167,7 +167,7 @@ export class SubtitleService {
               if (splitted.length > 0) {
                 lines.push(splitted.join(''));
                 splitted.length = 0;
-                splitted.push(token);
+                splitted.push(...token.split('\n'));
               } else {
                 lines.push(token);
               }
@@ -180,7 +180,7 @@ export class SubtitleService {
               return;
             }
 
-            splitted.push(token);
+            splitted.push(...token.split('\n'));
           });
           if (splitted.length > 0) {
             lines.push(splitted.join(''));

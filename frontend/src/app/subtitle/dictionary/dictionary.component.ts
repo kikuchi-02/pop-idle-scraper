@@ -39,13 +39,8 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('searchInput') searchInputElement: ElementRef;
 
   @Input() newDictionaryKeys: string[];
-  newDictionary: UserDictionary = [
-    {
-      id: undefined,
-      word: '',
-      pronunciation: '',
-    },
-  ];
+  newDictionary: UserDictionary = [];
+
   private updateWords = new Map<number, WordDetail>();
   private deleteWordIds = new Set<number>();
 
@@ -68,6 +63,7 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.paginate(0, 10);
+    this.initializeNewKeys();
   }
   ngOnDestroy(): void {
     this.unsubscriber$.next();
@@ -242,5 +238,24 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pageIndex = response.pageIndex;
         this.cd.detectChanges();
       });
+  }
+
+  private initializeNewKeys(): void {
+    if (this.newDictionaryKeys && this.newDictionaryKeys.length > 0) {
+      this.newDictionaryKeys.forEach((key) => {
+        this.newDictionary.push({
+          id: undefined,
+          word: key,
+          pronunciation: '',
+        });
+      });
+    } else {
+      this.newDictionary.push({
+        id: undefined,
+        word: '',
+        pronunciation: '',
+      });
+    }
+    this.cd.markForCheck();
   }
 }

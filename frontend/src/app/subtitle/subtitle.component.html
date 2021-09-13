@@ -12,19 +12,11 @@
       >
         dictionary
       </button>
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="download()"
-      >
-        download
-      </button>
 
       <mat-slide-toggle
         color="primary"
-        [checked]="showSubtitleLine"
-        (toggleChange)="showSubtitleLine = !showSubtitleLine"
+        [checked]="showSubtitleLine.toggle"
+        (toggleChange)="showSubtitleLine.toggle = !showSubtitleLine.toggle"
       >
         line
       </mat-slide-toggle>
@@ -44,19 +36,19 @@
       </mat-button-toggle-group>
     </div>
   </div>
-  <div class="input-area">
-    <div class="input-area__label">
-      <div class="input-area__label-label">
+  <div class="editor">
+    <div class="editor__wrapper">
+      <div class="editor__label">
         <label>input</label>
-        <div class="input-area__caution-scroll">
+        <div class="editor__label-caution-scroll">
           <div
-            class="input-area__caution-scroll-button svg__icon"
+            class="editor__label-caution-scroll-button svg__icon"
             (click)="scrollToCaution('input')"
           >
             <mat-icon>arrow_downward</mat-icon>
           </div>
         </div>
-        <!-- <div class="input-area__label-tool">
+        <!-- <div class="editor__label-tool">
           <div class="svg__icon" (click)="saveInput()">
             <mat-icon>save</mat-icon>
           </div>
@@ -65,39 +57,44 @@
           </div>
         </div> -->
       </div>
-      <div class="input-area__label-label">
-        <label>output</label>
-        <div
-          class="input-area__label-warning"
-          [class.input-area__label-warning--show]="!!outputWarning"
-        >
-          <div class="input-area__label-warning-inner">
-            <mat-icon>warning</mat-icon>
-            <div class="input-area__label-warning-tooltip">
-              {{ outputWarning }}
-            </div>
-          </div>
-        </div>
-        <div class="input-area__label-tool">
-          <div class="svg__icon" (click)="refreshOutput()">
-            <mat-icon>refresh</mat-icon>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="input-area__textarea">
-      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-        <div class="input-area__subtitle-line"></div>
-      </div>
+      <div
+        class="editor__subtitle-line"
+        *ngIf="showSubtitleLine.toggle && showSubtitleLine.width"
+      ></div>
       <quill-editor
         [debounceTime]="300"
         class="textarea"
         [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'input')"
       ></quill-editor>
-      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-        <div class="input-area__subtitle-line"></div>
+    </div>
+    <div class="editor__wrapper">
+      <div class="editor__label">
+        <label>output</label>
+        <div
+          class="editor__label-warning"
+          [class.editor__label-warning--show]="!!outputWarning"
+        >
+          <div class="editor__label-warning-inner">
+            <mat-icon>warning</mat-icon>
+            <div class="editor__label-warning-tooltip">
+              {{ outputWarning }}
+            </div>
+          </div>
+        </div>
+        <div class="editor__label-tool">
+          <div class="svg__icon" (click)="download()">
+            <mat-icon>file_download</mat-icon>
+          </div>
+          <div class="svg__icon" (click)="refreshOutput()">
+            <mat-icon>refresh</mat-icon>
+          </div>
+        </div>
       </div>
+      <div
+        class="editor__subtitle-line"
+        *ngIf="showSubtitleLine.toggle && showSubtitleLine.width"
+      ></div>
       <quill-editor
         [debounceTime]="300"
         class="textarea"
