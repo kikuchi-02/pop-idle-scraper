@@ -7,141 +7,193 @@
       </div></mat-panel-title
     >
   </mat-expansion-panel-header>
-  <div class="row">
-    <div class="row__item">
-      <form (ngSubmit)="highlight([highlightValue.value])">
-        <mat-form-field>
-          <mat-label>Highlight</mat-label>
-          <input matInput [formControl]="highlightValue" />
-          <button
-            type="reset"
-            mat-button
-            *ngIf="highlightValue.value"
-            matSuffix
-            mat-icon-button
-            aria-label="Clear"
-            (click)="highlightValue.reset()"
+  <div class="tool__wrapper">
+    <mat-card class="highlight">
+      <mat-card-title>Highlight</mat-card-title>
+      <div class="highlight__wrapper">
+        <div class="highlight__word">
+          <form (ngSubmit)="highlight([highlightValue.value])">
+            <mat-form-field>
+              <mat-label>Word</mat-label>
+              <input matInput [formControl]="highlightValue" />
+              <button
+                type="reset"
+                mat-button
+                *ngIf="highlightValue.value"
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="highlightValue.reset()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </form>
+        </div>
+        <div class="highlight__base-form">
+          <form (ngSubmit)="highlightBaseForm([baseFormValue.value])">
+            <mat-form-field>
+              <mat-label>Base form</mat-label>
+              <input matInput [formControl]="baseFormValue" />
+              <button
+                type="reset"
+                mat-button
+                *ngIf="baseFormValue.value"
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="baseFormValue.reset()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </form>
+        </div>
+      </div>
+    </mat-card>
+    <mat-card class="highlight-reserved">
+      <mat-card-title>Highlight Reserved</mat-card-title>
+      <div class="highlight-reserved__wrapper">
+        <div class="highlight-reserved__words">
+          <mat-form-field>
+            <mat-label>Keywords</mat-label>
+            <mat-select [formControl]="keywordValues" multiple>
+              <mat-select-trigger>
+                <span class="keywords">{{ keywordValues.value?.length }}</span>
+              </mat-select-trigger>
+              <mat-option *ngFor="let key of keys" [value]="key">{{
+                key
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div
+            class="svg__icon"
+            (click)="highlight(keywordValues.value, 'orange')"
           >
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-form-field>
-      </form>
-    </div>
-    <div class="row__item">
-      <form (ngSubmit)="highlightBaseForm([baseFormValue.value])">
-        <mat-form-field>
-          <mat-label>Highlight base form</mat-label>
-          <input matInput [formControl]="baseFormValue" />
-          <button
-            type="reset"
-            mat-button
-            *ngIf="baseFormValue.value"
-            matSuffix
-            mat-icon-button
-            aria-label="Clear"
-            (click)="baseFormValue.reset()"
+            <mat-icon>format_color_fill</mat-icon>
+          </div>
+        </div>
+        <div class="highlight-reserved__conjunctions">
+          <mat-form-field>
+            <mat-label>conjunctions</mat-label>
+            <mat-select [formControl]="conjunctionValues" multiple>
+              <mat-select-trigger>
+                <span class="keywords">{{
+                  conjunctionValues.value?.length
+                }}</span>
+              </mat-select-trigger>
+              <mat-option *ngFor="let key of conjunctions" [value]="key">{{
+                key
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div
+            class="svg__icon"
+            (click)="highlight(conjunctionValues.value, 'green')"
           >
-            <mat-icon>close</mat-icon>
+            <mat-icon>border_color</mat-icon>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+    <mat-card class="color">
+      <mat-card-title>Color</mat-card-title>
+      <div class="color__wrapper">
+        <div class="color__text">
+          <mat-form-field>
+            <mat-label>text color</mat-label>
+            <input
+              matInput
+              [ngxMatColorPicker]="picker1"
+              [formControl]="textColorCtr"
+            />
+            <ngx-mat-color-toggle
+              matSuffix
+              [for]="picker1"
+            ></ngx-mat-color-toggle>
+            <ngx-mat-color-picker
+              #picker1
+              [touchUi]="false"
+              [color]="color"
+            ></ngx-mat-color-picker>
+          </mat-form-field>
+        </div>
+        <div class="color__background">
+          <mat-form-field>
+            <mat-label>background color</mat-label>
+            <input
+              matInput
+              [ngxMatColorPicker]="picker2"
+              [formControl]="backgroundColorCtr"
+            />
+            <ngx-mat-color-toggle
+              matSuffix
+              [for]="picker2"
+            ></ngx-mat-color-toggle>
+            <ngx-mat-color-picker
+              #picker2
+              [touchUi]="false"
+              [color]="color"
+            ></ngx-mat-color-picker>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card>
+    <mat-card class="others">
+      <mat-card-title>Others</mat-card-title>
+      <div class="others__wrapper">
+        <div class="others__format">
+          <button mat-raised-button color="primary" (click)="reformat()">
+            format
           </button>
-        </mat-form-field>
-      </form>
-    </div>
-  </div>
-  <div class="row">
-    <div class="row__item">
-      <mat-form-field>
-        <mat-label>Keywords</mat-label>
-        <mat-select [formControl]="keywordValues" multiple>
-          <mat-select-trigger>
-            <span class="keywords">{{ keywordValues.value?.length }}</span>
-          </mat-select-trigger>
-          <mat-option *ngFor="let key of keys" [value]="key">{{
-            key
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <div class="svg__icon" (click)="highlight(keywordValues.value, 'orange')">
-        <mat-icon>border_color</mat-icon>
-      </div>
-    </div>
-    <div class="row__item">
-      <mat-form-field>
-        <mat-label>conjunctions</mat-label>
-        <mat-select [formControl]="conjunctionValues" multiple>
-          <mat-select-trigger>
-            <span class="keywords">{{ conjunctionValues.value?.length }}</span>
-          </mat-select-trigger>
-          <mat-option *ngFor="let key of conjunctions" [value]="key">{{
-            key
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <div
-        class="svg__icon"
-        (click)="highlight(conjunctionValues.value, 'green')"
-      >
-        <mat-icon>border_color</mat-icon>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <mat-form-field class="row__item">
-      <mat-label>text color</mat-label>
-      <input
-        matInput
-        [ngxMatColorPicker]="picker1"
-        [formControl]="textColorCtr"
-      />
-      <ngx-mat-color-toggle matSuffix [for]="picker1"></ngx-mat-color-toggle>
-      <ngx-mat-color-picker
-        #picker1
-        [touchUi]="false"
-        [color]="color"
-      ></ngx-mat-color-picker>
-    </mat-form-field>
-    <mat-form-field class="row__item">
-      <mat-label>background color</mat-label>
-      <input
-        matInput
-        [ngxMatColorPicker]="picker2"
-        [formControl]="backgroundColorCtr"
-      />
-      <ngx-mat-color-toggle matSuffix [for]="picker2"></ngx-mat-color-toggle>
-      <ngx-mat-color-picker
-        #picker2
-        [touchUi]="false"
-        [color]="color"
-      ></ngx-mat-color-picker>
-    </mat-form-field>
-  </div>
-  <div class="row">
-    <div class="row__label">buttons:</div>
-    <button mat-button color="primary" class="row__item" (click)="reformat()">
-      format
-    </button>
-    <mat-slide-toggle
-      class="row__item"
-      color="primary"
-      [checked]="true"
-      (toggleChange)="toggleSubtitleButton.emit()"
-    >
-      subtitle
-    </mat-slide-toggle>
-  </div>
-  <div class="row">
-    <div class="row__item row__item-remove">
-      <div class="row__label">remove:</div>
-      <div class="svg__icon" (click)="removeOldHighlighted()">
-        <mat-icon>format_color_fill</mat-icon>
-      </div>
+        </div>
 
-      <div class="svg__icon" (click)="removeAllUnderlinedSentences()">
-        <mat-icon>format_underlined</mat-icon>
-      </div>
+        <div class="others__subtitle">
+          <h4>Subtitle</h4>
+          <mat-slider
+            [(ngModel)]="subtitleWidth"
+            color="primary"
+            thumbLabel
+          ></mat-slider>
+        </div>
 
-      <div class="svg__icon" (click)="removeStrike()">
-        <mat-icon>strikethrough_s</mat-icon>
+        <div class="others__font">
+          <mat-form-field>
+            <mat-label>Font</mat-label>
+            <mat-select [(ngModel)]="font" name="font">
+              <mat-option *ngFor="let font of fonts" [value]="font">
+                {{ font }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
-    </div>
+    </mat-card>
+    <mat-card class="remove">
+      <mat-card-title>Remove</mat-card-title>
+      <div class="remove__wrapper">
+        <div>
+          <button mat-button color="primary" (click)="removeOldHighlighted()">
+            Highlight
+          </button>
+        </div>
+
+        <div>
+          <button
+            mat-button
+            color="primary"
+            (click)="removeAllUnderlinedSentences()"
+          >
+            UnderLine
+          </button>
+        </div>
+
+        <div>
+          <button mat-button color="primary" (click)="removeStrike()">
+            Strike
+          </button>
+        </div>
+      </div>
+    </mat-card>
   </div>
 </mat-expansion-panel>

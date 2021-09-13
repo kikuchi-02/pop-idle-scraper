@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
 import { WebsocketProvider } from 'y-websocket';
 import { Doc } from 'yjs';
+import { availableFonts, Font } from '../typing';
 
 @Injectable({
   providedIn: 'root',
@@ -30,26 +31,14 @@ export class AppService {
     return environment.USE_WS;
   }
 
-  // https://stackoverflow.com/questions/14563064/japanese-standard-web-fonts
-  public availableFonts = [
-    'ヒラギノ角ゴ Pro W3',
-    'Hiragino Kaku Gothic Pro',
-    'Osaka',
-    'メイリオ',
-    'Meiryo',
-    'ＭＳ Ｐゴシック',
-    'MS PGothic',
-    'sans-serif',
-  ];
-
   private fontKey = 'app-font-key';
-  private currentFont: string;
-  get font(): string {
+  private currentFont: Font;
+  get font(): Font {
     if (this.currentFont) {
       return this.currentFont;
     }
-    const value = localStorage.getItem(this.fontKey);
-    if (value && this.availableFonts.includes(value)) {
+    const value = localStorage.getItem(this.fontKey) as Font;
+    if (value && availableFonts.includes(value)) {
       this.currentFont = value;
       return value;
     }
@@ -57,7 +46,7 @@ export class AppService {
     return this.currentFont;
   }
 
-  set font(value: string) {
+  set font(value: Font) {
     if (value !== this.currentFont) {
       this.currentFont = value;
       localStorage.setItem(this.fontKey, this.currentFont);

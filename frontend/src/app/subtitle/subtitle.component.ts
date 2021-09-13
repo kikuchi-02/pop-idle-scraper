@@ -14,6 +14,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { AppService } from '../services/app.service';
+import { availableFonts, Font } from '../typing';
 import { SubtitleService } from './subtitle.service';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -69,11 +70,11 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   darkTheme = false;
 
-  fonts = this.appService.availableFonts;
-  get font(): string {
+  fonts = availableFonts;
+  get font(): Font {
     return this.appService.font;
   }
-  set font(v: string) {
+  set font(v: Font) {
     this.appService.font = v;
   }
 

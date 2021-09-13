@@ -6,31 +6,74 @@
     margin-left: auto;
   }
 
-  .row {
+  .tool__wrapper {
     display: flex;
-    align-items: center;
-    &__item {
-      margin-right: 30px;
-      display: flex;
+    flex-wrap: wrap;
 
-      .svg__icon {
-        display: block;
-        align-self: center;
-      }
-
-      &-remove {
-        .svg__icon {
-          margin-right: 20px;
-        }
-      }
-    }
-    &__label {
-      margin-right: 20px;
+    mat-card-title {
+      text-align: left;
     }
   }
 
   .highlight {
-    margin-left: 5px;
+    width: 400px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    &__wrapper {
+      display: flex;
+    }
+    &__word {
+      margin-right: 30px;
+    }
+  }
+
+  .highlight-reserved {
+    width: 440px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    &__wrapper {
+      display: flex;
+    }
+    &__words {
+      margin-right: 30px;
+      display: flex;
+      align-items: center;
+    }
+    &__conjunctions {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .color {
+    width: 450px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    &__wrapper {
+      display: flex;
+    }
+    &__text {
+      margin-right: 30px;
+    }
+  }
+
+  .others {
+    width: 400px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    &__wrapper {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .remove {
+    width: 400px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    &__wrapper {
+      display: flex;
+    }
   }
 }
 

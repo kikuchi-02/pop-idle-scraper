@@ -22,10 +22,8 @@ import { Quill } from 'quill';
 import { fromEvent, ReplaySubject, Subject } from 'rxjs';
 import {
   debounceTime,
-  distinctUntilChanged,
   filter,
   first,
-  map,
   mergeMap,
   skip,
   takeUntil,
@@ -51,9 +49,17 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
   blurred = false;
   focused = false;
 
-  showSubtitleLine = { toggle: true, single: true, double: true };
+  subtitleWidth = this.appService.subtitleWidth;
+  get subtitleLineLeftPx(): number {
+    return (this.subtitleWidth / 100) * 310 * 2 + 15;
+  }
+  get subtitleLineLeftPxDouble(): number {
+    return (this.subtitleWidth / 100) * 310 * 4 + 15;
+  }
 
   darkTheme = false;
+
+  font = this.appService.font;
 
   titleFormControl = new FormControl('', [Validators.required]);
   // statusFormControl = new FormControl(ScriptStatus.WIP, [Validators.required]);
@@ -121,6 +127,19 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+  showSubtitleLine(type: 'single' | 'double'): boolean {
+    if (!this.editorComponent) {
+      return false;
+    }
+    const editorWidth = this.editorComponent.elementRef.nativeElement.getBoundingClientRect()
+      .width;
+    if (type === 'single') {
+      return this.subtitleLineLeftPx + 15 < editorWidth;
+    } else {
+      return this.subtitleLineLeftPxDouble + 15 < editorWidth;
+    }
+  }
+
   onEditorCreated(editor: Quill): void {
     this.initialized$
       .pipe(first(), takeUntil(this.unsubscriber$))
@@ -157,32 +176,6 @@ export class ScriptComponent implements OnInit, OnDestroy, AfterViewInit {
         this.consolePositionTop = document
           .querySelector('.tool-box__wrapper')
           .getBoundingClientRect().height;
-      });
-
-    fromEvent(window, 'resize')
-      .pipe(
-        map(
-          () =>
-            this.editorComponent.elementRef.nativeElement.getBoundingClientRect()
-              .width
-        ),
-        distinctUntilChanged(),
-        debounceTime(300),
-        takeUntil(this.unsubscriber$)
-      )
-      .subscribe((width) => {
-        if (width > 900) {
-          this.showSubtitleLine.single = true;
-          this.showSubtitleLine.double = true;
-        } else if (width > 500) {
-          this.showSubtitleLine.single = true;
-          this.showSubtitleLine.double = false;
-        } else {
-          this.showSubtitleLine.single = false;
-          this.showSubtitleLine.double = false;
-        }
-
-        this.cd.markForCheck();
       });
   }
 
