@@ -6,12 +6,15 @@ import {
   OnDestroy,
   OnInit,
   Renderer2,
+  ViewChild,
 } from '@angular/core';
+import { QuillEditorComponent } from 'ngx-quill';
 import Quill from 'quill';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { AppService } from '../services/app.service';
+import { availableFonts, Font } from '../typing';
 import { SubtitleService } from './subtitle.service';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -22,8 +25,8 @@ interface Srt {
   text: string;
 }
 
-const layouts = ['plain', 'sound', 'tag', 'srt', 'link'] as const;
-type Layout = typeof layouts[number];
+const targets = ['plain', 'sound', 'tag', 'srt', 'link'] as const;
+type Target = typeof targets[number];
 
 @Component({
   selector: 'app-subtitle',
@@ -33,21 +36,64 @@ type Layout = typeof layouts[number];
 })
 export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
-  static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
+  static subtitleTargetLocalStorageKey = 'subtitleTargetLocalStorageKey';
 
   loading = false;
 
-  layout: Layout = 'plain';
+  target: Target = 'plain';
   dictionaryOpen = false;
 
   warningMessenger$ = new Subject<void>();
   newDictionaryKeys: string[] = [];
 
-  showSubtitleLine = true;
+  get subtitleWidth(): number {
+    return this.appService.subtitleWidth;
+  }
+  set subtitleWidth(v: number) {
+    this.appService.subtitleWidth = v;
+  }
+
+  get subtitleLineLeftPx(): number {
+    return (this.subtitleWidth / 100) * 310 * 2 + 15;
+  }
+
+  @ViewChild(QuillEditorComponent) quillEditor: QuillEditorComponent;
+
+  get showSubtitleLine(): boolean {
+    if (!this.quillEditor) {
+      return false;
+    }
+    const editorWidth = this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
+      .width;
+    return this.subtitleLineLeftPx + 15 < editorWidth;
+  }
 
   darkTheme = false;
 
-  outputWarning = undefined;
+  fonts = availableFonts;
+  get font(): Font {
+    return this.appService.font;
+  }
+  set font(v: Font) {
+    this.appService.font = v;
+  }
+
+  get editorWidth(): number {
+    if (this.quillEditor) {
+      return this.quillEditor.elementRef.nativeElement.getBoundingClientRect()
+        .width;
+    }
+    return 0;
+  }
+
+  private errors = new Map<Target, boolean>(
+    targets.map((target) => [target, false])
+  );
+
+  get hasError(): boolean {
+    return this.errors.get(this.target);
+  }
+
   private editorInitialized$ = new BehaviorSubject<boolean>(false);
 
   private unsubscriber$ = new Subject<void>();
@@ -84,7 +130,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     }
 
     this.initialInput();
-    this.applyLayout();
+    this.applyTarget();
 
     this.editorInitialized$.next(true);
     this.cd.markForCheck();
@@ -99,7 +145,6 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   convertSound(): void {
     const loadingKey = this.appService.setLoading();
     const input = this.inputEditor.getText();
-    localStorage.setItem(SubtitleComponent.subtitleLocalStorageKey, input);
     this.ngZone.runOutsideAngular(() => {
       this.subtitleService
         .textToSoundText(input)
@@ -107,9 +152,13 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         .subscribe((result) => {
           const inputDelta = new Delta();
           let lastIndex = 0;
+          this.errors.set('sound', result.inputUnknownIndexes.length > 0);
           result.inputUnknownIndexes.forEach(({ word, start, end }) => {
+            const uuid = uuidv4();
             inputDelta.retain(start - lastIndex);
-            inputDelta.retain(end - start, { 'background-color': 'orange' });
+            inputDelta.retain(end - start, {
+              warning: { uuid, unknown: word },
+            });
             lastIndex = end;
           });
           this.inputEditor.updateContents(inputDelta);
@@ -168,20 +217,20 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       });
   }
 
-  applyLayout(type?: Layout): void {
+  applyTarget(type?: Target): void {
     if (!type) {
       type = localStorage.getItem(
-        SubtitleComponent.subtitleLayoutLocalStorageKey
-      ) as Layout;
+        SubtitleComponent.subtitleTargetLocalStorageKey
+      ) as Target;
     }
-    if (type === this.layout) {
+    if (type === this.target) {
       return;
     }
 
-    if (layouts.includes(type)) {
-      this.layout = type;
+    if (targets.includes(type)) {
+      this.target = type;
     }
-    localStorage.setItem(SubtitleComponent.subtitleLayoutLocalStorageKey, type);
+    localStorage.setItem(SubtitleComponent.subtitleTargetLocalStorageKey, type);
     this.refreshInput();
     this.refreshOutput();
 
@@ -212,12 +261,12 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     const content = this.outputEditor.getText();
 
     let filename: string;
-    switch (this.layout) {
+    switch (this.target) {
       case 'srt':
         filename = `subtitle.srt`;
         break;
       default:
-        filename = `${this.layout}.txt`;
+        filename = `${this.target}.txt`;
     }
 
     const anchor = this.renderer.createElement('a');
@@ -258,7 +307,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
         const delta = new Delta();
 
-        for (const text of lines) {
+        for (const line of lines) {
+          const text = line.trim();
           const metrics = context.measureText(text);
 
           const attrs: { caution?: string } = {};
@@ -301,9 +351,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           partials.push(this.calcSrt(last));
         }
 
-        if (errors.size > 0) {
-          this.outputWarning = Array.from(errors.values()).join('\n');
-        }
+        this.errors.set('srt', errors.size > 0);
 
         const firstAt = 5;
         let result = '';
@@ -353,7 +401,18 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     const input = localStorage.getItem(
       SubtitleComponent.subtitleLocalStorageKey
     );
-    this.inputEditor.setText(input || '');
+
+    if (input) {
+      this.inputEditor.setText(input);
+    } else {
+      this.inputEditor.setText(
+        'これはサンプルの文章です。\n' +
+          'この工程では、"/subtitle"で文章を変換し、"softalk"に入力用の文章へ変換したり、字幕を生成します。\n' +
+          'ターゲットが"sound"の時はoutput欄の色がついている文字をクリックすることで、ユーザー辞書への登録も可能です。\n\n' +
+          'ターゲットが"srt"の時は字幕入力形式に変換します。\n\n' +
+          'https://w.atwiki.jp/softalk/\n'
+      );
+    }
   }
 
   refreshInput(): void {
@@ -367,8 +426,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   refreshOutput(): void {
-    this.outputWarning = undefined;
-    switch (this.layout) {
+    switch (this.target) {
       case 'plain':
         this.outputEditor.setText(this.inputEditor.getText());
         break;
@@ -385,19 +443,26 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         this.extractLinks();
         break;
       default:
-        throw new Error(`not implemented this type ${this.layout}`);
+        throw new Error(`not implemented this type ${this.target}`);
     }
   }
 
-  scrollToCaution(side: 'input' | 'output'): void {
+  scrollToError(side: 'input' | 'output'): void {
     const scrollers = document.querySelectorAll('.ql-editor');
     const scroller = side === 'input' ? scrollers[0] : scrollers[1];
 
     const scrollTop = scroller.scrollTop;
 
-    const cautionElements = document.querySelectorAll('[data-caution]');
+    const cautionElements = [];
+    cautionElements.push(
+      ...Array.from(document.querySelectorAll('[data-caution]'))
+    );
+    cautionElements.push(
+      ...Array.from(document.querySelectorAll('[data-warning-unknown]'))
+    );
+
     let find = false;
-    for (const element of Array.from(cautionElements)) {
+    for (const element of cautionElements) {
       const top = (element as any).offsetTop - 200;
       if (top > scrollTop) {
         scroller.scrollTo({ top, behavior: 'smooth' });
@@ -408,7 +473,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     if (find) {
       return;
     }
-    for (const element of Array.from(cautionElements)) {
+    for (const element of cautionElements) {
       const top = Math.max((element as any).offsetTop - 200, 0);
       scroller.scrollTo({ top, behavior: 'smooth' });
       break;

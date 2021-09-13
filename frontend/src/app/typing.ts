@@ -202,3 +202,16 @@ export interface Token {
   surface: string;
   base_form: string;
 }
+
+// https://stackoverflow.com/questions/14563064/japanese-standard-web-fonts
+export const availableFonts = [
+  'ヒラギノ角ゴ Pro W3',
+  'Hiragino Kaku Gothic Pro',
+  'Osaka',
+  'メイリオ',
+  'Meiryo',
+  'ＭＳ Ｐゴシック',
+  'MS PGothic',
+  'sans-serif',
+] as const;
+export type Font = typeof availableFonts[number];

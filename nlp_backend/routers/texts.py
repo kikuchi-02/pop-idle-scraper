@@ -42,7 +42,7 @@ def split_by_new_line(body: ScriptBody = Body(..., embedded=True)):
     token = None
     tokenizer = get_tokenizer()
     for next_token in chain(tokenizer.tokenize(body.text), (None,)):
-        if token is None or next_token is None:
+        if token is None:
             token = next_token
             continue
         str += token.surface
@@ -57,7 +57,8 @@ def split_by_new_line(body: ScriptBody = Body(..., embedded=True)):
         token = next_token
 
     if str != "":
-        splitted_token.append(str)
+        str = str.replace("。", "。\n").replace("☆", "\n☆\n\n\n")
+        splitted_token.extend(str.split("\n"))
     return splitted_token
 
 
@@ -74,7 +75,7 @@ def generate_phonetics(body: ScriptBody = Body(..., embedded=True)):
     token = None
     tokenizer = get_tokenizer()
     for next_token in chain(tokenizer.tokenize(text), (None,)):
-        if token is None or next_token is None:
+        if token is None:
             token = next_token
             continue
 
@@ -94,7 +95,11 @@ def generate_phonetics(body: ScriptBody = Body(..., embedded=True)):
                 {"start": outputIndex, "end": outputIndex + len(token.surface)}
             )
 
-        if token.infl_type == "特殊・マス" and next_token.surface == "。":
+        if (
+            token.infl_type == "特殊・マス"
+            and next_token is not None
+            and next_token.surface == "。"
+        ):
             pronunciation = "マ_ス"
             result.append(pronunciation)
             outputLength = len(pronunciation)
@@ -126,6 +131,7 @@ def generate_phonetics(body: ScriptBody = Body(..., embedded=True)):
         outputIndex += outputLength
 
         token = next_token
+
     return {
         "text": "".join(result),
         "input_unknown_indexes": input_unknown_indexes,

@@ -1,4 +1,4 @@
-<div class="wrapper">
+<div class="wrapper" [class.dark-theme]="darkTheme">
   <button *ngIf="activeWarning?.num" (click)="format(0)">n->カ</button>
   <button *ngIf="activeWarning?.num" (click)="format(1)">カ->n</button>
   <button *ngIf="activeWarning?.unknown" (click)="addDictionary()">

@@ -8,7 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSliderModule } from '@angular/material/slider';
 import { QuillModule } from 'ngx-quill';
 import Quill from 'quill';
 import { SharedModule } from '../shared/shared.module';
@@ -39,9 +40,10 @@ Quill.register(CautionBlot);
     QuillModule.forRoot({ modules: { toolbar: false } }),
     OverlayModule,
     MatIconModule,
-    MatSlideToggleModule,
     MatButtonToggleModule,
     MatPaginatorModule,
+    MatSelectModule,
+    MatSliderModule,
   ],
 })
 export class SubtitleModule {}

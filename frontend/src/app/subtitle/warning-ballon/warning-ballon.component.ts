@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
+import { AppService } from 'src/app/services/app.service';
 
 @Component({
   selector: 'app-warning-ballon',
@@ -32,11 +33,24 @@ export class WarningBallonComponent implements OnInit, OnDestroy {
     unknown?: string;
   }>();
 
+  darkTheme = false;
+
   private unsubscriber$ = new Subject<void>();
 
   activeWarning: { uuid: string; num?: string; unknown?: string };
 
-  constructor(private cd: ChangeDetectorRef, private elementRef: ElementRef) {}
+  constructor(
+    private cd: ChangeDetectorRef,
+    private elementRef: ElementRef,
+    private appService: AppService
+  ) {
+    this.appService.darkTheme$
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((val) => {
+        this.darkTheme = val;
+        this.cd.markForCheck();
+      });
+  }
 
   ngOnInit(): void {
     this.messenger$

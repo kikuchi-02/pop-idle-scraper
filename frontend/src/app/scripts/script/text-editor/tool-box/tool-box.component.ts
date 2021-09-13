@@ -14,6 +14,7 @@ import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { AppService } from 'src/app/services/app.service';
 import { TokenizeService } from 'src/app/services/tokenizer.service';
+import { availableFonts, Font } from 'src/app/typing';
 import { ScriptService } from '../../script.service';
 import { CONJUNCTIONS } from '../constants';
 import { EditorService } from '../editor.service';
@@ -39,7 +40,26 @@ export class ToolBoxComponent implements OnInit, OnDestroy {
 
   wordCount = 0;
 
-  @Output() toggleSubtitleButton = new EventEmitter<void>();
+  get subtitleWidth(): number {
+    return this.appService.subtitleWidth;
+  }
+  set subtitleWidth(v: number) {
+    this.appService.subtitleWidth = v;
+    this.subtitleChange.emit(v);
+  }
+
+  fonts = availableFonts;
+
+  get font(): Font {
+    return this.appService.font;
+  }
+  set font(v: Font) {
+    this.appService.font = v;
+    this.fontChange.emit(v);
+  }
+
+  @Output() fontChange = new EventEmitter<Font>();
+  @Output() subtitleChange = new EventEmitter<number>();
 
   private toolBoxHighlightKey = 'tool-box-highlight-key';
   private toolBoxBaseFormKey = 'tool-box-base-form-key';

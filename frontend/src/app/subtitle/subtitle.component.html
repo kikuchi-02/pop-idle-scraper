@@ -2,38 +2,46 @@
   <div class="menu">
     <div class="menu__tool">
       <h3>Tool</h3>
-      <button
-        (click)="dictionaryOpen = !dictionaryOpen"
-        type="button"
-        cdkOverlayOrigin
-        #trigger="cdkOverlayOrigin"
-        mat-raised-button
-        color="primary"
-      >
-        dictionary
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="download()"
-      >
-        download
-      </button>
+      <div class="menu__tool-wrapper">
+        <div class="menu__dictionary">
+          <button
+            (click)="dictionaryOpen = !dictionaryOpen"
+            type="button"
+            cdkOverlayOrigin
+            #trigger="cdkOverlayOrigin"
+            mat-stroked-button
+            color="primary"
+          >
+            Dictionary
+          </button>
+        </div>
 
-      <mat-slide-toggle
-        color="primary"
-        [checked]="showSubtitleLine"
-        (toggleChange)="showSubtitleLine = !showSubtitleLine"
-      >
-        line
-      </mat-slide-toggle>
+        <div class="menu__subtitle">
+          <h4>Subtitle</h4>
+          <mat-slider
+            [(ngModel)]="subtitleWidth"
+            color="primary"
+            thumbLabel
+          ></mat-slider>
+        </div>
+
+        <div class="menu__font">
+          <mat-form-field appearance="fill">
+            <mat-label>Font</mat-label>
+            <mat-select [(ngModel)]="font" name="font">
+              <mat-option *ngFor="let font of fonts" [value]="font">
+                {{ font }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
     </div>
-    <div class="menu__layout">
-      <h3>Layout: {{ layout }}</h3>
+    <div class="menu__target">
+      <h3>Target: {{ target }}</h3>
       <mat-button-toggle-group
-        [ngModel]="layout"
-        (ngModelChange)="applyLayout($event)"
+        [ngModel]="target"
+        (ngModelChange)="applyTarget($event)"
         aria-label="Font Style"
       >
         <mat-button-toggle value="plain">plain</mat-button-toggle>
@@ -44,19 +52,21 @@
       </mat-button-toggle-group>
     </div>
   </div>
-  <div class="input-area">
-    <div class="input-area__label">
-      <div class="input-area__label-label">
+  <div class="editor">
+    <div class="editor__wrapper">
+      <div class="editor__label">
         <label>input</label>
-        <div class="input-area__caution-scroll">
-          <div
-            class="input-area__caution-scroll-button svg__icon"
-            (click)="scrollToCaution('input')"
-          >
-            <mat-icon>arrow_downward</mat-icon>
+        <div
+          class="editor__label-warning"
+          [class.editor__label-warning--show]="hasError"
+          (click)="scrollToError('input')"
+        >
+          <div class="editor__label-warning-inner">
+            <mat-icon>warning</mat-icon>
           </div>
         </div>
-        <!-- <div class="input-area__label-tool">
+
+        <!-- <div class="editor__label-tool">
           <div class="svg__icon" (click)="saveInput()">
             <mat-icon>save</mat-icon>
           </div>
@@ -65,42 +75,41 @@
           </div>
         </div> -->
       </div>
-      <div class="input-area__label-label">
+      <div
+        class="editor__subtitle-line"
+        [style.visibility]="showSubtitleLine ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPx"
+      ></div>
+      <quill-editor
+        [debounceTime]="300"
+        class="textarea"
+        [styles]="{ 'font-family': font }"
+        [class.dark-theme]="darkTheme"
+        (onEditorCreated)="onEditorCreated($event, 'input')"
+      ></quill-editor>
+    </div>
+    <div class="editor__wrapper">
+      <div class="editor__label">
         <label>output</label>
-        <div
-          class="input-area__label-warning"
-          [class.input-area__label-warning--show]="!!outputWarning"
-        >
-          <div class="input-area__label-warning-inner">
-            <mat-icon>warning</mat-icon>
-            <div class="input-area__label-warning-tooltip">
-              {{ outputWarning }}
-            </div>
+        <div class="editor__label-tool">
+          <div class="svg__icon" (click)="download()">
+            <mat-icon>file_download</mat-icon>
           </div>
-        </div>
-        <div class="input-area__label-tool">
           <div class="svg__icon" (click)="refreshOutput()">
             <mat-icon>refresh</mat-icon>
           </div>
         </div>
       </div>
-    </div>
-    <div class="input-area__textarea">
-      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-        <div class="input-area__subtitle-line"></div>
-      </div>
+      <div
+        class="editor__subtitle-line"
+        [style.visibility]="showSubtitleLine ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPx"
+      ></div>
       <quill-editor
+        placeholder=""
         [debounceTime]="300"
         class="textarea"
-        [class.dark-theme]="darkTheme"
-        (onEditorCreated)="onEditorCreated($event, 'input')"
-      ></quill-editor>
-      <div class="input-area__subtitle" *ngIf="showSubtitleLine">
-        <div class="input-area__subtitle-line"></div>
-      </div>
-      <quill-editor
-        [debounceTime]="300"
-        class="textarea"
+        [styles]="{ 'font-family': font }"
         [class.dark-theme]="darkTheme"
         (onEditorCreated)="onEditorCreated($event, 'output')"
       ></quill-editor>

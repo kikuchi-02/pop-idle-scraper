@@ -1,16 +1,28 @@
 @import '../../styles.scss';
 .wrapper {
   @include wrapper;
-  width: auto;
-  max-width: none;
   height: calc(100% - #{$header-height});
+  overflow-x: hidden;
 
   .menu {
-    display: flex;
-    height: 110px;
+    display: block;
+    height: 220px;
+    @include mq('md') {
+      display: flex;
+      height: 110px;
+    }
+
+    h3 {
+      margin-bottom: 3px;
+    }
 
     &__tool {
       margin: 10px 40px 10px 0;
+
+      &-wrapper {
+        display: flex;
+        align-items: center;
+      }
 
       button {
         width: 100px;
@@ -18,7 +30,7 @@
       }
     }
 
-    &__layout {
+    &__target {
       margin: 10px 0;
 
       ::ng-deep .mat-button-toggle-group {
@@ -29,21 +41,46 @@
     }
   }
 
-  .input-area {
-    height: calc(100% - 110px);
+  .editor {
+    display: block;
+
+    height: calc(100% - 220px);
+    @include mq('md') {
+      height: calc(100% - 110px);
+      display: flex;
+    }
+
+    width: 100%;
     padding: 10px 0;
     box-sizing: border-box;
     overflow: hidden;
+
+    &__wrapper {
+      width: 100%;
+      height: 50%;
+      @include mq('md') {
+        width: 50%;
+        height: 100%;
+      }
+      max-width: 650px;
+
+      position: relative;
+    }
 
     &__label {
       display: flex;
       width: 100%;
       height: 30px;
+      padding: 0px 10px;
+      box-sizing: border-box;
 
-      &-label {
-        display: flex;
-        width: 50%;
-        padding: 0px 10px;
+      label {
+        font-size: 30px;
+      }
+
+      button {
+        width: 100px;
+        margin: 0 20px;
       }
 
       &-warning {
@@ -59,29 +96,12 @@
             color: #ff9966;
           }
           &:hover {
-            .input-area__label-warning-tooltip {
+            .editor__label-warning-tooltip {
               display: block;
             }
           }
         }
-        &-tooltip {
-          display: none;
-          content: attr(data-warning-message) '';
-          position: absolute;
-          bottom: 30px;
-          left: 10px;
-          z-index: 25;
-          background-color: #c0c0c0;
-          box-shadow: 0px 0px 10px;
-          width: 300px;
-          border: 1px solid black;
-        }
       }
-
-      label {
-        font-size: 30px;
-      }
-
       &-tool {
         margin: 0 20px 0 auto;
         display: flex;
@@ -90,46 +110,56 @@
         }
       }
     }
-    &__textarea {
-      display: flex;
-      width: 100%;
 
-      max-height: calc(100% - 30px);
-      overflow: auto;
-
-      ::ng-deep .textarea {
-        min-height: 600px;
-        // flex-grow: 1;
-        width: 50%;
-        .ql-editor {
-          p {
-            margin: 0px;
-          }
-        }
-
-        &.dark-theme {
-          .ql-blank::before {
-            color: $dark-color;
-            opacity: 0.6;
-          }
-        }
-
-        [data-warning-uuid] {
-          cursor: pointer;
-        }
-        [data-warning-num] {
-          border-bottom: dotted 2px red;
-        }
-
-        [data-warning-unknown] {
-          background-color: orange;
+    ::ng-deep .textarea {
+      display: block;
+      height: calc(100% - 30px);
+      .ql-editor {
+        p {
+          margin: 0px;
         }
       }
-    }
 
-    &__subtitle {
-      align-self: stretch;
-      position: relative;
+      span[data-caution] {
+        position: relative;
+        border-bottom: dotted 2px orange;
+
+        &:hover:after {
+          content: attr(data-caution) '';
+          position: absolute;
+          top: 20px;
+          left: 10px;
+          z-index: 25;
+          background-color: #c0c0c0;
+          box-shadow: 0px 0px 10px;
+          width: 200px;
+          border: 1px solid black;
+        }
+      }
+
+      &.dark-theme {
+        .ql-blank::before {
+          color: $dark-color;
+          opacity: 0.6;
+        }
+
+        span[data-caution] {
+          &:hover:after {
+            background-color: $dark-background;
+          }
+        }
+      }
+
+      [data-warning-uuid] {
+        cursor: pointer;
+      }
+      [data-warning-num] {
+        border-bottom: dotted 2px red;
+      }
+
+      [data-warning-unknown] {
+        background-color: orange;
+      }
     }
 
     &__subtitle-line {
@@ -145,22 +175,5 @@
 .svg__icon {
   &:hover {
     color: #3f51b5;
-  }
-}
-
-::ng-deep span[data-caution] {
-  position: relative;
-  border-bottom: dotted 2px orange;
-
-  &:hover:after {
-    content: attr(data-caution) '';
-    position: absolute;
-    bottom: 20px;
-    left: 10px;
-    z-index: 25;
-    background-color: #c0c0c0;
-    box-shadow: 0px 0px 10px;
-    width: 200px;
-    border: 1px solid black;
   }
 }

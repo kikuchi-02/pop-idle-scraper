@@ -52,7 +52,7 @@
       <p>last update: {{ script.updated | date: 'short' }}</p>
     </div>
     <div class="tool__item tool__item--right" *ngIf="script.updated">
-      <button mat-raised-button color="primary" (click)="openHistoryDialog()">
+      <button mat-stroked-button color="primary" (click)="openHistoryDialog()">
         Histories({{ script.revisions.length }})
       </button>
     </div>
@@ -61,29 +61,27 @@
   <main class="main">
     <div class="tool-box__wrapper" [class.dark-theme]="darkTheme">
       <app-tool-box
-        (toggleSubtitleButton)="
-          showSubtitleLine.toggle = !showSubtitleLine.toggle
-        "
+        (fontChange)="font = $event"
+        (subtitleChange)="subtitleWidth = $event"
       ></app-tool-box>
     </div>
 
     <div class="editor">
       <div
-        class="editor__subtitle"
-        *ngIf="showSubtitleLine.toggle && showSubtitleLine.single"
-      >
-        <div class="editor__subtitle-line"></div>
-      </div>
+        class="editor__subtitle-line"
+        [style.visibility]="showSubtitleLine('single') ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPx"
+      ></div>
       <div
-        class="editor__subtitle"
-        *ngIf="showSubtitleLine.toggle && showSubtitleLine.double"
-      >
-        <div class="editor__subtitle-double-line"></div>
-      </div>
+        class="editor__subtitle-line"
+        [style.visibility]="showSubtitleLine('double') ? 'visible' : 'hidden'"
+        [style.left.px]="subtitleLineLeftPxDouble"
+      ></div>
 
       <quill-editor
         class="editor__main"
         [class.dark-theme]="darkTheme"
+        [styles]="{ 'font-family': font }"
         (onEditorCreated)="onEditorCreated($event)"
         (onContentChanged)="onContentChanged($event)"
         (onSelectionChanged)="onSelectionChanged($event)"

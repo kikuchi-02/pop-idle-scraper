@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 :host {
   position: absolute;
   z-index: 30;
@@ -6,6 +8,9 @@
 .wrapper {
   border: 1px solid #000;
   background-color: #fff;
+  &.dark-theme {
+    background-color: $dark-background;
+  }
   box-shadow: 0px 0px 10px;
   height: 20px;
   padding: 8px 10px;

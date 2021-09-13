@@ -47,13 +47,14 @@ export class MemberService {
           return linkAcc;
         }, {});
 
-        return tableResult.map((item) => {
+        const res = tableResult.map((item) => {
           const idleLinks = links[item.kind];
           item.tables = item.value.map((table) =>
             this.parseTable(table, idleLinks)
           );
           return item;
         });
+        return res;
       }),
       catchError((err) => {
         console.error(err);
@@ -91,7 +92,15 @@ export class MemberService {
           }
         }
         if (column === 'link') {
-          row[column] = (links[row['名前']] || []).map((link) => {
+          const targetLinks = new Set<string>();
+          if (links[row['名前']]) {
+            links[row['名前']].forEach((l) => targetLinks.add(l));
+          }
+          if (row[column]) {
+            targetLinks.add(row[column]);
+          }
+
+          row[column] = Array.from(targetLinks).map((link) => {
             const url = new URL(link);
             return { host: url.host, link };
           });
