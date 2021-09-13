@@ -290,9 +290,10 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       .replace(/（[^）]*）/g, '')
       .replace(/\d\.?\s?\n/g, '\n')
       .replace(/【(.*)】/g, (match, p1, offset, str) => p1 + '\n');
+    const maxWidth = (this.subtitleWidth / 100) * 310 * 2;
 
     this.subtitleService
-      .splitByNewLine(input)
+      .splitByNewLine(input, maxWidth)
       .pipe(takeUntil(this.unsubscriber$))
       .subscribe((lines) => {
         this.inputEditor.setText(lines.join('\n'));
@@ -312,7 +313,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           const metrics = context.measureText(text);
 
           const attrs: { caution?: string } = {};
-          if (metrics.width > 310) {
+          if (metrics.width > maxWidth) {
             attrs.caution = 'too long sentence, cannot be splitted';
             errors.add('Too long sentences');
           }

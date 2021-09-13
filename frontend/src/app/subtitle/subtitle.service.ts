@@ -134,8 +134,7 @@ export class SubtitleService {
   //   );
   // }
 
-  splitByNewLine(text: string): Observable<string[]> {
-    const maxWidth = 310;
+  splitByNewLine(text: string, maxWidth: number): Observable<string[]> {
     return this.http
       .post<string[]>('/api/v2/newline', { text })
       .pipe(
