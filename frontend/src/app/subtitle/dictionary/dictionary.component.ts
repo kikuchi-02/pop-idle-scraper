@@ -249,13 +249,31 @@ export class DictionaryComponent implements OnInit, OnDestroy, AfterViewInit {
           pronunciation: '',
         });
       });
+      this.cd.detectChanges();
+      this.ngZone.onStable
+        .pipe(first(), takeUntil(this.unsubscriber$))
+        .subscribe(() => {
+          const innerNew = this.elementRef.nativeElement.querySelector(
+            '.inner__new'
+          );
+          console.log({ innerNew });
+          if (innerNew) {
+            const inputs = innerNew.querySelectorAll(
+              '.dictionary__pronunciation'
+            );
+            if (inputs.length > 0) {
+              console.log({ inputs });
+              inputs[inputs.length - 1].focus();
+            }
+          }
+        });
     } else {
       this.newDictionary.push({
         id: undefined,
         word: '',
         pronunciation: '',
       });
+      this.cd.markForCheck();
     }
-    this.cd.markForCheck();
   }
 }

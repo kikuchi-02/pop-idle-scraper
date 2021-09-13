@@ -146,8 +146,11 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           const inputDelta = new Delta();
           let lastIndex = 0;
           result.inputUnknownIndexes.forEach(({ word, start, end }) => {
+            const uuid = uuidv4();
             inputDelta.retain(start - lastIndex);
-            inputDelta.retain(end - start, { 'background-color': 'orange' });
+            inputDelta.retain(end - start, {
+              warning: { uuid, unknown: word },
+            });
             lastIndex = end;
           });
           this.inputEditor.updateContents(inputDelta);

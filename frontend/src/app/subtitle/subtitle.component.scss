@@ -105,7 +105,7 @@
           display: none;
           content: attr(data-warning-message) '';
           position: absolute;
-          bottom: 30px;
+          top: 30px;
           left: 10px;
           z-index: 25;
           background-color: #c0c0c0;
@@ -174,7 +174,7 @@
   &:hover:after {
     content: attr(data-caution) '';
     position: absolute;
-    bottom: 20px;
+    top: 20px;
     left: 10px;
     z-index: 25;
     background-color: #c0c0c0;
