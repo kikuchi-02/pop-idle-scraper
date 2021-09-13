@@ -9,7 +9,7 @@
             type="button"
             cdkOverlayOrigin
             #trigger="cdkOverlayOrigin"
-            mat-raised-button
+            mat-stroked-button
             color="primary"
           >
             Dictionary
@@ -37,11 +37,11 @@
         </div>
       </div>
     </div>
-    <div class="menu__layout">
-      <h3>Layout: {{ layout }}</h3>
+    <div class="menu__target">
+      <h3>Target: {{ target }}</h3>
       <mat-button-toggle-group
-        [ngModel]="layout"
-        (ngModelChange)="applyLayout($event)"
+        [ngModel]="target"
+        (ngModelChange)="applyTarget($event)"
         aria-label="Font Style"
       >
         <mat-button-toggle value="plain">plain</mat-button-toggle>
@@ -56,14 +56,16 @@
     <div class="editor__wrapper">
       <div class="editor__label">
         <label>input</label>
-        <div class="editor__label-caution-scroll">
-          <div
-            class="editor__label-caution-scroll-button svg__icon"
-            (click)="scrollToCaution('input')"
-          >
-            <mat-icon>arrow_downward</mat-icon>
+        <div
+          class="editor__label-warning"
+          [class.editor__label-warning--show]="hasError"
+          (click)="scrollToError('input')"
+        >
+          <div class="editor__label-warning-inner">
+            <mat-icon>warning</mat-icon>
           </div>
         </div>
+
         <!-- <div class="editor__label-tool">
           <div class="svg__icon" (click)="saveInput()">
             <mat-icon>save</mat-icon>
@@ -89,17 +91,6 @@
     <div class="editor__wrapper">
       <div class="editor__label">
         <label>output</label>
-        <div
-          class="editor__label-warning"
-          [class.editor__label-warning--show]="!!outputWarning"
-        >
-          <div class="editor__label-warning-inner">
-            <mat-icon>warning</mat-icon>
-            <div class="editor__label-warning-tooltip">
-              {{ outputWarning }}
-            </div>
-          </div>
-        </div>
         <div class="editor__label-tool">
           <div class="svg__icon" (click)="download()">
             <mat-icon>file_download</mat-icon>

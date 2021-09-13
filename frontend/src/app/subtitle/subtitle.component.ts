@@ -25,8 +25,8 @@ interface Srt {
   text: string;
 }
 
-const layouts = ['plain', 'sound', 'tag', 'srt', 'link'] as const;
-type Layout = typeof layouts[number];
+const targets = ['plain', 'sound', 'tag', 'srt', 'link'] as const;
+type Target = typeof targets[number];
 
 @Component({
   selector: 'app-subtitle',
@@ -36,11 +36,11 @@ type Layout = typeof layouts[number];
 })
 export class SubtitleComponent implements OnInit, OnDestroy {
   public static subtitleLocalStorageKey = 'subtitleLocalStorageKey';
-  static subtitleLayoutLocalStorageKey = 'subtitleLayoutLocalStorageKey';
+  static subtitleTargetLocalStorageKey = 'subtitleTargetLocalStorageKey';
 
   loading = false;
 
-  layout: Layout = 'plain';
+  target: Target = 'plain';
   dictionaryOpen = false;
 
   warningMessenger$ = new Subject<void>();
@@ -86,7 +86,14 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     return 0;
   }
 
-  outputWarning = undefined;
+  private errors = new Map<Target, boolean>(
+    targets.map((target) => [target, false])
+  );
+
+  get hasError(): boolean {
+    return this.errors.get(this.target);
+  }
+
   private editorInitialized$ = new BehaviorSubject<boolean>(false);
 
   private unsubscriber$ = new Subject<void>();
@@ -123,7 +130,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     }
 
     this.initialInput();
-    this.applyLayout();
+    this.applyTarget();
 
     this.editorInitialized$.next(true);
     this.cd.markForCheck();
@@ -145,6 +152,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         .subscribe((result) => {
           const inputDelta = new Delta();
           let lastIndex = 0;
+          this.errors.set('sound', result.inputUnknownIndexes.length > 0);
           result.inputUnknownIndexes.forEach(({ word, start, end }) => {
             const uuid = uuidv4();
             inputDelta.retain(start - lastIndex);
@@ -209,20 +217,20 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       });
   }
 
-  applyLayout(type?: Layout): void {
+  applyTarget(type?: Target): void {
     if (!type) {
       type = localStorage.getItem(
-        SubtitleComponent.subtitleLayoutLocalStorageKey
-      ) as Layout;
+        SubtitleComponent.subtitleTargetLocalStorageKey
+      ) as Target;
     }
-    if (type === this.layout) {
+    if (type === this.target) {
       return;
     }
 
-    if (layouts.includes(type)) {
-      this.layout = type;
+    if (targets.includes(type)) {
+      this.target = type;
     }
-    localStorage.setItem(SubtitleComponent.subtitleLayoutLocalStorageKey, type);
+    localStorage.setItem(SubtitleComponent.subtitleTargetLocalStorageKey, type);
     this.refreshInput();
     this.refreshOutput();
 
@@ -253,12 +261,12 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     const content = this.outputEditor.getText();
 
     let filename: string;
-    switch (this.layout) {
+    switch (this.target) {
       case 'srt':
         filename = `subtitle.srt`;
         break;
       default:
-        filename = `${this.layout}.txt`;
+        filename = `${this.target}.txt`;
     }
 
     const anchor = this.renderer.createElement('a');
@@ -343,9 +351,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
           partials.push(this.calcSrt(last));
         }
 
-        if (errors.size > 0) {
-          this.outputWarning = Array.from(errors.values()).join('\n');
-        }
+        this.errors.set('srt', errors.size > 0);
 
         const firstAt = 5;
         let result = '';
@@ -420,8 +426,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
   }
 
   refreshOutput(): void {
-    this.outputWarning = undefined;
-    switch (this.layout) {
+    switch (this.target) {
       case 'plain':
         this.outputEditor.setText(this.inputEditor.getText());
         break;
@@ -438,19 +443,26 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         this.extractLinks();
         break;
       default:
-        throw new Error(`not implemented this type ${this.layout}`);
+        throw new Error(`not implemented this type ${this.target}`);
     }
   }
 
-  scrollToCaution(side: 'input' | 'output'): void {
+  scrollToError(side: 'input' | 'output'): void {
     const scrollers = document.querySelectorAll('.ql-editor');
     const scroller = side === 'input' ? scrollers[0] : scrollers[1];
 
     const scrollTop = scroller.scrollTop;
 
-    const cautionElements = document.querySelectorAll('[data-caution]');
+    const cautionElements = [];
+    cautionElements.push(
+      ...Array.from(document.querySelectorAll('[data-caution]'))
+    );
+    cautionElements.push(
+      ...Array.from(document.querySelectorAll('[data-warning-unknown]'))
+    );
+
     let find = false;
-    for (const element of Array.from(cautionElements)) {
+    for (const element of cautionElements) {
       const top = (element as any).offsetTop - 200;
       if (top > scrollTop) {
         scroller.scrollTo({ top, behavior: 'smooth' });
@@ -461,7 +473,7 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     if (find) {
       return;
     }
-    for (const element of Array.from(cautionElements)) {
+    for (const element of cautionElements) {
       const top = Math.max((element as any).offsetTop - 200, 0);
       scroller.scrollTo({ top, behavior: 'smooth' });
       break;
