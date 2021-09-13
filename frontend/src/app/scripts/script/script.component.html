@@ -52,7 +52,7 @@
       <p>last update: {{ script.updated | date: 'short' }}</p>
     </div>
     <div class="tool__item tool__item--right" *ngIf="script.updated">
-      <button mat-raised-button color="primary" (click)="openHistoryDialog()">
+      <button mat-stroked-button color="primary" (click)="openHistoryDialog()">
         Histories({{ script.revisions.length }})
       </button>
     </div>

@@ -22,10 +22,19 @@
   ></quill-editor>
 </div>
 <div mat-dialog-actions>
-  <button mat-button color="primary" (click)="onNoClick()" cdkFocusInitial>
+  <button
+    mat-stroked-button
+    color="primary"
+    (click)="onNoClick()"
+    cdkFocusInitial
+  >
     Close
   </button>
-  <button mat-button color="primary" [mat-dialog-close]="selectedRevision">
+  <button
+    mat-stroked-button
+    color="primary"
+    [mat-dialog-close]="selectedRevision"
+  >
     Paste to editor
   </button>
 </div>

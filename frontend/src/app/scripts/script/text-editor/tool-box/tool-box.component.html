@@ -18,7 +18,7 @@
               <input matInput [formControl]="highlightValue" />
               <button
                 type="reset"
-                mat-button
+                mat-stroked-button
                 *ngIf="highlightValue.value"
                 matSuffix
                 mat-icon-button
@@ -37,7 +37,7 @@
               <input matInput [formControl]="baseFormValue" />
               <button
                 type="reset"
-                mat-button
+                mat-stroked-button
                 *ngIf="baseFormValue.value"
                 matSuffix
                 mat-icon-button
@@ -142,13 +142,13 @@
     <mat-card class="others">
       <mat-card-title>Others</mat-card-title>
       <div class="others__wrapper">
-        <div class="others__format">
-          <button mat-raised-button color="primary" (click)="reformat()">
+        <div class="others__format others__item">
+          <button mat-stroked-button color="primary" (click)="reformat()">
             format
           </button>
         </div>
 
-        <div class="others__subtitle">
+        <div class="others__subtitle others__item">
           <h4>Subtitle</h4>
           <mat-slider
             [(ngModel)]="subtitleWidth"
@@ -157,7 +157,7 @@
           ></mat-slider>
         </div>
 
-        <div class="others__font">
+        <div class="others__font others__item">
           <mat-form-field>
             <mat-label>Font</mat-label>
             <mat-select [(ngModel)]="font" name="font">
@@ -172,15 +172,19 @@
     <mat-card class="remove">
       <mat-card-title>Remove</mat-card-title>
       <div class="remove__wrapper">
-        <div>
-          <button mat-button color="primary" (click)="removeOldHighlighted()">
+        <div class="remove__button">
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="removeOldHighlighted()"
+          >
             Highlight
           </button>
         </div>
 
-        <div>
+        <div class="remove__button">
           <button
-            mat-button
+            mat-stroked-button
             color="primary"
             (click)="removeAllUnderlinedSentences()"
           >
@@ -188,8 +192,8 @@
           </button>
         </div>
 
-        <div>
-          <button mat-button color="primary" (click)="removeStrike()">
+        <div class="remove__button">
+          <button mat-stroked-button color="primary" (click)="removeStrike()">
             Strike
           </button>
         </div>
