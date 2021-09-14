@@ -40,7 +40,8 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   loading = false;
 
-  target: Target = 'plain';
+  target: Target = undefined;
+  targets = targets;
   dictionaryOpen = false;
 
   warningMessenger$ = new Subject<void>();
@@ -130,7 +131,11 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     }
 
     this.initialInput();
-    this.applyTarget();
+
+    const target = localStorage.getItem(
+      SubtitleComponent.subtitleTargetLocalStorageKey
+    ) as Target;
+    this.applyTarget(target);
 
     this.editorInitialized$.next(true);
     this.cd.markForCheck();
@@ -217,24 +222,17 @@ export class SubtitleComponent implements OnInit, OnDestroy {
       });
   }
 
-  applyTarget(type?: Target): void {
-    if (!type) {
-      type = localStorage.getItem(
-        SubtitleComponent.subtitleTargetLocalStorageKey
-      ) as Target;
-    }
-    if (type === this.target) {
-      return;
-    }
-
+  applyTarget(type: Target): void {
     if (targets.includes(type)) {
       this.target = type;
+      localStorage.setItem(
+        SubtitleComponent.subtitleTargetLocalStorageKey,
+        type
+      );
+      this.refreshInput();
+      this.refreshOutput();
+      this.cd.markForCheck();
     }
-    localStorage.setItem(SubtitleComponent.subtitleTargetLocalStorageKey, type);
-    this.refreshInput();
-    this.refreshOutput();
-
-    this.cd.markForCheck();
   }
 
   warningChange(event: { uuid: string; num?: string; unknown?: string }): void {
