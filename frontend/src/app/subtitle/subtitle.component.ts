@@ -13,6 +13,7 @@ import Quill from 'quill';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import * as wasm from 'wasm';
 import { AppService } from '../services/app.service';
 import { availableFonts, Font } from '../typing';
 import { SubtitleService } from './subtitle.service';
@@ -149,63 +150,43 @@ export class SubtitleComponent implements OnInit, OnDestroy {
 
   convertSound(): void {
     const loadingKey = this.appService.setLoading();
-    const input = this.inputEditor.getText();
-    this.ngZone.runOutsideAngular(() => {
-      this.subtitleService
-        .textToSoundText(input)
-        .pipe(takeUntil(this.unsubscriber$))
-        .subscribe((result) => {
-          const inputDelta = new Delta();
-          let lastIndex = 0;
-          this.errors.set('sound', result.inputUnknownIndexes.length > 0);
-          result.inputUnknownIndexes.forEach(({ word, start, end }) => {
-            const uuid = uuidv4();
-            inputDelta.retain(start - lastIndex);
-            inputDelta.retain(end - start, {
-              warning: { uuid, unknown: word },
-            });
-            lastIndex = end;
-          });
-          this.inputEditor.updateContents(inputDelta);
+    const input = this.inputEditor.getText().trim();
+    this.subtitleService
+      .textToSoundText(input)
+      .pipe(takeUntil(this.unsubscriber$))
+      .subscribe((result) => {
+        this.errors.set('sound', result.input_unknown_indexes.length > 0);
+        this.outputEditor.setContents([{ insert: '\n' }] as any);
+        this.outputEditor.setText(result.text);
+        const outputText = this.outputEditor.getText();
+        const res = wasm.format_sound(input, outputText, result);
+        this.inputEditor.setContents(res.input);
+        this.outputEditor.setContents(res.output);
 
-          this.outputEditor.setText(result.text);
-          const outputDelta1 = new Delta();
-          let lastOutputIndex1 = 0;
-          const outputText = this.outputEditor.getText();
-          result.outputUnknownIndexes.forEach(({ word, start, end }) => {
-            const uuid = uuidv4();
-            const unknown = outputText.substring(start, end);
-            outputDelta1.retain(start - lastOutputIndex1);
-            outputDelta1.retain(end - start, { warning: { uuid, unknown } });
-            lastOutputIndex1 = end;
-          });
-          this.outputEditor.updateContents(outputDelta1);
-
-          const outputDelta2 = new Delta();
-          let lastOutputIndex2 = 0;
-          result.outputWarningIndexes.forEach(({ start, end }) => {
-            const uuid = uuidv4();
-            const num = parseInt(outputText.substring(start, end), 10);
-            outputDelta2.retain(start - lastOutputIndex2);
-            outputDelta2.retain(end - start, { warning: { uuid, num } });
-            lastOutputIndex2 = end;
-          });
-          this.outputEditor.updateContents(outputDelta2);
-
-          this.appService.resolveLoading(loadingKey);
-          this.cd.markForCheck();
-
-          this.ngZone.onStable
-            .pipe(
-              first(),
-              takeUntil(this.warningUnsubscriber$),
-              takeUntil(this.unsubscriber$)
-            )
-            .subscribe(() => {
-              this.warningMessenger$.next();
-            });
+        const outputDelta2 = new Delta();
+        let lastOutputIndex2 = 0;
+        result.output_warning_indexes.forEach(({ start, end }) => {
+          const uuid = uuidv4();
+          const num = parseInt(outputText.substring(start, end), 10);
+          outputDelta2.retain(start - lastOutputIndex2);
+          outputDelta2.retain(end - start, { warning: { uuid, num } });
+          lastOutputIndex2 = end;
         });
-    });
+        this.outputEditor.updateContents(outputDelta2);
+
+        this.appService.resolveLoading(loadingKey);
+        this.cd.markForCheck();
+
+        this.ngZone.onStable
+          .pipe(
+            first(),
+            takeUntil(this.warningUnsubscriber$),
+            takeUntil(this.unsubscriber$)
+          )
+          .subscribe(() => {
+            this.warningMessenger$.next();
+          });
+      });
   }
 
   extractTags(): void {
@@ -291,90 +272,19 @@ export class SubtitleComponent implements OnInit, OnDestroy {
     const maxWidth = (this.subtitleWidth / 100) * 310 * 2;
 
     this.subtitleService
-      .splitByNewLine(input, maxWidth)
+      .splitByNewLine(input, maxWidth, this.font)
       .pipe(takeUntil(this.unsubscriber$))
-      .subscribe((lines) => {
-        this.inputEditor.setText(lines.join('\n'));
+      .subscribe((response) => {
+        this.inputEditor.setContents([{ insert: '\n' }] as any);
+        this.outputEditor.setContents([{ insert: '\n' }] as any);
 
-        const partials: Srt[] = [];
-        let last: string;
-        let seqCounter = 0;
-        const errors = new Set();
+        this.inputEditor.setText(response.lines.join('\n'));
 
-        const canvas = this.renderer.createElement('canvas');
-        const context = canvas.getContext('2d');
+        this.inputEditor.updateContents(response.input as any);
 
-        const delta = new Delta();
+        this.errors.set('srt', response.errors.length > 0);
+        this.outputEditor.setText(response.subtitle);
 
-        for (const line of lines) {
-          const text = line.trim();
-          const metrics = context.measureText(text);
-
-          const attrs: { caution?: string } = {};
-          if (metrics.width > maxWidth) {
-            attrs.caution = 'too long sentence, cannot be splitted';
-            errors.add('Too long sentences');
-          }
-
-          seqCounter++;
-          if (text === '' || text === '。') {
-            seqCounter = 0;
-            if (last !== undefined) {
-              partials.push(this.calcSrt(last));
-              last = undefined;
-            }
-          } else {
-            if (seqCounter > 2) {
-              // attrs.caution =
-              //   'The sentence continues for more than three lines';
-              // errors.add('Sentences continue for more than three lines.');
-
-              // 3行目には改行入れる。
-              delta.insert('\n');
-              seqCounter = 0;
-            }
-            if (last !== undefined) {
-              partials.push(this.calcSrt(last, text));
-              last = undefined;
-            } else {
-              last = text;
-            }
-          }
-
-          // length plus new line character
-          delta.retain(text.length + 1, attrs);
-        }
-        this.inputEditor.updateContents(delta);
-
-        if (last !== undefined) {
-          partials.push(this.calcSrt(last));
-        }
-
-        this.errors.set('srt', errors.size > 0);
-
-        const firstAt = 5;
-        let result = '';
-        let lastTime: number;
-        for (let i = 0; i < partials.length; i++) {
-          const srt = partials[i];
-          const start = lastTime === undefined ? firstAt : lastTime;
-          const end = start + srt.duration;
-
-          const startS = this.calcSubtitleTime(start);
-          const endS = this.calcSubtitleTime(end);
-          const block =
-            `${i + 1}\n` +
-            `${startS.hour}:${startS.minute}:${startS.second},000` +
-            ' --> ' +
-            `${endS.hour}:${endS.minute}:${endS.second},000` +
-            '\n' +
-            `${srt.text}` +
-            '\n\n';
-
-          result += block;
-          lastTime = end;
-        }
-        this.outputEditor.setText(result);
         this.appService.resolveLoading(loadingKey);
         this.cd.markForCheck();
       });

@@ -33,7 +33,8 @@
     "y-quill": "^0.1.4",
     "y-websocket": "^1.3.16",
     "yjs": "^13.5.11",
-    "zone.js": "~0.11.3"
+    "zone.js": "~0.11.3",
+    "wasm": "file:../wasm/pkg"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1102.9",
