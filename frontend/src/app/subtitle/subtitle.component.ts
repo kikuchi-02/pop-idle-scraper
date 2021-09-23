@@ -278,8 +278,6 @@ export class SubtitleComponent implements OnInit, OnDestroy {
         this.inputEditor.setContents([{ insert: '\n' }] as any);
         this.outputEditor.setContents([{ insert: '\n' }] as any);
 
-        this.inputEditor.setText(response.lines.join('\n'));
-
         this.inputEditor.updateContents(response.input as any);
 
         this.errors.set('srt', response.errors.length > 0);
