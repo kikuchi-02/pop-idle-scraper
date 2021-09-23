@@ -1,0 +1,3 @@
+[submodule "pop-idle-text-editor-wasm"]
+	path = pop-idle-text-editor-wasm
+	url = git@github.com:kikuchi-02/pop-idle-text-editor-wasm.git
